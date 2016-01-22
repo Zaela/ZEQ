@@ -41,26 +41,26 @@ function VertexBuffer:setMaterial(mat)
 end
 
 local function grow(self)
-	local cap   = self._capacity * 2
-	local array = Vertex.Array(cap)
+    local cap   = self._capacity * 2
+    local array = Vertex.Array(cap)
 
-	ffi.copy(array, self._array, Vertex:sizeof() * self._capacity)
+    ffi.copy(array, self._array, Vertex:sizeof() * self._capacity)
 
-	self._array     = array
-	self._capacity  = cap
+    self._array     = array
+    self._capacity  = cap
 end
 
 local function checkSize(self)
-	local index = self._count
-	self._count = index + 1
-	if self._count == self._capacity then
-		grow(self)
-	end
-	return self._array[index]
+    local index = self._count
+    self._count = index + 1
+    if self._count == self._capacity then
+        grow(self)
+    end
+    return self._array[index]
 end
 
 function VertexBuffer:addVertex()
-	return checkSize(self)
+    return checkSize(self)
 end
 
 function VertexBuffer:addVertexCopy(vert)

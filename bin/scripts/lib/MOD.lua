@@ -5,13 +5,13 @@ local EQGCommon = require "EQGCommon"
 local BinUtil   = require "BinUtil"
 
 local Header = Struct[[
-    uint32_t	signature;		// "EQGM"
-	uint32_t	version;
-	uint32_t	stringBlockLen;
-	uint32_t	materialCount;
-	uint32_t	vertexCount;
-	uint32_t	triangleCount;
-	uint32_t	boneCount;
+    uint32_t    signature;        // "EQGM"
+    uint32_t    version;
+    uint32_t    stringBlockLen;
+    uint32_t    materialCount;
+    uint32_t    vertexCount;
+    uint32_t    triangleCount;
+    uint32_t    boneCount;
 ]]
 
 local Signature = BinUtil.toFileSignature("EQGM")

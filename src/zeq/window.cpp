@@ -10,11 +10,11 @@ Window::Window()
       m_zoneModel(nullptr)
 {
     sf::ContextSettings settings;
-	settings.depthBits          = 24;
-	settings.stencilBits        = 8;
-	settings.antialiasingLevel  = gConfig.getInt(Config::AntiAliasLevel, 0);
-	settings.majorVersion       = 3;
-	settings.minorVersion       = 0;
+    settings.depthBits          = 24;
+    settings.stencilBits        = 8;
+    settings.antialiasingLevel  = gConfig.getInt(Config::AntiAliasLevel, 0);
+    settings.majorVersion       = 3;
+    settings.minorVersion       = 0;
     
     int style = 0;
     

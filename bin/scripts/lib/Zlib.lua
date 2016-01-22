@@ -1,6 +1,6 @@
 
-local ffi		= require "ffi"
-local BinUtil	= require "BinUtil"
+local ffi        = require "ffi"
+local BinUtil    = require "BinUtil"
 
 local assert = assert
 
@@ -17,16 +17,16 @@ local Zlib = {}
 local lenArg = BinUtil.ULong.Arg()
 
 function Zlib.decompressToBuffer(data, len, outbuf, outbufLen)
-	lenArg[0] = outbufLen
-	local res = C.uncompress(outbuf, lenArg, data, len)
-	assert(res == 0)
+    lenArg[0] = outbufLen
+    local res = C.uncompress(outbuf, lenArg, data, len)
+    assert(res == 0)
 end
 
 function Zlib.compressToBuffer(data, len, outbuf, outbufLen)
-	lenArg[0] = outbufLen
-	local res = C.compress2(outbuf, lenArg, data, len, 9)
-	assert(res == 0)
-	return lenArg[0]
+    lenArg[0] = outbufLen
+    local res = C.compress2(outbuf, lenArg, data, len, 9)
+    assert(res == 0)
+    return lenArg[0]
 end
 
 return Zlib

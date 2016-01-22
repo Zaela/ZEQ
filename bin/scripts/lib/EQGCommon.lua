@@ -12,11 +12,11 @@ local EQGProperty   = require "EQGProperty"
 local ModelEQG      = require "ModelEQG"
 
 local EQGMaterial = Struct.packed[[
-    uint32_t    index;			// Essentially meaningless
-    uint32_t    nameIndex;		// Index of the material's name in the file's string block
-    uint32_t    shaderIndex;	// Index of the name of the shader to use for this material in the file's string block
-    uint32_t    propertyCount;	// Number of EQGProperty elements following this material
-    EQGProperty properties[0];	// Properties array accessor
+    uint32_t    index;            // Essentially meaningless
+    uint32_t    nameIndex;        // Index of the material's name in the file's string block
+    uint32_t    shaderIndex;    // Index of the name of the shader to use for this material in the file's string block
+    uint32_t    propertyCount;    // Number of EQGProperty elements following this material
+    EQGProperty properties[0];    // Properties array accessor
 ]]
 
 local EQGVertex = Struct.packed[[
@@ -122,27 +122,27 @@ function EQGCommon:checkLength(p)
 end
 
 function EQGCommon:extractStrings(p)
-	local stringBlock   = BinUtil.Char:cast(self:data() + p)
+    local stringBlock   = BinUtil.Char:cast(self:data() + p)
     local len           = self:getStringBlockLength()
     
-	p = p + len
+    p = p + len
+    
+    self:checkLength(p)
 
-	self:checkLength(p)
+    -- Create a table mapping string indices to lua strings
+    local strings   = {}
+    local i         = 0
 
-	-- Create a table mapping string indices to lua strings
-	local strings   = {}
-	local i         = 0
-
-	while i < len do
-		local str   = ffi.string(stringBlock + i)
-		strings[i]  = str
+    while i < len do
+        local str   = ffi.string(stringBlock + i)
+        strings[i]  = str
         
-		i = i + #str + 1 -- Need to skip null terminator
-	end
+        i = i + #str + 1 -- Need to skip null terminator
+    end
     
     self:setStrings(strings)
 
-	return p
+    return p
 end
 
 function EQGCommon:extractMaterials(p)
@@ -152,33 +152,33 @@ function EQGCommon:extractMaterials(p)
     local model     = self:model()
     local pfs       = self:getPFS()
 
-	for i = 1, header.materialCount do
-		local binMat = EQGMaterial:cast(data + p)
-		p = p + EQGMaterial:sizeof()
+    for i = 1, header.materialCount do
+        local binMat = EQGMaterial:cast(data + p)
+        p = p + EQGMaterial:sizeof()
 
-		self:checkLength(p)
+        self:checkLength(p)
 
-		p = p + EQGProperty:sizeof() * binMat.propertyCount
+        p = p + EQGProperty:sizeof() * binMat.propertyCount
 
-		self:checkLength(p)
+        self:checkLength(p)
         
         local mat = MaterialEQG(strings[binMat.nameIndex])
         
         model:addMaterial(mat)
         
-		for j = 0, binMat.propertyCount - 1 do
-			local prop = binMat.properties[j]
+        for j = 0, binMat.propertyCount - 1 do
+            local prop = binMat.properties[j]
             
             mat:addProperty(prop, strings, pfs)
-		end
+        end
         
         for diffuse, normal in mat:textures() do
             model:addTexture(diffuse)
             model:addNormalMap(normal)
         end
-	end
+    end
 
-	return p
+    return p
 end
 
 function EQGCommon:extractVertexBuffers(p)

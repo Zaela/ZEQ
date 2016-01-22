@@ -75,7 +75,7 @@ end
 
 function ZoneWLD.readAllMaterials(model)
     local wld       = model:getWLD()
-	local matCount  = wld:getFragCountByType(0x30)
+    local matCount  = wld:getFragCountByType(0x30)
     
     if matCount == 0 then error "no materials" end
     
@@ -85,7 +85,7 @@ function ZoneWLD.readAllMaterials(model)
         end
     end
 
-	model:initVertexBuffers(matCount)
+    model:initVertexBuffers(matCount)
     
     local function getTexture(name, isMasked)
         name = name:lower()
@@ -150,7 +150,7 @@ function ZoneWLD.readAllMaterials(model)
         material:setAnimDelay(f04.milliseconds)
         
         for i = 0, f04.count - 1 do
-			local f03 = wld:getFragByRef(f04.refList[i])
+            local f03 = wld:getFragByRef(f04.refList[i])
             
             if f03 == nil or f03.stringLen == 0 then return vb:setMaterial(Material.NULL) end
             
@@ -170,25 +170,25 @@ function ZoneWLD.readAllMaterials(model)
         model:addMaterialIndexByF30(BinUtil.toAddress(f30), i)
         
         local f03
-		if f30.ref > 0 then
-			local f05 = wld:getFragByRefVar(f30)
-			if not f05 then goto skip end
-			local f04 = wld:getFragByRefVar(f05)
-			if not f04 then goto skip end
+        if f30.ref > 0 then
+            local f05 = wld:getFragByRefVar(f30)
+            if not f05 then goto skip end
+            local f04 = wld:getFragByRefVar(f05)
+            if not f04 then goto skip end
 
-			if not f04:isAnimated() then
-				f03 = wld:getFragByRefVar(f04)
-			else
-				handleAnimated(f04, f30, i)
-				goto skip
-			end
-		else
-			f03 = wld:getFragByRefVar(f30)
-		end
+            if not f04:isAnimated() then
+                f03 = wld:getFragByRefVar(f04)
+            else
+                handleAnimated(f04, f30, i)
+                goto skip
+            end
+        else
+            f03 = wld:getFragByRefVar(f30)
+        end
 
-		frag03toMaterial(f03, f30, i)
+        frag03toMaterial(f03, f30, i)
 
-		::skip::
+        ::skip::
     end
 end
 
@@ -207,13 +207,13 @@ function ZoneWLD.readMesh(model, f36)
     local p     = Frag36:sizeof()
     
     local function checkTooShort()
-		if p > len then error("Frag36 is too short for length of data indicated") end
-	end
+        if p > len then error("Frag36 is too short for length of data indicated") end
+    end
     
     checkTooShort()
     
     local scale     = 1.0 / bit.lshift(1, f36.scale)
-	local normScale = 1.0 / 127.0
+    local normScale = 1.0 / 127.0
     
     -- vertices
     local wldVerts = Geo.Vertex:cast(data + p)
@@ -223,77 +223,77 @@ function ZoneWLD.readMesh(model, f36)
     
     -- texture coords
     local uv16, uv32
-	if f36.uvCount > 0 then
-		if wld:getVersion() == 1 then
+    if f36.uvCount > 0 then
+        if wld:getVersion() == 1 then
             uv16 = Geo.UV16:cast(data + p)
             p = p + Geo.UV16:sizeof() * f36.uvCount
-		else
+        else
             uv32 = Geo.UV32:cast(data + p)
             p = p + Geo.UV32:sizeof() * f36.uvCount
-		end
-	end
+        end
+    end
 
-	checkTooShort()
+    checkTooShort()
     
     -- normals
-	local wldNorms = Geo.Normal:cast(data + p)
-	p = p + Geo.Normal:sizeof() * f36.vertCount
+    local wldNorms = Geo.Normal:cast(data + p)
+    p = p + Geo.Normal:sizeof() * f36.vertCount
 
-	checkTooShort()
+    checkTooShort()
 
-	-- vertex colors
+    -- vertex colors
     local wldColors = Geo.Color:cast(data + p)
     p = p + Geo.Color:sizeof() * f36.colorCount
 
-	checkTooShort()
+    checkTooShort()
 
-	-- triangles
+    -- triangles
     local wldTris = Geo.Triangle:cast(data + p)
     p = p + Geo.Triangle:sizeof() * f36.polyCount
 
-	checkTooShort()
+    checkTooShort()
 
-	-- bone assignments
+    -- bone assignments
     -- fill in later
     
     local matIndicesByF30   = model:getMaterialIndicesByF30()
-	local matIndices        = {}
-	local f31               = wld:getFragByRef(f36.materialListRef)
+    local matIndices        = {}
+    local f31               = wld:getFragByRef(f36.materialListRef)
     
-	for i = 0, f31.refCount - 1 do
-		local f30       = wld:getFragByRef(f31.refList[i])
-		matIndices[i]   = matIndicesByF30[BinUtil.toAddress(f30)]
-	end
+    for i = 0, f31.refCount - 1 do
+        local f30       = wld:getFragByRef(f31.refList[i])
+        matIndices[i]   = matIndicesByF30[BinUtil.toAddress(f30)]
+    end
     
     local function triVertNorm(idx)
-		local vert = wldVerts[idx]
-		local norm = wldNorms[idx]
-		return
-			f36.x + tonumber(vert.x) * scale,
-			f36.y + tonumber(vert.y) * scale,
-			f36.z + tonumber(vert.z) * scale,
-			tonumber(norm.i) * normScale,
-			tonumber(norm.j) * normScale,
-			tonumber(norm.k) * normScale
-	end
+        local vert = wldVerts[idx]
+        local norm = wldNorms[idx]
+        return
+            f36.x + tonumber(vert.x) * scale,
+            f36.y + tonumber(vert.y) * scale,
+            f36.z + tonumber(vert.z) * scale,
+            tonumber(norm.i) * normScale,
+            tonumber(norm.j) * normScale,
+            tonumber(norm.k) * normScale
+    end
 
-	local triUV
-	if uv16 then
-		local uvScale = 1.0 / 256.0
-		function triUV(idx)
-			local uv = uv16[idx]
-			return
-				tonumber(uv.u) * uvScale,
-				tonumber(-uv.v) * uvScale
-		end
-	elseif uv32 then
-		function triUV(idx)
-			local uv = uv32[idx]
-			return uv.u, uv.v
-		end
-	else
-		function triUV() return 0, 0 end
-	end
+    local triUV
+    if uv16 then
+        local uvScale = 1.0 / 256.0
+        function triUV(idx)
+            local uv = uv16[idx]
+            return
+                tonumber(uv.u) * uvScale,
+                tonumber(-uv.v) * uvScale
+        end
+    elseif uv32 then
+        function triUV(idx)
+            local uv = uv32[idx]
+            return uv.u, uv.v
+        end
+    else
+        function triUV() return 0, 0 end
+    end
     
     local function triColor(idx)
         local c = wldColors[idx]
@@ -303,36 +303,36 @@ function ZoneWLD.readMesh(model, f36)
     local nvb, cvb
     
     -- construct vertices and triangles based on their materials
-	for m = 1, f36.polyTextureCount do
+    for m = 1, f36.polyTextureCount do
         local te = Geo.TextureEntry:cast(data + p)
         p = p + Geo.TextureEntry:sizeof()
 
-		checkTooShort()
+        checkTooShort()
 
-		local matIndex = matIndices[te.index]
-		-- hohonora seems to have an index that is way out of range
-		if not matIndex then goto skip end
+        local matIndex = matIndices[te.index]
+        -- hohonora seems to have an index that is way out of range
+        if not matIndex then goto skip end
 
-		nvb, cvb = model:getVertexBuffer(matIndex)
+        nvb, cvb = model:getVertexBuffer(matIndex)
 
-		for i = 0, te.count - 1 do
-			local tri   = wldTris[i]
+        for i = 0, te.count - 1 do
+            local tri   = wldTris[i]
             local vb    = bit.band(tri.flag, Geo.TRIANGLE_PERMEABLE) == 0 and nvb or cvb
 
-			for i = 0, 2 do
-				local idx   = tri.index[i]
+            for i = 0, 2 do
+                local idx   = tri.index[i]
                 local v     = vb:addVertex()
                 
                 v.x, v.z, v.y, v.i, v.k, v.j    = triVertNorm(idx)
                 v.u, v.v                        = triUV(idx)
                 --v.r, v.b, v.g, v.a              = triColor(idx)
-			end
-		end
+            end
+        end
 
-		::skip::
-		-- advance tris ptr to next set
-		wldTris = wldTris + te.count
-	end
+        ::skip::
+        -- advance tris ptr to next set
+        wldTris = wldTris + te.count
+    end
 end
 
 function ZoneWLD.readObjectDefinitions(defModel, objectModelDefs)
@@ -426,15 +426,15 @@ function ZoneWLD.readObjectPlacements(defModel, objectModelDefs, wld)
 
     for i, f15 in wld:getFragsByType(0x15) do
         local modelName = wld:getFragNameByRef(f15.refName)
-		if modelName == "" then goto skip end
+        if modelName == "" then goto skip end
         
         local x = f15.x
-		local y = f15.z
-		local z = f15.y
+        local y = f15.z
+        local z = f15.y
 
-		--local rotX = f15.rotZ / 512.0 * 360.0
-		local rotY = -f15.rotX / 512.0 * 360.0
-		local rotZ = f15.rotY / 512.0 * 360.0
+        --local rotX = f15.rotZ / 512.0 * 360.0
+        local rotY = -f15.rotX / 512.0 * 360.0
+        local rotZ = f15.rotY / 512.0 * 360.0
         
         local scale = f15.scaleZ
         
@@ -442,11 +442,11 @@ function ZoneWLD.readObjectPlacements(defModel, objectModelDefs, wld)
         if not objectModel then goto skip end
         
         local mat4 = Matrix.angleYZ(rotY, rotZ)
-		mat4:setTranslation(x, y, z)
+        mat4:setTranslation(x, y, z)
         
         if scale ~= 1.0 and scale ~= 0.0 then
-			mat4 = mat4 * Matrix.scale(scale)
-		end
+            mat4 = mat4 * Matrix.scale(scale)
+        end
         
         applyVBs(mat4, objectModel:vertexBuffers(), vertexBuffersByMat, vbs)
         applyVBs(mat4, objectModel:noCollideVertexBuffers(), noCollideVertexBuffersByMat, cvb)
