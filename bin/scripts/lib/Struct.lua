@@ -41,6 +41,13 @@ function Struct.named(name, contents, class)
 	return create(ffi.typeof(name), class)
 end
 
+function Struct.namedPacked(name, contents, class)
+    ffi.cdef("#pragma pack(1)")
+    local ret = Struct.named(name, contents, class)
+    ffi.cdef("#pragma pack()")
+    return ret
+end
+
 function Struct.primitive(typename)
 	return create(ffi.typeof(typename))
 end

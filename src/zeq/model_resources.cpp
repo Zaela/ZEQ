@@ -5,17 +5,6 @@ ModelResources gModelResources;
 extern Lua gLua;
 extern Database gDatabase;
 
-void ModelResources::init()
-{
-    //gDatabase.prepare(QUERY_BLOB, m_queryBlob);
-    //gDatabase.prepare(QUERY_MODEL_TEXTURES, m_queryModelTextures);
-    //gDatabase.prepare(QUERY_MODEL_TEXTURE_SETS, m_queryModelTextureSets);
-    //gDatabase.prepare(QUERY_MODEL_VERTICES, m_queryModelVertices);
-    //gDatabase.prepare(QUERY_MODEL_GEOMETRY, m_queryModelGeometry);
-    //gDatabase.prepare(QUERY_ZONE_MODEL_ID, m_queryZoneModelId);
-    //gDatabase.prepare(QUERY_ZONE_CACHED_OCTREES, m_queryZoneCachedOctrees);
-}
-
 void ModelResources::getBlob(int64_t id, Blob& blob)
 {
     gDatabase.prepare(QUERY_BLOB, blob.query);

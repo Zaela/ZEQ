@@ -1,4 +1,5 @@
 
+local ZoneEQG       = require "ZoneEQG"
 local ZoneWLD       = require "ZoneWLD"
 local Database      = require "Database"
 local File          = require "File"
@@ -10,7 +11,13 @@ local table = table
 local Converter = {}
 
 function Converter.convertZone(shortname)
-    local obj = ZoneWLD.convert(shortname)
+    local obj
+
+    obj = ZoneEQG.convert(shortname)
+    
+    if not obj then
+        obj = ZoneWLD.convert(shortname)
+    end
     
     if obj then
         Converter.insertZone(obj, shortname)
@@ -184,51 +191,61 @@ function Converter.insertStaticModel(db, q, model, name)
         end
     end)
     
-    local function handleTexture(tex, isMasked)
+    local function blobTexture(tex, isMasked)
         tex:open()
         tex:normalize()
         if isMasked then
             tex:mask()
         end
         
-        local diffuseId, dupe = Converter.insertBlob(db, q, tex:data(), tex:length(), true)
+        local id, dupe = Converter.insertBlob(db, q, tex:data(), tex:length(), true)
         tex:close()
+        
+        return id, dupe
+    end
+    
+    local function handleTexture(tex, normalTex, isMasked)
+        local diffuseId, diffuseDupe = blobTexture(tex, isMasked)
+        local normalId, normalDupe = 0
+        
+        if normalTex then
+            normalId, normalDupe = blobTexture(normalTex, false)
+        end
         
         stmt:bindString(1, tex:getName())
         stmt:bindInt(2, diffuseId)
-        stmt:bindNull(3) -- fixme when normal maps are supported
+        stmt:bindInt(3, normalId)
         stmt:bindInt(4, tex:width())
         stmt:bindInt(5, tex:height())
         stmt:commit()
         
-        if dupe then
+        local id
+        if diffuseDupe then
             st2:bindInt64(1, diffuseId)
             
             if st2:select() then
-                local id = st2:getInt64(1)
-                tex:setId(id)
-                table.insert(texIds, id)
+                id = st2:getInt64(1)
                 st2:reset()
-                goto done
+                goto gotId
             end
         end
         
-        local id = db:getLastInsertId()
+        id = db:getLastInsertId()
+        ::gotId::
         tex:setId(id)
         table.insert(texIds, id)
-        ::done::
     end
     
     -- textures
     db:transaction(function()
         stmt = q.insertTexture
         st2  = q.selectTextureDiffuse
-        for tex in model:textures() do
-            handleTexture(tex, false)
+        for tex, normalTex in model:textures() do
+            handleTexture(tex, normalTex, false)
         end
 
         for tex in model:maskedTextures() do
-            handleTexture(tex, true)
+            handleTexture(tex, nil, true)
         end
     end)
     

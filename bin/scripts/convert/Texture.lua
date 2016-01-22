@@ -26,15 +26,6 @@ function Texture:close()
 end
 
 function Texture:normalize()
-    -- all textures will be converted to PNG
-    --[[
-    if self._image:getFormat() == "png" then return end
-    
-    local data, len = self._image:convertToPng()
-    
-    self._data  = data
-    self._len   = len
-    --]]
     local data, len, w, h = self._image:normalize()
     
     self._data      = data

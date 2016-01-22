@@ -56,6 +56,10 @@ function ConvMaterial:addTexture(tex)
     table.insert(self._textures, tex)
 end
 
+function ConvMaterial:getTextures()
+    return self._textures
+end
+
 function ConvMaterial:textures()
     local i         = 0
     local textures  = self._textures

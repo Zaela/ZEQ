@@ -136,7 +136,7 @@ function Image:mask()
 	local width     = C.FreeImage_GetWidth(ptr)
 	local height    = C.FreeImage_GetHeight(ptr)
 
-    -- assuming the top-left pixel is the mask color
+    -- Assuming the first color in the palette is the mask color
     local pixels    = Pixel:cast(data)
     local p         = C.FreeImage_GetPalette(self._base)
     

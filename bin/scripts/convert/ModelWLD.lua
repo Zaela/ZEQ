@@ -26,17 +26,6 @@ function ModelWLD:getWLD()
     return self._wld
 end
 
-function ModelWLD:initVertexBuffers(count)
-    local vbs = self._vertexBuffers
-    local cvb = self._noCollideVertexBuffers
-    for i = 1, count do
-        table.insert(vbs, VertexBuffer())
-    end
-    for i = 1, count do
-        table.insert(cvb, VertexBuffer())
-    end
-end
-
 function ModelWLD:addMaterialIndexByF30(addr, index)
     self._materialsByF30[addr] = index
 end

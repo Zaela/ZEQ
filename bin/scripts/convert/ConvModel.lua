@@ -1,6 +1,8 @@
 
 local Class         = require "Class"
 local ConvObject    = require "ConvObject"
+local VertexBuffer  = require "VertexBuffer"
+local ConvMaterial  = require "ConvMaterial"
 
 local ConvModel = Class("ConvModel", ConvObject)
 
@@ -12,10 +14,45 @@ function ConvModel.new()
     m._texturesByName           = {}
     m._maskedTextures           = {}
     m._maskedTexturesByName     = {}
+    m._normalMaps               = {}
+    m._normalMapsByName         = {}
     m._vertexBuffers            = {}
     m._noCollideVertexBuffers   = {}
     
     return ConvModel:instance(m)
+end
+
+function ConvModel:initVertexBuffers(count, bindMaterials)
+    count       = count or #self._materials
+    local vbs   = self._vertexBuffers
+    local cvb   = self._noCollideVertexBuffers
+    
+    for i = 0, count do
+        vbs[i] = VertexBuffer()
+    end
+    for i = 0, count do
+        cvb[i] = VertexBuffer()
+    end
+    
+    -- Zeroth buffers always use the NULL material (used by EQG models only)
+    vbs[0]:setMaterial(ConvMaterial.NULL)
+    cvb[0]:setMaterial(ConvMaterial.NULL)
+    
+    if bindMaterials then
+        local mats = self._materials
+        
+        for i = 1, count do
+            local mat       = mats[i]
+            local vb, cb    = vbs[i], cvb[i]
+            
+            vb:setMaterial(mat)
+            cb:setMaterial(mat)
+        end
+    end
+end
+
+function ConvModel:getMaterial(index)
+    return self._materials[index]
 end
 
 function ConvModel:getVertexBuffer(index)
@@ -41,6 +78,11 @@ function ConvModel:addTexture(tex, isMasked)
     byName[tex:getName()] = tex
 end
 
+function ConvModel:addNormalMap(tex)
+    table.insert(self._normalMaps, tex)
+    self._normalMapsByName[tex:getName()] = tex
+end
+
 function ConvModel:getTextureByName(name, isMasked)
     local textures = isMasked and self._maskedTexturesByName or self._texturesByName
     return textures[name]
@@ -62,12 +104,20 @@ local function iterator(tbl)
     end
 end
 
+local function iterator2(a, b)
+    local i = 0
+    return function()
+        i = i + 1
+        return a[i], b[i]
+    end
+end
+
 function ConvModel:materials()
     return iterator(self._materials)
 end
 
 function ConvModel:textures()
-    return iterator(self._textures)
+    return iterator2(self._textures, self._normalMaps)
 end
 
 function ConvModel:maskedTextures()

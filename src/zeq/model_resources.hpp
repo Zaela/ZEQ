@@ -62,16 +62,6 @@
 class ModelResources
 {
 private:
-    // Queries
-    /*Query m_queryBlob;
-    Query m_queryModelTextures;
-    Query m_queryModelTextureSets;
-    Query m_queryModelMaterials;
-    Query m_queryModelVertices;
-    Query m_queryModelGeometry;
-    Query m_queryZoneModelId;
-    Query m_queryZoneCachedOctrees;*/
-
     // The model that is currently being loaded
     ModelPrototype* m_buildModel;
 
@@ -133,8 +123,6 @@ private:
     ZoneModel* loadZoneModel_impl(const std::string& shortname);
 
 public:
-    void init();
-
     ZoneModel* loadZoneModel(const std::string& shortname);
 
     void cacheOctree(ZoneModel* zoneModel);

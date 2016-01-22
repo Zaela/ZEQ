@@ -3,8 +3,6 @@ local BlendTypes    = require "BlendTypes"
 local ConvMaterial  = require "ConvMaterial"
 local Class         = require "Class"
 
-local table = table
-
 local MaterialWLD = Class("MaterialWLD", ConvMaterial)
 
 local blendMapping = {

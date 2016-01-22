@@ -196,4 +196,8 @@ function PFS:names()
 	end
 end
 
+function PFS:getEntryByExtension(ext)
+    return self:getEntry(self._byExt[ext][1])
+end
+
 return PFS
