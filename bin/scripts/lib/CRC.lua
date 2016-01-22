@@ -1,11 +1,11 @@
 
-local bit        = require "bit"
-local crc_table    = require "crc_table"
+local bit           = require "bit"
+local crc_table     = require "crc_table"
 
 local lshift        = bit.lshift
 local rshift        = bit.rshift
-local xor            = bit.bxor
-local bitwise_and    = bit.band
+local xor           = bit.bxor
+local bitwise_and   = bit.band
 
 local CRC = {}
 

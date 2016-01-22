@@ -12,11 +12,11 @@ local EQGProperty   = require "EQGProperty"
 local ModelEQG      = require "ModelEQG"
 
 local EQGMaterial = Struct.packed[[
-    uint32_t    index;            // Essentially meaningless
-    uint32_t    nameIndex;        // Index of the material's name in the file's string block
+    uint32_t    index;          // Essentially meaningless
+    uint32_t    nameIndex;      // Index of the material's name in the file's string block
     uint32_t    shaderIndex;    // Index of the name of the shader to use for this material in the file's string block
-    uint32_t    propertyCount;    // Number of EQGProperty elements following this material
-    EQGProperty properties[0];    // Properties array accessor
+    uint32_t    propertyCount;  // Number of EQGProperty elements following this material
+    EQGProperty properties[0];  // Properties array accessor
 ]]
 
 local EQGVertex = Struct.packed[[

@@ -1,16 +1,16 @@
 
-local BinUtil    = require "BinUtil"
-local Class        = require "Class"
+local BinUtil   = require "BinUtil"
+local Class     = require "Class"
 local Struct    = require "Struct"
 local Buffer    = require "Buffer"
-local Zlib        = require "Zlib"
-local File        = require "File"
-local CRC        = require "CRC"
-local ffi        = require "ffi"
+local Zlib      = require "Zlib"
+local File      = require "File"
+local CRC       = require "CRC"
+local ffi       = require "ffi"
 local Config    = require "Config"
 
-local table        = table
-local ipairs     = ipairs
+local table     = table
+local ipairs    = ipairs
 
 local Header = Struct[[
     uint32_t offset;
@@ -36,7 +36,7 @@ local ProcessedEntry = Struct[[
     uint32_t deflatedLen;
 ]]
 
-local Signature    = BinUtil.toFileSignature("PFS ")
+local Signature = BinUtil.toFileSignature("PFS ")
 
 local PFS = Class("PFS")
 
@@ -69,12 +69,12 @@ function PFS.new(path)
     tooShort()
 
     local pfs = {
-        _path            = path,
+        _path           = path,
         _rawData        = data,
-        _decompressed    = {},
-        _names            = {},
-        _byName            = {},
-        _byExt            = {},
+        _decompressed   = {},
+        _names          = {},
+        _byName         = {},
+        _byExt          = {},
     }
 
     PFS:instance(pfs)
@@ -162,10 +162,10 @@ function PFS:_decompressEntry(i)
     local ent = self[i]
     if not ent then return end
 
-    local data        = self._rawData + ent.offset
-    local ilen        = ent.inflatedLen
-    local read        = 0
-    local pos        = 0
+    local data      = self._rawData + ent.offset
+    local ilen      = ent.inflatedLen
+    local read      = 0
+    local pos       = 0
     local buffer    = BinUtil.Byte.Array(ilen)
 
     while read < ilen do
@@ -175,7 +175,7 @@ function PFS:_decompressEntry(i)
         Zlib.decompressToBuffer(data + pos, bh.deflatedLen, buffer + read, ilen - read)
 
         read = read + bh.inflatedLen
-        pos    = pos + bh.deflatedLen
+        pos  = pos + bh.deflatedLen
     end
 
     self._decompressed[i] = buffer

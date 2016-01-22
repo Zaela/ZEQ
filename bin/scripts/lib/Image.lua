@@ -23,32 +23,32 @@ else
 end
 
 ffi.cdef[[
-__stdcall void*        FreeImage_OpenMemory(uint8_t*, uint32_t);
-__stdcall int        FreeImage_GetFileTypeFromMemory(void*, int);
-__stdcall void*        FreeImage_LoadFromMemory(int, void*, int);
 __stdcall void*     FreeImage_OpenMemory(uint8_t*, uint32_t);
-__stdcall void        FreeImage_CloseMemory(void*);
+__stdcall int       FreeImage_GetFileTypeFromMemory(void*, int);
+__stdcall void*     FreeImage_LoadFromMemory(int, void*, int);
+__stdcall void*     FreeImage_OpenMemory(uint8_t*, uint32_t);
+__stdcall void      FreeImage_CloseMemory(void*);
 __stdcall long      FreeImage_TellMemory(void*);
 __stdcall int       FreeImage_SeekMemory(void*, long, int);
 __stdcall uint32_t  FreeImage_ReadMemory(void* buf, uint32_t, uint32_t, void*);
-__stdcall void*        FreeImage_ConvertTo32Bits(void*);
-__stdcall void        FreeImage_Unload(void*);
-__stdcall uint8_t*    FreeImage_GetBits(void*);
-__stdcall uint32_t    FreeImage_GetWidth(void*);
-__stdcall uint32_t    FreeImage_GetHeight(void*);
-__stdcall int        FreeImage_FlipVertical(void*);
+__stdcall void*     FreeImage_ConvertTo32Bits(void*);
+__stdcall void      FreeImage_Unload(void*);
+__stdcall uint8_t*  FreeImage_GetBits(void*);
+__stdcall uint32_t  FreeImage_GetWidth(void*);
+__stdcall uint32_t  FreeImage_GetHeight(void*);
+__stdcall int       FreeImage_FlipVertical(void*);
 
 __stdcall Pixel*    FreeImage_GetPalette(void*);
-__stdcall int        FreeImage_Save(int, void*, const char*, int);
+__stdcall int       FreeImage_Save(int, void*, const char*, int);
 __stdcall int       FreeImage_SaveToMemory(int, void*, void*, int);
-__stdcall void*        FreeImage_ConvertFromRawBits(uint8_t*, int, int, int, uint32_t, uint32_t, uint32_t, uint32_t, int);
+__stdcall void*     FreeImage_ConvertFromRawBits(uint8_t*, int, int, int, uint32_t, uint32_t, uint32_t, uint32_t, int);
 
 __stdcall int       FreeImage_AcquireMemory(void*, uint8_t**, uint32_t*);
 
 __stdcall uint32_t  FreeImage_ZLibCompress(uint8_t* dst, uint32_t dstsize, uint8_t* src, uint32_t srcsize); 
 ]]
 
-local C = ffi.C--ffi.load("./libfreeimage-3.17.0.so")--ffi.C
+local C = ffi.C
 
 local Image = Class("Image")
 

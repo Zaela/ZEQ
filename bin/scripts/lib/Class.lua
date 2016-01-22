@@ -13,11 +13,11 @@ local Class = setmetatable({__call = call}, mt)
 Class.__index = Class
 
 function Class.new(name, super)
-    local is = "is" .. name
-    Class[is] = Util.falseFunc
+    local is    = "is" .. name
+    Class[is]   = Util.falseFunc
 
     local newclass = {
-        __call    = call,
+        __call  = call,
         [is]    = Util.trueFunc,
     }
 

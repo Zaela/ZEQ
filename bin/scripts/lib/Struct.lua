@@ -2,7 +2,7 @@
 local ffi = require "ffi"
 
 local string        = string
-local setmetatable    = setmetatable
+local setmetatable  = setmetatable
 
 local Struct = {}
 Struct.__index = Struct
@@ -11,9 +11,9 @@ Struct.__call = function(t, ...) return t.Type(...) end
 local function create(type, class)
     local s = {
         Type    = type,
-        Ptr        = ffi.typeof("$*", type),
-        Array    = ffi.typeof("$[?]", type),
-        Arg        = ffi.typeof("$[1]", type),
+        Ptr     = ffi.typeof("$*", type),
+        Array   = ffi.typeof("$[?]", type),
+        Arg     = ffi.typeof("$[1]", type),
     }
 
     if class then ffi.metatype(type, class) end

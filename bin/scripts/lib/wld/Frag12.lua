@@ -10,8 +10,8 @@ Struct.named("WLDFrag12Entry", [[
 ]])
 
 return Struct([[
-    WLDFragHeader    header;
+    WLDFragHeader   header;
     uint32_t        flag;
     uint32_t        count;
-    WLDFrag12Entry    entry[0];
+    WLDFrag12Entry  entry[0];
 ]], FragHeader)

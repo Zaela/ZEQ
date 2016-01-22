@@ -1,15 +1,15 @@
 
-local BinUtil    = require "BinUtil"
-local Class        = require "Class"
-local ffi        = require "ffi"
+local BinUtil   = require "BinUtil"
+local Class     = require "Class"
+local ffi       = require "ffi"
 
 local Buffer = Class("Buffer")
 
 function Buffer.new(type)
     local buf = {
-        _capacity    = 32,
-        _count        = 0,
-        _array        = BinUtil.Byte.Array(32),
+        _capacity   = 32,
+        _count      = 0,
+        _array      = BinUtil.Byte.Array(32),
     }
 
     return Buffer:instance(buf)

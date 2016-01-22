@@ -1,29 +1,29 @@
 
-local ffi        = require "ffi"
+local ffi       = require "ffi"
 local Struct    = require "Struct"
 
-local C            = ffi.C
+local C         = ffi.C
 local io        = io
-local math        = math
-local tonumber    = tonumber
+local math      = math
+local tonumber  = tonumber
 
 local BinUtil = {
     Void    = {Ptr = ffi.typeof("void*")},
-    Int        = Struct.primitive("int"),
-    Int16    = Struct.primitive("int16_t"),
-    Int64    = Struct.primitive("int64_t"),
-    Uint16    = Struct.primitive("uint16_t"),
-    Uint32    = Struct.primitive("uint32_t"),
-    Uint64    = Struct.primitive("uint64_t"),
-    Float    = Struct.primitive("float"),
-    Double    = Struct.primitive("double"),
+    Int     = Struct.primitive("int"),
+    Int16   = Struct.primitive("int16_t"),
+    Int64   = Struct.primitive("int64_t"),
+    Uint16  = Struct.primitive("uint16_t"),
+    Uint32  = Struct.primitive("uint32_t"),
+    Uint64  = Struct.primitive("uint64_t"),
+    Float   = Struct.primitive("float"),
+    Double  = Struct.primitive("double"),
     Char    = Struct.primitive("char"),
     Byte    = Struct.primitive("uint8_t"),
-    IntPtr    = Struct.primitive("intptr_t"),
-    UintPtr    = Struct.primitive("uintptr_t"),
+    IntPtr  = Struct.primitive("intptr_t"),
+    UintPtr = Struct.primitive("uintptr_t"),
     -----------------------------------------------
     Long    = Struct.primitive("long"),
-    ULong    = Struct.primitive("unsigned long"),
+    ULong   = Struct.primitive("unsigned long"),
 }
 
 -- converts a pointer type to its (signed) address as a lua number

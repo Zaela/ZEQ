@@ -1,8 +1,8 @@
 
-local ffi        = require "ffi"
+local ffi       = require "ffi"
 local io        = require "io"
-local Class        = require "Class"
-local BinUtil    = require "BinUtil"
+local Class     = require "Class"
+local BinUtil   = require "BinUtil"
 
 local File = Class("File")
 

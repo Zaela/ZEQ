@@ -1,8 +1,8 @@
 
-local bit            = require "bit"
+local bit           = require "bit"
 local Struct        = require "Struct"
-local Class            = require "Class"
-local BinUtil        = require "BinUtil"
+local Class         = require "Class"
+local BinUtil       = require "BinUtil"
 local FragHeader    = require "wld/FragHeader"
 
 local Bone
@@ -42,18 +42,18 @@ function Frag:addChildren(vw)
 end
 
 Frag10 = Struct([[
-    WLDFragHeader    header;
+    WLDFragHeader   header;
     uint32_t        flag;
-    int                numBones;
-    int                ref;
+    int             numBones;
+    int             ref;
 ]], Frag)
 
 Bone = Struct[[
-    int            nameref;
+    int         nameref;
     uint32_t    flag;
-    int            refA;
-    int            refB;
-    int            size;
+    int         refA;
+    int         refB;
+    int         size;
 ]]
 
 return Frag10

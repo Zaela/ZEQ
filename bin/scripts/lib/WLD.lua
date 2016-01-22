@@ -1,9 +1,9 @@
 
-local Class            = require "Class"
+local Class         = require "Class"
 local Struct        = require "Struct"
-local BinUtil        = require "BinUtil"
-local ffi            = require "ffi"
-local bit            = require "bit"
+local BinUtil       = require "BinUtil"
+local ffi           = require "ffi"
+local bit           = require "bit"
 local FragHeader    = require "wld/FragHeader"
 
 local FragTypes = {
@@ -71,10 +71,10 @@ function WLD.new(data, len)
 
     local wld = {
         _stringBlock        = stringBlock,
-        _stringBlockLen        = header.stringBlockLen,
+        _stringBlockLen     = header.stringBlockLen,
         _rawData            = data,
-        _rawLen                = len,
-        _header                = header,
+        _rawLen             = len,
+        _header             = header,
         _version            = version,
     }
 
@@ -82,8 +82,8 @@ function WLD.new(data, len)
     wld:encodeStrings()
 
     -- Gather fragments
-    local fragsByIndex        = {}
-    local fragsByNameIndex    = {}
+    local fragsByIndex       = {}
+    local fragsByNameIndex   = {}
     local fragsByName        = {}
     local fragsByType        = {}
 
@@ -119,8 +119,8 @@ function WLD.new(data, len)
         tooShort()
     end
 
-    wld._fragsByIndex        = fragsByIndex
-    wld._fragsByNameIndex    = fragsByNameIndex
+    wld._fragsByIndex       = fragsByIndex
+    wld._fragsByNameIndex   = fragsByNameIndex
     wld._fragsByName        = fragsByName
     wld._fragsByType        = fragsByType
 

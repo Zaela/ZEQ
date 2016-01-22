@@ -1,6 +1,6 @@
 
 local Struct        = require "Struct"
-local Class            = require "Class"
+local Class         = require "Class"
 local FragHeader    = require "wld/FragHeader"
 
 local Animated
@@ -27,18 +27,18 @@ function Frag:addChildren(vw)
 end
 
 local Frag04 = Struct([[
-    WLDFragHeader    header;
+    WLDFragHeader   header;
     uint32_t        flag;
-    int                count;
-    int                ref;
+    int             count;
+    int             ref;
 ]], Frag)
 
 Animated = Struct[[
-    WLDFragHeader    header;
+    WLDFragHeader   header;
     uint32_t        flag;
-    int                count;
+    int             count;
     uint32_t        milliseconds;
-    int                refList[0];
+    int             refList[0];
 ]]
 
 return Frag04
