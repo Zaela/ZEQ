@@ -44,8 +44,8 @@ end
 
 function MOD:staticGeometry(obj, s)
     -- this is definitely wrong
-    local mat4 = Matrix.angleXYZ(obj.rot.x, obj.rot.y, obj.rot.z)
-    mat4:setTranslation(obj.x, obj.y, obj.z)
+    local mat4 = Matrix.angleXYZ(obj.rot.x, -obj.rot.z, -obj.rot.y)
+    mat4:setTranslation(-obj.y, obj.z, -obj.x)
     
     local scale = obj.scale
     if scale ~= 1.0 and scale ~= 0.0 then

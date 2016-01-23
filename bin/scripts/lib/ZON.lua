@@ -110,6 +110,10 @@ function ZON.new(pfs, data, len)
         if model == ter then
             ter:shift(obj)
         else
+            if obj.rot.y ~= 0.0 then obj.rot.y = obj.rot.y + 90 end
+            if obj.rot.y ~= 0.0 or obj.rot.z ~= 0.0 then
+                io.write(string.format("[%i] %s %g,%g,%g %g,%g,%g\n", i, name, obj.x, obj.y, obj.z, obj.rot.x, obj.rot.y, obj.rot.z))
+            end
             model:staticGeometry(obj, staticGeometry)
         end
     end
