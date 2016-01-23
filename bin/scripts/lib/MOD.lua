@@ -1,8 +1,12 @@
 
-local Struct    = require "Struct"
-local Class     = require "Class"
-local EQGCommon = require "EQGCommon"
-local BinUtil   = require "BinUtil"
+local ffi           = require "ffi"
+local Struct        = require "Struct"
+local Class         = require "Class"
+local EQGCommon     = require "EQGCommon"
+local BinUtil       = require "BinUtil"
+local Vertex        = require "Vertex"
+local VertexBuffer  = require "VertexBuffer"
+local Matrix        = require "Matrix"
 
 local Header = Struct[[
     uint32_t    signature;        // "EQGM"
@@ -35,7 +39,57 @@ function MOD.new(pfs, data, len)
     
     eqg:extractModel(p)
     
-    return eqg
+    return MOD:instance(eqg)
+end
+
+function MOD:staticGeometry(obj, s)
+    -- this is definitely wrong
+    local mat4 = Matrix.angleXYZ(obj.rot.x, obj.rot.y, obj.rot.z)
+    mat4:setTranslation(obj.x, obj.y, obj.z)
+    
+    local scale = obj.scale
+    if scale ~= 1.0 and scale ~= 0.0 then
+        mat4 = mat4 * Matrix.scale(scale)
+    end
+
+    local temp = Vertex()
+    
+    local function shiftVBs(iter, targets)
+        for src in iter do
+            if src:isEmpty() then goto skip end
+            
+            local mat = src:getMaterial()
+            local name
+            
+            if mat:getName() == "NULL" or mat:getTextureCount() == 0 or not mat:getTextures()[1] then
+                name = "NULL"
+            else
+                name = mat:getTextures()[1]:getName()
+            end
+            
+            local vb = targets[name]
+            if not vb then
+                vb = VertexBuffer()
+                vb:setMaterial(mat)
+                targets[name] = vb
+            end
+            
+            local data = src:data()
+            
+            for i = 0, src:count() - 1 do
+                ffi.copy(temp, data + i, Vertex:sizeof())
+                mat4:transformVector(temp)
+                vb:addVertexCopy(temp)
+            end
+            
+            ::skip::
+        end
+    end
+    
+    local model = self:model()
+    
+    shiftVBs(model:vertexBuffers(), s.vertexBuffersByTexName)
+    shiftVBs(model:noCollideVertexBuffers(), s.noCollideVertexBuffersByTexName)
 end
 
 return MOD

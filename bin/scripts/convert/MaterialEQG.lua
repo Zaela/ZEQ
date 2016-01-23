@@ -24,13 +24,14 @@ local function makeTextureHandler(func)
     return function(self, prop, strings, pfs)
         local name      = prop:getValue(strings):lower()
         local data, len = pfs:getEntryByName(name)
+        local tex
         
         if not data then
             io.write("Could not find texture '", name, "'\n")
-            return
+            tex = Texture.NULL
+        else
+            tex = Texture(name, data, len)
         end
-        
-        local tex = Texture(name, data, len)
         
         func(self, tex)
     end

@@ -25,7 +25,8 @@ class Lua
 private:
     lua_State* L;
 
-    static const int CONFIG_INDEX = 1;
+    static const int TRACEBACK_INDEX    = 1;
+    static const int CONFIG_INDEX       = 2;
 
 private:
     void getConfigOption(int index);

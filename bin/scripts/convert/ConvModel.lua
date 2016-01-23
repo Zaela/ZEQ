@@ -88,6 +88,14 @@ function ConvModel:getTextureByName(name, isMasked)
     return textures[name]
 end
 
+function ConvModel:addVertexBuffer(vb)
+    table.insert(self._vertexBuffers, vb)
+end
+
+function ConvModel:addNoCollideVertexBuffer(vb)
+    table.insert(self._noCollideVertexBuffers, vb)
+end
+
 function ConvModel:getVertexBuffers()
     return self._vertexBuffers
 end

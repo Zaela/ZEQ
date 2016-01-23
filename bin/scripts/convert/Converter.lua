@@ -4,6 +4,7 @@ local ZoneWLD       = require "ZoneWLD"
 local Database      = require "Database"
 local File          = require "File"
 local Image         = require "Image"
+local Texture       = require "Texture"
 local ConvMaterial  = require "ConvMaterial"
 
 local table = table
@@ -192,6 +193,8 @@ function Converter.insertStaticModel(db, q, model, name)
     end)
     
     local function blobTexture(tex, isMasked)
+        if tex == Texture.NULL then return 0 end
+        
         tex:open()
         tex:normalize()
         if isMasked then
@@ -211,6 +214,8 @@ function Converter.insertStaticModel(db, q, model, name)
         if normalTex then
             normalId, normalDupe = blobTexture(normalTex, false)
         end
+        
+        if diffuseId == 0 then return end
         
         stmt:bindString(1, tex:getName())
         stmt:bindInt(2, diffuseId)

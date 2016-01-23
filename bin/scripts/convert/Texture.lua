@@ -59,4 +59,7 @@ function Texture:mask()
     self._len   = len
 end
 
+Texture.NULL = Texture("NULL")
+Texture.NULL:setId(0)
+
 return Texture

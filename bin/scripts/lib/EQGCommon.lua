@@ -28,7 +28,7 @@ local EQGVertex = Struct.packed[[
 local EQGVertexV3 = Struct.packed[[
     float       x, y, z;    // Position
     float       i, j, k;    // Normal
-    uint32_t    unk_i;
+    uint8_t     r, g, b, a;
     float       u, v;       // Texture coordinates
     float       unk_f[2];
 ]]
@@ -174,7 +174,9 @@ function EQGCommon:extractMaterials(p)
         
         for diffuse, normal in mat:textures() do
             model:addTexture(diffuse)
-            model:addNormalMap(normal)
+            if normal then
+                model:addNormalMap(normal)
+            end
         end
     end
 
@@ -212,12 +214,15 @@ function EQGCommon:extractVertexBuffers(p)
         local vb, cvb   = model:getVertexBuffer(index)
         local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
         
-        for j = 2, 0, -1 do
+        --for j = 2, 0, -1 do
+        for j = 0, 2 do
             local s = verts[tri.index[j]]
             local v = use:addVertex()
             
-            v.x, v.z, v.y   = s.x, s.y, s.z
-            v.i, v.k, v.j   = s.i, s.j, s.k
+            --v.x, v.z, v.y   = s.x, s.y, s.z
+            --v.i, v.k, v.j   = s.i, s.j, s.k
+            v.x, v.y, v.z   = s.x, s.y, s.z
+            v.i, v.j, v.k   = s.i, s.j, s.k
             v.u, v.v        = s.u, s.v
         end
     end

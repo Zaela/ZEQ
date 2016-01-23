@@ -2,6 +2,7 @@
 local Class         = require "Class"
 local BlendTypes    = require "BlendTypes"
 local ConvObject    = require "ConvObject"
+local Texture       = require "Texture"
 
 local table = table
 
@@ -53,7 +54,7 @@ function ConvMaterial:getTextureAt(index)
 end
 
 function ConvMaterial:addTexture(tex)
-    table.insert(self._textures, tex)
+    table.insert(self._textures, tex or Texture.NULL)
 end
 
 function ConvMaterial:getTextures()

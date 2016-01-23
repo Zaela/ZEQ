@@ -14,6 +14,10 @@ void Lua::init()
     
     luaL_openlibs(L);
     
+    lua_getglobal(L, "debug");
+    lua_getfield(L, -1, "traceback");
+    lua_remove(L, 1);
+    
     runScript(LUA_INIT_PATH);
 }
 
@@ -25,7 +29,7 @@ Lua::~Lua()
 
 bool Lua::runScript(const std::string& path, int numReturns)
 {
-    if (luaL_loadfile(L, path.c_str()) || lua_pcall(L, 0, numReturns, 0))
+    if (luaL_loadfile(L, path.c_str()) || lua_pcall(L, 0, numReturns, TRACEBACK_INDEX))
     {
         printf("Lua::runScript error: %s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
@@ -37,7 +41,7 @@ bool Lua::runScript(const std::string& path, int numReturns)
 
 bool Lua::runFunc(int numArgs, int numReturns)
 {
-    if (lua_pcall(L, numArgs, numReturns, 0))
+    if (lua_pcall(L, numArgs, numReturns, TRACEBACK_INDEX))
     {
         printf("Lua::runFunc error: %s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
