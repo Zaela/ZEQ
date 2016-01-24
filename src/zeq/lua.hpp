@@ -48,7 +48,7 @@ public:
     void initDatabase();
 
     bool convertZone(const std::string& shortname);
-    bool convertMobModel(int race, uint8_t gender);
+    bool convertMob(int race, uint8_t gender);
 };
 
 #endif//_ZEQ_LUA_HPP_

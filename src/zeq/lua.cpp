@@ -141,7 +141,7 @@ bool Lua::convertZone(const std::string& shortname)
     return runFunc(1);
 }
 
-bool Lua::convertMobModel(int race, uint8_t gender)
+bool Lua::convertMob(int race, uint8_t gender)
 {
     if (!runScript(LUA_GET_MOB_CONVERTER_PATH, 1))
     {

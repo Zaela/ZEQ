@@ -11,6 +11,7 @@ local PFS           = require "PFS"
 local EQGProperty   = require "EQGProperty"
 local ModelEQG      = require "ModelEQG"
 local BoneEQG       = require "BoneEQG"
+local BAEQG         = require "BoneAssignmentEQG"
 local ANI -- must load later, mutual requires
 
 local table = table
@@ -314,27 +315,63 @@ function EQGCommon:extractBoneAssignments(p)
     
     self:checkLength(p)
     
-    local tris = self._srcTris
+    local tris      = self._srcTris
+    local handled   = {}
     
-    for i = 0, header.vertexCount - 1 do
+    model:initWeightBuffers()
+    
+    -- Need to account for triangles indexing vertices as one huge flat array while we have them separated into buffers
+    local vertCountsByMat           = {}
+    local noCollideVertCountsByMat  = {}
+    
+    for i = 1, #model:getVertexBuffers() do
+        vertCountsByMat[i]          = 0
+        noCollideVertCountsByMat[i] = 0
+    end
+        
+    for i = 0, header.triangleCount - 1 do
         local tri   = tris[i]
         local index = tri.materialIndex + 1
         
-        local vb, cvb   = model:getVertexBuffer(index)
-        local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
+        local wt, nwt   = model:getWeightBuffer(index)
+        local col       = bit.band(tri.flag, 0x01) == 0
+        local use       = col and wt or nwt
+        local vcounts   = col and vertCountsByMat or noCollideVertCountsByMat
+        local vcount    = vcounts[index]
         
         for j = 0, 2 do
             local binBA = binBAs[tri.index[j]]
-			for k = 0, binBA.count - 1 do
-				local wt    = binBA.weights[k]
-				--local buf   = getWeightBuffer(wt.boneIndex + 1)
 
-				--buf:addWeight(vertCount + j, matIndex, wt.value)
+            for k = 0, binBA.count - 1 do
+                local wt = binBA.weights[k]
                 
-                io.write(string.format("MAT %i VERT %i WT %i AMT %g\n", tri.materialIndex, tri.index[j], k, wt.value))
-			end
+                use:add(vcount + j, wt.boneIndex, wt.value)
+            end
+        end
+        
+        vcounts[index] = vcount + 3
+    end
+    
+    model:sortWeights()
+        
+    local function count(iter)
+        for wt in iter do
+            if wt:isEmpty() then goto skip end
+            
+            io.write("== WT COUNT ", wt._count, " ==\n")
+            
+            local arr = wt._array
+            for i = 0, wt._count - 1 do
+                local a = arr[i]
+                io.write(string.format("VERT %u BONE %u WT %g\n", a.vertIndex, a.boneIndex, a.weight))
+            end
+            
+            ::skip::
         end
     end
+    
+    count(model:weightBuffers())
+    count(model:noCollideWeightBuffers())
 end
 
 function EQGCommon:extractModel(p)

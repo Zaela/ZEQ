@@ -1,7 +1,7 @@
 
 #include "temp.hpp"
 
-extern Temp gTemp;
+Temp gTemp;
 
 Temp::Temp()
     : m_capacity(DEFAULT_MEMORY_BYTES),

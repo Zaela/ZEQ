@@ -6,7 +6,7 @@
 #include "model_prototype.hpp"
 #include "vertex_buffer.hpp"
 #include "axis_aligned_bounding_box.hpp"
-#include "temp.hpp"
+#include "temp_alloc.hpp"
 #include "camera.hpp"
 #include "opengl.hpp"
 #include "config.hpp"

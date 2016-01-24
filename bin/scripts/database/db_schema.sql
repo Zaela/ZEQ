@@ -140,38 +140,31 @@ CREATE TABLE MobModels (
     race    INT,
     gender  INT,
     modelId INT,
-    PRIMARY KEY (race, gender);
+    PRIMARY KEY (race, gender)
 );
 
-CREATE TABLE Bones (
-    id          INTEGER PRIMARY KEY,
-    parentId    INT DEFAULT 0,
-    attachType  INT DEFAULT 0,
-    x           REAL,
-    y           REAL,
-    z           REAL,
-    rx          REAL,
-    ry          REAL,
-    rz          REAL,
-    rw          REAL,
-    sx          REAL,
-    sy          REAL,
-    sz          REAL
+CREATE TABLE MobHeadModels (
+    mainModelId INT,
+    headModelId INT,
+    headNumber  INT,
+    PRIMARY KEY (mainModelId, headModelId)
 );
 
-CREATE TABLE MobModels2Bones (
-    id          INTEGER PRIMARY KEY,
-    mobModelId  INT,
-    boneId      INT
+CREATE TABLE Frames (
+    id      INTEGER PRIMARY KEY,
+    blobId  INT
 );
 
-CREATE INDEX Index_MobModels2Bones ON MobModels2Bones (mobModelId);
-
-CREATE TABLE WeightedBoneAssignments (
-    boneId      INT,
-    vertId      INT,
-    vertIndex   INT,
-    weight      REAL
+CREATE TABLE AnimationFrames (
+    modelId         INT,
+    animType        INT,
+    frameId         INT,
+    milliseconds    INT
 );
 
-CREATE INDEX Index_WeightedBoneAssignments ON WeightedBoneAssignments (boneId);
+CREATE INDEX Index_AnimationFrames ON AnimationFrames (modelId, animType);
+
+CREATE TABLE BoneAssignments (
+    vertId  INT PRIMARY KEY,
+    blobId  INT
+);

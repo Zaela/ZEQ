@@ -65,7 +65,7 @@ public:
 
     void reset();
 };
-
+/*
 static Temp gTemp;
 
 template <typename T>
@@ -108,5 +108,5 @@ public:
 
 template <typename T>
 class TempVector : public std::vector<T, TempAllocator<T>> { };
-
+*/
 #endif//_ZEQ_TEMP_HPP_
