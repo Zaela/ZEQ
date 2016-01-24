@@ -56,7 +56,7 @@ function ZON.new(pfs, data, len)
         error "file does not have a valid ZON signature"
     end
 
-    local eqg = EQGCommon(pfs, data, len, header)
+    local eqg = EQGCommon(pfs, data, len, header, Header)
     
     p = eqg:extractStrings(p)
     
@@ -71,7 +71,7 @@ function ZON.new(pfs, data, len)
     local models        = {}
     
     for i = 0, header.modelCount - 1 do
-        local name      = strings[nameIndices[i]]:lower()
+        local name      = strings[nameIndices[i]]
         modelNames[i]   = name
         
         local model

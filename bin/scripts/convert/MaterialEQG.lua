@@ -38,8 +38,8 @@ local function makeTextureHandler(func)
 end
 
 local propHandlers = {
-    e_TextureDiffuse0   = makeTextureHandler(MaterialEQG.addTexture),
-    e_TextureNormal0    = makeTextureHandler(MaterialEQG.addNormalMap),
+    e_texturediffuse0   = makeTextureHandler(MaterialEQG.addTexture),
+    e_texturenormal0    = makeTextureHandler(MaterialEQG.addNormalMap),
 }
 
 function MaterialEQG:addProperty(prop, strings, pfs)

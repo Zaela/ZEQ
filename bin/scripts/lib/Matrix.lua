@@ -107,6 +107,12 @@ function Matrix:setTranslation(x, y, z)
     m[14] = z
 end
 
+function Matrix.translation(v)
+    local m = Matrix.identity()
+    m:setTranslation(v.x, v.y, v.z)
+    return m
+end
+
 ------------------------------------------------
 -- Rotation matrices
 ------------------------------------------------
@@ -182,6 +188,28 @@ function Matrix.angleXYZ(x, y, z)
     return Matrix.angleX(x) * Matrix.angleY(y) * Matrix.angleZ(z)
 end
 
+-- Transposed, technically
+function Matrix.fromQuaternion(q)
+	local mat = Mat4()
+	local m = mat.m
+
+	m[ 0] = 1.0 - 2.0 * q.y * q.y - 2.0 * q.z * q.z
+	m[ 4] = 2.0 * q.x * q.y + 2.0 * q.z * q.w
+	m[ 8] = 2.0 * q.x * q.z - 2.0 * q.y * q.w
+
+	m[ 1] = 2.0 * q.x * q.y - 2.0 * q.z * q.w
+	m[ 5] = 1.0 - 2.0 * q.x * q.x - 2.0 * q.z * q.z
+	m[ 9] = 2.0 * q.z * q.y + 2.0 * q.x * q.w
+
+	m[ 2] = 2.0 * q.x * q.z + 2.0 * q.y * q.w
+	m[ 6] = 2.0 * q.z * q.y - 2.0 * q.x * q.w
+	m[10] = 1.0 - 2.0 * q.x * q.x - 2.0 * q.y * q.y
+
+	m[15] = 1.0
+
+	return mat
+end
+
 ------------------------------------------------
 -- Camera matrices
 ------------------------------------------------
@@ -238,7 +266,7 @@ end
 -- Transformations
 ------------------------------------------------
 
--- rotate, translate
+-- Rotate, translate
 function Matrix:transformVector(vec)
     local m = self.m
 
@@ -249,13 +277,13 @@ function Matrix:transformVector(vec)
     vec.x, vec.y, vec.z = x, y, z
 end
 
-function Matrix.scale(v)
+function Matrix.scale(x, y, z)
     local mat = Mat4()
     local m = mat.m
 
-    m[ 0] = v
-    m[ 5] = v
-    m[10] = v
+    m[ 0] = x
+    m[ 5] = y or x
+    m[10] = z or x
     m[15] = 1
 
     return mat

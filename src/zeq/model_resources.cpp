@@ -116,7 +116,7 @@ ZoneModel* ModelResources::loadZoneModel_impl(const std::string& shortname)
     ZoneModel* zoneModel = new ZoneModel(modelId);
     m_buildModel = zoneModel;
     
-    gModelResources.loadEssentials(modelId);
+    loadEssentials(modelId);
     
     timer.print("done");
     
@@ -272,6 +272,60 @@ void ModelResources::cacheOctree(ZoneModel* zoneModel)
     gDatabase.commitTransaction();
     
     timer.print("done");
+}
+
+AnimatedModel* ModelResources::loadMobModel(int race, uint8_t gender)
+{
+    AnimatedModel* mobModel = loadMobModel_impl(race, gender);
+    
+    if (mobModel)
+        return mobModel;
+    
+    // Wasn't already loaded, attempt to do a conversion from the EQ folder
+    printf("no data found\nAttempting to convert mob from original data files...\n");
+    fflush(stdout);
+    
+    if (!gLua.convertMob(race, gender))
+    {
+        //throw
+        return nullptr;
+    }
+    
+    return loadMobModel_impl(race, gender);
+}
+
+AnimatedModel* ModelResources::loadMobModel_impl(int race, uint8_t gender)
+{
+    int64_t modelId = -1;
+    PerfTimer timer;
+    Query queryMobModelId;
+    
+    printf("Loading mob data for race %i gender %u... ", race, gender);
+    fflush(stdout);
+    
+    // Retrieve model ID for the mob
+    gDatabase.prepare(QUERY_MOB_MODEL_ID, queryMobModelId);
+    
+    queryMobModelId.bindInt(1, race);
+    queryMobModelId.bindInt(2, gender);
+    
+    while (queryMobModelId.select())
+    {
+        modelId = queryMobModelId.getInt64(1);
+    }
+    
+    if (modelId == -1)
+        return nullptr;
+    
+    AnimatedModel* mobModel = new AnimatedModel(modelId);
+    m_buildModel = mobModel;
+    
+    loadEssentials(modelId);
+    
+    timer.print("done");
+    
+    m_buildModel = nullptr;
+    return mobModel;
 }
 
 void ModelResources::loadEssentials(int64_t modelId)

@@ -8,6 +8,7 @@ local File      = require "File"
 local CRC       = require "CRC"
 local ffi       = require "ffi"
 local Config    = require "Config"
+local Util      = require "Util"
 
 local table     = table
 local ipairs    = ipairs
@@ -198,6 +199,23 @@ end
 
 function PFS:getEntryByExtension(ext)
     return self:getEntry(self._byExt[ext][1])
+end
+
+function PFS:namesByExtension(ext)
+    local ext = self._byExt[ext]
+    
+    if not ext then return Util.nullFunc end
+    
+    local names = self._names
+    local i     = 0
+    
+    return function()
+        i = i + 1
+        local index = ext[i]
+        if index then
+            return names[index]
+        end
+    end
 end
 
 return PFS

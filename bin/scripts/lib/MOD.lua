@@ -35,7 +35,7 @@ function MOD.new(pfs, data, len)
         error "file does not have a valid MOD signature"
     end
 
-    local eqg = EQGCommon(pfs, data, len, header)
+    local eqg = EQGCommon(pfs, data, len, header, Header)
     
     eqg:extractModel(p)
     

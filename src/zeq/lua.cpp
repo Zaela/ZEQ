@@ -140,3 +140,18 @@ bool Lua::convertZone(const std::string& shortname)
     lua_pushstring(L, shortname.c_str());
     return runFunc(1);
 }
+
+bool Lua::convertMobModel(int race, uint8_t gender)
+{
+    if (!runScript(LUA_GET_MOB_CONVERTER_PATH, 1))
+    {
+        //throw
+        printf("failed to get mob converter func\n");
+        return false;
+    }
+    
+    // Converter func is on top of stack, takes race and gender as arguments
+    lua_pushinteger(L, race);
+    lua_pushinteger(L, gender);
+    return runFunc(2);
+}

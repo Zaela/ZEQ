@@ -10,6 +10,10 @@ local Matrix        = require "Matrix"
 local PFS           = require "PFS"
 local EQGProperty   = require "EQGProperty"
 local ModelEQG      = require "ModelEQG"
+local BoneEQG       = require "BoneEQG"
+local ANI -- must load later, mutual requires
+
+local table = table
 
 local EQGMaterial = Struct.packed[[
     uint32_t    index;          // Essentially meaningless
@@ -69,13 +73,17 @@ local EQGBoneAssignment = Struct.packed[[
 
 local EQGCommon = Class("EQGCommon")
 
-function EQGCommon.new(pfs, data, len, header)
+function EQGCommon.new(pfs, data, len, header, headerType)
     local c = {
-        _pfs    = pfs,
-        _data   = data,
-        _len    = len,
-        _header = header,
-        _model  = ModelEQG(),
+        _pfs                = pfs,
+        _data               = data,
+        _len                = len,
+        _header             = header,
+        _headerType         = headerType,
+        _model              = ModelEQG(),
+        _bonesListOrder     = {},
+        _bonesRecurseOrder  = {},
+        _bonesList2Recurse  = {},
     }
     
     return EQGCommon:instance(c)
@@ -135,7 +143,7 @@ function EQGCommon:extractStrings(p)
 
     while i < len do
         local str   = ffi.string(stringBlock + i)
-        strings[i]  = str
+        strings[i]  = str:lower()
         
         i = i + #str + 1 -- Need to skip null terminator
     end
@@ -207,6 +215,8 @@ function EQGCommon:extractVertexBuffers(p)
     
     self:checkLength(p)
     
+    self._srcTris = tris
+    
     for i = 0, triCount - 1 do
         local tri   = tris[i]
         local index = tri.materialIndex + 1
@@ -230,10 +240,113 @@ function EQGCommon:extractVertexBuffers(p)
     return p
 end
 
+function EQGCommon:extractBones(p)
+    local data      = self:data()
+    local header    = self:header()
+    local strings   = self:strings()
+    
+    local binBones  = EQGBone:cast(data + p)
+    p = p + EQGBone:sizeof() * header.boneCount
+    
+    self:checkLength(p)
+    
+    -- "Recurse order" is the default, but some animations use the "list order" instead.
+    -- We will be converting any list order animations to recurse order so that only one ordering is needed in the DB.
+    local listOrder         = self._bonesListOrder
+    local recurseOrder      = self._bonesRecurseOrder
+    local recurseIndices    = self._bonesList2Recurse
+    
+    for i = 0, header.boneCount - 1 do
+        local bone = binBones[i]
+        local name = strings[bone.nameIndex]
+        
+        table.insert(listOrder, BoneEQG(name, bone.pos, bone.rot, bone.scale))
+    end
+    
+    local function recurse(i, parent)
+        local binBone   = binBones[i]
+        local bone      = listOrder[i + 1]
+        
+        if binBone.linkBoneIndex ~= 0xFFFFFFFF then
+            recurse(binBone.linkBoneIndex, parent)
+        end
+        
+        table.insert(recurseOrder, bone)
+        table.insert(recurseIndices, i)
+        
+        if parent then
+            parent:addChild(bone)
+        end
+        
+        if binBone.childBoneIndex ~= 0xFFFFFFFF then
+            recurse(binBone.childBoneIndex, bone)
+        end
+    end
+    
+    recurse(0)
+    
+    -- Check if there is any difference between list and recurse order
+    local diff
+    
+    for i, o in ipairs(recurseIndices) do
+        if i ~= (o + 1) then
+            diff = true
+            break
+        end
+    end
+    
+    if not diff then
+        --io.write("No difference between list and recurse bone orders\n")
+        self._bonesListOrder    = nil
+        self._bonesList2Recurse = nil
+    end
+
+    return p
+end
+
+function EQGCommon:extractBoneAssignments(p)
+    local data      = self:data()
+    local header    = self:header()
+    local model     = self:model()
+    
+    local binBAs = EQGBoneAssignment:cast(data + p)
+    p = p + EQGBoneAssignment:sizeof() * header.vertexCount
+    
+    self:checkLength(p)
+    
+    local tris = self._srcTris
+    
+    for i = 0, header.vertexCount - 1 do
+        local tri   = tris[i]
+        local index = tri.materialIndex + 1
+        
+        local vb, cvb   = model:getVertexBuffer(index)
+        local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
+        
+        for j = 0, 2 do
+            local binBA = binBAs[tri.index[j]]
+			for k = 0, binBA.count - 1 do
+				local wt    = binBA.weights[k]
+				--local buf   = getWeightBuffer(wt.boneIndex + 1)
+
+				--buf:addWeight(vertCount + j, matIndex, wt.value)
+                
+                io.write(string.format("MAT %i VERT %i WT %i AMT %g\n", tri.materialIndex, tri.index[j], k, wt.value))
+			end
+        end
+    end
+end
+
 function EQGCommon:extractModel(p)
     p = self:extractStrings(p)
     p = self:extractMaterials(p)
     p = self:extractVertexBuffers(p)
+    
+    local header = self:header()
+    if self._headerType:hasField("boneCount") and header.boneCount > 0 then
+        p = self:extractBones(p)
+        p = self:extractBoneAssignments(p)
+    end
 end
 
 return EQGCommon

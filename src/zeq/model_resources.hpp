@@ -9,6 +9,7 @@
 #include "opengl.hpp"
 #include "model_prototype.hpp"
 #include "zone_model.hpp"
+#include "animated_model.hpp"
 #include "axis_aligned_bounding_box.hpp"
 #include "vec3.hpp"
 #include "lua.hpp"
@@ -58,6 +59,10 @@
     "SELECT minX, minY, minZ, maxX, maxY, maxZ "            \
     "FROM CachedOctrees "                                   \
     "WHERE zoneModelId = ? AND vertId = ?"
+    
+#define QUERY_MOB_MODEL_ID                                  \
+    "SELECT modelId FROM MobModels "                        \
+    "WHERE race = ? AND gender = ?"
 
 class ModelResources
 {
@@ -120,10 +125,12 @@ private:
     
     void loadCachedOctree(int64_t modelId, ZoneModel* zoneModel);
     
-    ZoneModel* loadZoneModel_impl(const std::string& shortname);
+    ZoneModel*      loadZoneModel_impl(const std::string& shortname);
+    AnimatedModel*  loadMobModel_impl(int race, uint8_t gender);
 
 public:
-    ZoneModel* loadZoneModel(const std::string& shortname);
+    ZoneModel*      loadZoneModel(const std::string& shortname);
+    AnimatedModel*  loadMobModel(int race, uint8_t gender);
 
     void cacheOctree(ZoneModel* zoneModel);
 

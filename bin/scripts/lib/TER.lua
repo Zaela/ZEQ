@@ -35,7 +35,7 @@ function TER.new(pfs, data, len)
         error "file does not have a valid TER signature"
     end
 
-    local eqg = EQGCommon(pfs, data, len, header)
+    local eqg = EQGCommon(pfs, data, len, header, Header)
     
     eqg:extractModel(p)
     
@@ -77,7 +77,7 @@ end
 function TER:appendStaticGeometry(s)
     local model = self:model()
     
-    local function handle(targetVBs, byTexName, addVB)
+    local function handle(targetVBs, byTexName)
         local existing = {}
         
         for i, vb in ipairs(targetVBs) do

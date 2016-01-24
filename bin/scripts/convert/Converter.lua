@@ -1,12 +1,14 @@
 
 local ZoneEQG       = require "ZoneEQG"
 local ZoneWLD       = require "ZoneWLD"
+local MobEQG        = require "MobEQG"
 local Database      = require "Database"
 local File          = require "File"
 local Image         = require "Image"
 local Texture       = require "Texture"
 local ConvMaterial  = require "ConvMaterial"
 
+local type  = type
 local table = table
 
 local Converter = {}
@@ -26,6 +28,29 @@ function Converter.convertZone(shortname)
     end
     
     error(string.format("Could not find zone '%s'", shortname))
+end
+
+function Converter.convertMob(race, gender)
+    local map = require "RaceMapping"
+    
+    local mapping = map.getFileFor(race, gender)
+    
+    if not mapping then
+        io.write(string.format("No known filename for race %i gender %i\n", race, gender))
+        return
+    end
+    
+    local obj
+    
+    if type(mapping) == "string" and mapping:find("%.eqg$") then
+        obj = MobEQG.convert(filename)
+    else
+    
+    end
+    
+    if obj then
+        Converter.insertMob(obj, race, gender)
+    end
 end
 
 function Converter.initDB()
@@ -157,6 +182,12 @@ function Converter.insertZone(obj, shortname)
     for k, query in pairs(q) do
         query:finalize()
     end
+    
+    obj = nil
+    q   = nil
+    db  = nil
+    
+    collectgarbage()
     
     io.write("done in ", os.clock() - time, " seconds\n")
 end

@@ -19,6 +19,7 @@ extern "C"
 #define LUA_INIT_DB_PATH "scripts/sys/init_db.lua"
 #define LUA_CONFIG_RUNNER_PATH "scripts/sys/read_config.lua"
 #define LUA_GET_ZONE_CONVERTER_PATH "scripts/sys/get_zone_convert.lua"
+#define LUA_GET_MOB_CONVERTER_PATH "scripts/sys/get_mob_convert.lua"
 
 class Lua
 {
@@ -47,6 +48,7 @@ public:
     void initDatabase();
 
     bool convertZone(const std::string& shortname);
+    bool convertMobModel(int race, uint8_t gender);
 };
 
 #endif//_ZEQ_LUA_HPP_

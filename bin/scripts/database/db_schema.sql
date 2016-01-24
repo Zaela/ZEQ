@@ -131,3 +131,47 @@ CREATE TABLE ObjectPlacements (
     y           REAL,
     z           REAL
 );
+
+--------------------------------------------------------------------------------
+-- Mob Models and Skeletal Animation
+--------------------------------------------------------------------------------
+
+CREATE TABLE MobModels (
+    race    INT,
+    gender  INT,
+    modelId INT,
+    PRIMARY KEY (race, gender);
+);
+
+CREATE TABLE Bones (
+    id          INTEGER PRIMARY KEY,
+    parentId    INT DEFAULT 0,
+    attachType  INT DEFAULT 0,
+    x           REAL,
+    y           REAL,
+    z           REAL,
+    rx          REAL,
+    ry          REAL,
+    rz          REAL,
+    rw          REAL,
+    sx          REAL,
+    sy          REAL,
+    sz          REAL
+);
+
+CREATE TABLE MobModels2Bones (
+    id          INTEGER PRIMARY KEY,
+    mobModelId  INT,
+    boneId      INT
+);
+
+CREATE INDEX Index_MobModels2Bones ON MobModels2Bones (mobModelId);
+
+CREATE TABLE WeightedBoneAssignments (
+    boneId      INT,
+    vertId      INT,
+    vertIndex   INT,
+    weight      REAL
+);
+
+CREATE INDEX Index_WeightedBoneAssignments ON WeightedBoneAssignments (boneId);

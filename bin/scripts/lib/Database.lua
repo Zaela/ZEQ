@@ -34,7 +34,7 @@ const char* sqlite3_column_text(sqlite3_stmt*, int col);
 void* sqlite3_column_blob(sqlite3_stmt*, int col);
 ]]
 
-local C = ffi.C--ffi.load("./libsqlite3.so")--ffi.C
+local C = ffi.C
 
 local OPEN_READWRITE    = 0x00000002
 local OPEN_CREATE       = 0x00000004
@@ -49,7 +49,6 @@ local DONE  = 101
 local Database = Class("Database")
 
 function Database.new(path)
-    --[[]]
     local ptr = ffi.new("sqlite3*[1]")
     local rc = C.sqlite3_open_v2(path, ptr, OPEN_READWRITE + OPEN_CREATE + OPEN_FULLMUTEX, nil)
     
@@ -60,16 +59,11 @@ function Database.new(path)
     end
     
     return ptr[0]
-    --]]
-    
-    --return ffi.cast("sqlite3*", _DB)
 end
 
---[[]]
 function Database:__gc()
     C.sqlite3_close(self)
 end
---]]
 
 function Database:errmsg()
     return ffi.string(C.sqlite3_errmsg(self))
@@ -127,13 +121,6 @@ function Database:analyze()
 end
 
 local Stmt = Class("DatabaseStmt")
-
---[[
-function Stmt:__gc()
-    if self == nil then return end
-    C.sqlite3_finalize(self)
-end
---]]
 
 function Stmt:finalize()
     C.sqlite3_finalize(self)
