@@ -36,8 +36,7 @@ function Converter.convertMob(race, gender)
     local mapping = map.getFileFor(race, gender)
     
     if not mapping then
-        io.write(string.format("No known filename for race %i gender %i\n", race, gender))
-        return
+        error(string.format("No known filename for race %i gender %i\n", race, gender))
     end
     
     local obj
@@ -84,7 +83,7 @@ function Converter.insertBlob(db, q, blob, len, compress)
     return db:getLastInsertId()
 end
 
-function Converter.initZoneQueries(db)
+function Converter.initCommonQueries(db)
     local q = {}
     
     local stmt = db:prepare("SELECT id FROM Materials WHERE name = 'NULL'")
@@ -138,7 +137,7 @@ function Converter.initZoneQueries(db)
         INSERT OR IGNORE INTO Models2Textures (modelId, texId) VALUES (?, ?)
     ]]
     
-     q.insertModels2TextureSets = db:prepare[[
+    q.insertModels2TextureSets = db:prepare[[
         INSERT OR IGNORE INTO Models2TextureSets (modelId, setId) VALUES (?, ?)
     ]]
     
@@ -154,9 +153,21 @@ function Converter.initZoneQueries(db)
         INSERT OR IGNORE INTO Models2Geometry (modelId, geoId) VALUES (?, ?)
     ]]
     
+    return q
+end
+
+function Converter.initZoneQueries(db)
+    local q = Converter.initCommonQueries(db)
+    
     q.insertZoneModel = db:prepare[[
         INSERT INTO ZoneModels (shortname, modelId) VALUES (?, ?)
     ]]
+    
+    return q
+end
+
+function Converter.initMobQueries(db)
+    local q = Converter.initCommonQueries(db)
     
     return q
 end
@@ -174,6 +185,38 @@ function Converter.insertZone(obj, shortname)
     
     stmt:bindString(1, shortname)
     stmt:bindInt64(2, id)
+    stmt:commit()
+    
+    db:analyze()
+    
+    q.nullMaterialId = nil
+    for k, query in pairs(q) do
+        query:finalize()
+    end
+    
+    obj = nil
+    q   = nil
+    db  = nil
+    
+    collectgarbage()
+    
+    io.write("done in ", os.clock() - time, " seconds\n")
+end
+
+function Converter.insertMob(obj, race, gender)
+    local db    = Converter.initDB()
+    local q     = Converter.initMobQueries(db)
+    
+    io.write("Inserting mob data into local database... ")
+    io.flush()
+    
+    local time  = os.clock()
+    local id    = nil
+    local stmt  = q.insertMobModel
+    
+    stmt:bindInt(1, race)
+    stmt:bindInt(2, gender)
+    stmt:bindInt64(3, id)
     stmt:commit()
     
     db:analyze()

@@ -13,15 +13,16 @@ local BA = Struct.packed[[
 
 local BAEQG = Class("BoneAssignmentEQG")
 
-function BAEQG.new()
+function BAEQG.new(vb)
     local b = ConvObject()
     
     local raw = BinUtil.Byte.Array(4 + BA:sizeof() * 32)
     
-    b._raw      = raw
-    b._count    = 0
-    b._capacity = 32
-    b._array    = BA:cast(raw + 4)
+    b._raw          = raw
+    b._count        = 0
+    b._capacity     = 32
+    b._array        = BA:cast(raw + 4)
+    b._vertexBuffer = vb
     
     BinUtil.Uint32:cast(raw)[0] = 1
     
@@ -74,6 +75,10 @@ end
 
 function BAEQG:isEmpty()
     return self._count == 0
+end
+
+function BAEQG:vertexBuffer()
+    return self._vertexBuffer
 end
 
 return BAEQG

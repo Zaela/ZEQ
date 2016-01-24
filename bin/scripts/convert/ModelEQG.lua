@@ -11,13 +11,15 @@ function ModelEQG.new()
 end
 
 function ModelEQG:initWeightBuffers()
-    local count = #self:getVertexBuffers()
+    local vbs   = self:getVertexBuffers()
+    local cvb   = self:getNoCollideVertexBuffers()
+    local count = #vbs
     
     local wt, nwt = {}, {}
     
     for i = 1, count do
-        wt[i]   = BAEQG()
-        nwt[i]  = BAEQG()
+        wt[i]   = BAEQG(vbs[i])
+        nwt[i]  = BAEQG(cvb[i])
     end
     
     self._weightBuffers             = wt
@@ -55,6 +57,14 @@ function ModelEQG:sortWeights()
     
     sort(self:weightBuffers())
     sort(self:noCollideWeightBuffers())
+end
+
+function ModelEQG:setSkeleton(skele)
+    self._skele = skele
+end
+
+function ModelEQG:getSkeleton()
+    return self._skele
 end
 
 return ModelEQG

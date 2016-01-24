@@ -11,6 +11,7 @@ local PFS           = require "PFS"
 local EQGProperty   = require "EQGProperty"
 local ModelEQG      = require "ModelEQG"
 local BoneEQG       = require "BoneEQG"
+local SkeletonEQG   = require "SkeletonEQG"
 local BAEQG         = require "BoneAssignmentEQG"
 local ANI -- must load later, mutual requires
 
@@ -245,6 +246,7 @@ function EQGCommon:extractBones(p)
     local data      = self:data()
     local header    = self:header()
     local strings   = self:strings()
+    local model     = self:model()
     
     local binBones  = EQGBone:cast(data + p)
     p = p + EQGBone:sizeof() * header.boneCount
@@ -297,10 +299,11 @@ function EQGCommon:extractBones(p)
     end
     
     if not diff then
-        --io.write("No difference between list and recurse bone orders\n")
         self._bonesListOrder    = nil
         self._bonesList2Recurse = nil
     end
+    
+    model:setSkeleton(SkeletonEQG(recurseOrder[1], #recurseOrder))
 
     return p
 end
@@ -315,8 +318,7 @@ function EQGCommon:extractBoneAssignments(p)
     
     self:checkLength(p)
     
-    local tris      = self._srcTris
-    local handled   = {}
+    local tris = self._srcTris
     
     model:initWeightBuffers()
     
@@ -354,6 +356,7 @@ function EQGCommon:extractBoneAssignments(p)
     
     model:sortWeights()
         
+    --[[
     local function count(iter)
         for wt in iter do
             if wt:isEmpty() then goto skip end
@@ -372,6 +375,7 @@ function EQGCommon:extractBoneAssignments(p)
     
     count(model:weightBuffers())
     count(model:noCollideWeightBuffers())
+    --]]
 end
 
 function EQGCommon:extractModel(p)

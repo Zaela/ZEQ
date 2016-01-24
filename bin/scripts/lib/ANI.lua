@@ -69,10 +69,10 @@ function ANI:boneOrdering()
     local header = self:header()
     
     if header.version <= 1 or header.recurseBoneOrder == 0 then
-        return "list"
+        return "recurse"
     end
     
-    return "recurse"
+    return "list"
 end
 
 return ANI
