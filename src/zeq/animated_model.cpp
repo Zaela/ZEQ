@@ -33,6 +33,8 @@ void AnimatedModelPrototype::readSkeletonRecurse(DBFrame* frames, uint32_t& cur,
         cur++;
         
         Bone& child = m_bones[cur];
+        
+        child.parent = &bone;
     
         bone.children.push_back(&child);
         readSkeletonRecurse(frames, cur, child, count);

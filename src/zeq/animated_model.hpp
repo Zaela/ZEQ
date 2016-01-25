@@ -33,12 +33,19 @@ private:
         Vec3        scale;
         Quaternion  rot;
         
+        Bone*       parent;
+        
         Mat4        localMatrix;
         Mat4        globalMatrix;
         Mat4        globalAnimMatrix;
         Mat4        globalInverseMatrix;
         
         std::vector<Bone*> children;
+        
+        Bone()
+        {
+            parent = nullptr;
+        }
     };
     
     std::vector<Bone> m_bones;

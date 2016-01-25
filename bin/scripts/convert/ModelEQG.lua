@@ -7,6 +7,9 @@ local ModelEQG = Class("ModelEQG", ConvModel)
 
 function ModelEQG.new()
     local m = ConvModel()
+    
+    m._animations = {}
+    
     return ModelEQG:instance(m)
 end
 
@@ -65,6 +68,14 @@ end
 
 function ModelEQG:skeleton()
     return self._skele
+end
+
+function ModelEQG:addAnimation(ani)
+    table.insert(self._animations, ani) --fixme, should translate the ANI name to the animId first and use that as index
+end
+
+function ModelEQG:animations()
+    return iter(self._animations)
 end
 
 return ModelEQG

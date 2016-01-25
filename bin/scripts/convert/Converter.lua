@@ -7,6 +7,7 @@ local File          = require "File"
 local Image         = require "Image"
 local Texture       = require "Texture"
 local ConvMaterial  = require "ConvMaterial"
+local BinUtil       = require "BinUtil"
 
 local type  = type
 local table = table
@@ -159,8 +160,12 @@ function Converter.initCommonQueries(db, q)
 end
 
 function Converter.initAnimQueries(db, q)
+    q.insertSkeletons = db:prepare[[
+        INSERT INTO Skeletons (modelId, blobId) VALUES (?, ?)
+    ]]
+    
     q.insertAnimationFrames = db:prepare[[
-        INSERT INTO AnimationFrames (modelId, animType, blobId, milliseconds) VALUES (?, ?, ?, ?)
+        INSERT INTO AnimationFrames (modelId, boneIndex, animType, blobId) VALUES (?, ?, ?, ?)
     ]]
     
     q.insertBoneAssignments = db:prepare[[
@@ -245,18 +250,13 @@ function Converter.insertAnimatedModel(db, q, model)
     local skele = model:skeleton()
     if skele then
         db:transaction(function()
-            -- Insert the main bone definitions, aka the base frame
-            stmt = q.insertAnimationFrames
+            stmt = q.insertSkeletons
             
             local blobId = Converter.insertBlob(db, q, skele:data(), skele:bytes(), true)
 
             stmt:bindInt64(1, modelId)
-            stmt:bindInt(2, 0)
-            stmt:bindInt64(3, blobId)
-            stmt:bindInt(4, 0)
+            stmt:bindInt64(2, blobId)
             stmt:commit()
-            
-            -- Insert animation frames
             
             -- Insert bone assignments
             stmt = q.insertBoneAssignments
@@ -280,6 +280,35 @@ function Converter.insertAnimatedModel(db, q, model)
             
             handleBAs(model:weightBuffers())
             handleBAs(model:noCollideWeightBuffers())
+            
+            -- Insert animation frames
+            stmt = q.insertAnimationFrames
+            
+            --modelId, boneIndex, animType, blobId
+            local animType = 1
+            for ani in model:animations() do
+                local byIndex = ani:dataByBoneIndex()
+            
+                stmt:bindInt64(1, modelId)
+                stmt:bindInt(3, animType) --fixme
+                animType = animType + 1
+                
+                local FrameHeader   = ani.FrameHeader
+                local Frame         = ani.Frame
+                
+                for index, data in pairs(byIndex) do
+                    stmt:bindInt(2, index)
+                    
+                    local frameHeader   = data
+                    local frames        = BinUtil.Byte:cast(data) + FrameHeader:sizeof()
+                    
+                    local blobId = Converter.insertBlob(db, q, frames, frameHeader.frameCount * Frame:sizeof(), true)
+                    
+                    stmt:bindInt64(4, blobId)
+                    
+                    stmt:commit()
+                end
+            end
         end)
     end
     

@@ -11,7 +11,7 @@ local BoneEntry = Struct.packed[[
 
 local SkeletonEQG = Class("SkeletonEQG")
 
-function SkeletonEQG.new(root, count)
+function SkeletonEQG.new(root, count, byName)
     local entries   = BoneEntry.Array(count)
     local index     = 0
     
@@ -47,6 +47,8 @@ function SkeletonEQG.new(root, count)
     local s = {
         _data   = entries,
         _bytes  = count * BoneEntry:sizeof(),
+        _count  = count,
+        _byName = byName,
     }
     
     return SkeletonEQG:instance(s)
@@ -58,6 +60,14 @@ end
 
 function SkeletonEQG:bytes()
     return self._bytes
+end
+
+function SkeletonEQG:count()
+    return self._count
+end
+
+function SkeletonEQG:boneIndicesByName()
+    return self._byName
 end
 
 return SkeletonEQG

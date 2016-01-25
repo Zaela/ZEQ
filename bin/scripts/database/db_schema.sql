@@ -150,11 +150,16 @@ CREATE TABLE MobHeadModels (
     PRIMARY KEY (mainModelId, headModelId)
 );
 
+CREATE TABLE Skeletons (
+    modelId INT PRIMARY KEY,
+    blobId  INT
+);
+
 CREATE TABLE AnimationFrames (
     modelId         INT,
+    boneIndex       INT,
     animType        INT,
-    blobId          INT,
-    milliseconds    INT
+    blobId          INT
 );
 
 CREATE INDEX Index_AnimationFrames ON AnimationFrames (modelId);

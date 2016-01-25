@@ -64,10 +64,8 @@
     "SELECT modelId FROM MobModels "                        \
     "WHERE race = ? AND gender = ?"
     
-#define QUERY_ANIMATION_FRAMES                              \
-    "SELECT animType, blobId, milliseconds "                \
-    "FROM AnimationFrames WHERE modelId = ? "               \
-    "ORDER BY animType"
+#define QUERY_SKELETONS                                     \
+    "SELECT blobId FROM Skeletons WHERE modelId = ?"
 
 #define QUERY_BONE_ASSIGNMENTS                              \
     "SELECT vertId, blobId "                                \
@@ -75,6 +73,11 @@
     "WHERE vertId IN "                                      \
     " (SELECT vertId FROM Models2Vertices "                 \
     "  WHERE modelId = ?)"
+    
+#define QUERY_ANIMATION_FRAMES                              \
+    "SELECT boneIndex, animType, blobId "                   \
+    "FROM AnimationFrames WHERE modelId = ? "               \
+    "ORDER BY boneIndex"
 
 class ModelResources
 {

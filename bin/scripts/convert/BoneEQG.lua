@@ -13,6 +13,7 @@ function BoneEQG.new(name, pos, rot, scale)
     b._pos      = pos
     b._rot      = rot
     b._scale    = scale
+    b._index    = 0
     
     b:setName(name)
 
@@ -46,6 +47,14 @@ function BoneEQG:children()
         i = i + 1
         return children[i]
     end
+end
+
+function BoneEQG:setIndex(index)
+    self._index = index
+end
+
+function BoneEQG:index()
+    return self._index
 end
 
 return BoneEQG

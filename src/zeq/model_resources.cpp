@@ -497,27 +497,21 @@ void ModelResources::loadGeometry(int64_t modelId)
 
 void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype* animModel)
 {
-    Query queryAnimationFrames;
+    Query querySkeletons;
     Query queryBoneAssignments;
+    Query queryAnimationFrames;
     
-    gDatabase.prepare(QUERY_ANIMATION_FRAMES, queryAnimationFrames);
-    queryAnimationFrames.bindInt64(1, modelId);
+    gDatabase.prepare(QUERY_SKELETONS, querySkeletons);
+    querySkeletons.bindInt64(1, modelId);
     
-    while (queryAnimationFrames.select())
+    while (querySkeletons.select())
     {
-        int animType        = queryAnimationFrames.getInt(1);
-        int64_t blobId      = queryAnimationFrames.getInt64(2);
-        int milliseconds    = queryAnimationFrames.getInt(3);
+        int64_t blobId = querySkeletons.getInt64(1);
         
         Blob blob;
         getBlob(blobId, blob);
         
-        // "Animation 0" is the base skeleton data
-        if (animType == 0)
-        {
-            animModel->readSkeleton(blob.data, blob.length);
-            continue;
-        }
+        animModel->readSkeleton(blob.data, blob.length);
     }
     
     gDatabase.prepare(QUERY_BONE_ASSIGNMENTS, queryBoneAssignments);
@@ -551,6 +545,21 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
             std::vector<uint32_t>& bas = animModel->readBoneAssignments(data, length);
             vb->setBoneAssignments(&bas);
         }
+    }
+    
+    gDatabase.prepare(QUERY_ANIMATION_FRAMES, queryAnimationFrames);
+    queryAnimationFrames.bindInt64(1, modelId);
+    
+    while (queryAnimationFrames.select())
+    {
+        int boneIndex       = queryAnimationFrames.getInt(1);
+        int animType        = queryAnimationFrames.getInt(2);
+        int64_t blobId      = queryAnimationFrames.getInt64(3);
+        
+        Blob blob;
+        getBlob(blobId, blob);
+        
+        //do stuff
     }
 }
 

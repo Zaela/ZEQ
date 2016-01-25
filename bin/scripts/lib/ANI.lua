@@ -35,7 +35,7 @@ local Signature = BinUtil.toFileSignature("EQGA")
 
 local ANI = Class("ANI", EQGCommon)
 
-function ANI.new(pfs, data, len)
+function ANI.new(pfs, name, data, len)
     local p = Header:sizeof()
     
     if len < p then
@@ -62,6 +62,14 @@ function ANI.new(pfs, data, len)
     
     local eqg = EQGCommon(pfs, data, len, header, headerType)
     
+    p = eqg:extractStrings(p)
+    
+    eqg:checkLength(p)
+    
+    eqg._p          = p
+    eqg._animName   = name
+    eqg._animData   = {}
+    
     return ANI:instance(eqg)
 end
 
@@ -74,5 +82,42 @@ function ANI:boneOrdering()
     
     return "list"
 end
+
+function ANI:readFrames(model)
+    local p         = self._p
+    local header    = self:header()
+    local data      = self:data()
+    
+    local strings   = self:strings()
+    local byName    = model:skeleton():boneIndicesByName()
+    local byIndex   = self._animData
+    
+    for i = 0, header.count - 1 do
+        local frameHeader = FrameHeader:cast(data + p)
+        p = p + FrameHeader:sizeof()
+        
+        self:checkLength(p)
+        p = p + Frame:sizeof() * frameHeader.frameCount
+        self:checkLength(p)
+        
+        local boneName  = strings[frameHeader.boneNameIndex]
+        local index     = byName[boneName]:index()
+        
+        byIndex[index] = frameHeader
+    end
+    
+    model:addAnimation(self)
+end
+
+function ANI:name()
+    return self._animName
+end
+
+function ANI:dataByBoneIndex()
+    return self._animData
+end
+
+ANI.FrameHeader = FrameHeader
+ANI.Frame       = Frame
 
 return ANI

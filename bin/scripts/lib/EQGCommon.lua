@@ -83,9 +83,6 @@ function EQGCommon.new(pfs, data, len, header, headerType)
         _header             = header,
         _headerType         = headerType,
         _model              = ModelEQG(),
-        _bonesListOrder     = {},
-        _bonesRecurseOrder  = {},
-        _bonesList2Recurse  = {},
     }
     
     return EQGCommon:instance(c)
@@ -275,17 +272,17 @@ function EQGCommon:extractBones(p)
     
     self:checkLength(p)
     
-    -- "Recurse order" is the default, but some animations use the "list order" instead.
-    -- We will be converting any list order animations to recurse order so that only one ordering is needed in the DB.
-    local listOrder         = self._bonesListOrder
-    local recurseOrder      = self._bonesRecurseOrder
-    local recurseIndices    = self._bonesList2Recurse
+    local listOrder = {}
+    local byName    = {}
     
     for i = 0, header.boneCount - 1 do
         local bone = binBones[i]
         local name = strings[bone.nameIndex]
         
-        table.insert(listOrder, BoneEQG(name, bone.pos, bone.rot, bone.scale))
+        local b = BoneEQG(name, bone.pos, bone.rot, bone.scale)
+        table.insert(listOrder, b)
+        
+        byName[name] = b
     end
     
     local function recurse(i, parent)
@@ -296,8 +293,7 @@ function EQGCommon:extractBones(p)
             recurse(binBone.linkBoneIndex, parent)
         end
         
-        table.insert(recurseOrder, bone)
-        table.insert(recurseIndices, i)
+        bone:setIndex(i)
         
         if parent then
             parent:addChild(bone)
@@ -310,22 +306,7 @@ function EQGCommon:extractBones(p)
     
     recurse(0)
     
-    -- Check if there is any difference between list and recurse order
-    local diff
-    
-    for i, o in ipairs(recurseIndices) do
-        if i ~= (o + 1) then
-            diff = true
-            break
-        end
-    end
-    
-    if not diff then
-        self._bonesListOrder    = nil
-        self._bonesList2Recurse = nil
-    end
-    
-    model:setSkeleton(SkeletonEQG(recurseOrder[1], #recurseOrder))
+    model:setSkeleton(SkeletonEQG(listOrder[1], #listOrder, byName))
 
     return p
 end
@@ -377,27 +358,6 @@ function EQGCommon:extractBoneAssignments(p)
     end
     
     model:sortWeights()
-        
-    --[[
-    local function count(iter)
-        for wt in iter do
-            if wt:isEmpty() then goto skip end
-            
-            io.write("== WT COUNT ", wt._count, " ==\n")
-            
-            local arr = wt._array
-            for i = 0, wt._count - 1 do
-                local a = arr[i]
-                io.write(string.format("VERT %u BONE %u WT %g\n", a.vertIndex, a.boneIndex, a.weight))
-            end
-            
-            ::skip::
-        end
-    end
-    
-    count(model:weightBuffers())
-    count(model:noCollideWeightBuffers())
-    --]]
 end
 
 function EQGCommon:extractModel(p, isZone)
@@ -409,6 +369,17 @@ function EQGCommon:extractModel(p, isZone)
     if self._headerType:hasField("boneCount") and header.boneCount > 0 then
         p = self:extractBones(p)
         p = self:extractBoneAssignments(p)
+        
+        local model = self:model()
+        local pfs   = self:getPFS()
+        
+        ANI = require "ANI"
+        
+        for name in pfs:namesByExtension("ani") do
+            local ani = ANI(pfs, name, pfs:getEntryByName(name))
+            
+            ani:readFrames(model)
+        end
     end
 end
 
