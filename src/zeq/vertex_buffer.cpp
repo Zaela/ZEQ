@@ -52,18 +52,22 @@ void VertexBuffer::setAnimatedTexture(AnimatedTexture* animTex)
     animTex->addReferencingVertexBuffer(this);
 }
 
-void VertexBuffer::registerWithOpenGL()
+void VertexBuffer::registerWithOpenGL(bool isDynamic)
 {
     if (!m_vertices)
         return;
     
-    uint32_t id = OpenGL::generateVBO(m_vertices, m_count * sizeof(Vertex));
+    uint32_t id = OpenGL::generateVBO(m_vertices, m_count * sizeof(Vertex), isDynamic);
     
     if (id)
     {
         m_vboId = id;
-        delete[] m_vertices;
-        m_vertices = nullptr;
+        
+        if (!isDynamic)
+        {
+            delete[] m_vertices;
+            m_vertices = nullptr;
+        }
     }
 }
 

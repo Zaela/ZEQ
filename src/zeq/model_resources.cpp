@@ -274,9 +274,38 @@ void ModelResources::cacheOctree(ZoneModel* zoneModel)
     timer.print("done");
 }
 
-AnimatedModelPrototype* ModelResources::loadMobModel(int race, uint8_t gender)
+MobModelPrototype* ModelResources::getMobModel(int race, uint8_t gender)
 {
-    AnimatedModelPrototype* mobModel = loadMobModel_impl(race, gender);
+    bool alreadyExists  = (m_mobModelsByRace.count(race) != 0);
+    MobModelSet& set    = m_mobModelsByRace[race];
+    
+    MobModelPrototype* model;
+    
+    if (alreadyExists)
+    {
+        model = set.gender[gender];
+        
+        if (model)
+        {
+            model->grab();
+            return model;
+        }
+    }
+    
+    model = loadMobModel(race, gender);
+    
+    if (model)
+    {
+        set.gender[gender] = model;
+        return model;
+    }
+    
+    return nullptr;
+}
+
+MobModelPrototype* ModelResources::loadMobModel(int race, uint8_t gender)
+{
+    MobModelPrototype* mobModel = loadMobModel_impl(race, gender);
     
     if (mobModel)
         return mobModel;
@@ -294,7 +323,7 @@ AnimatedModelPrototype* ModelResources::loadMobModel(int race, uint8_t gender)
     return loadMobModel_impl(race, gender);
 }
 
-AnimatedModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gender)
+MobModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gender)
 {
     int64_t modelId = -1;
     PerfTimer timer;
@@ -317,10 +346,11 @@ AnimatedModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gend
     if (modelId == -1)
         return nullptr;
     
-    AnimatedModelPrototype* mobModel = new AnimatedModelPrototype(race, gender);
+    MobModelPrototype* mobModel = new MobModelPrototype(race, gender);
     m_buildModel = mobModel;
     
     loadEssentials(modelId);
+    loadAnimationFrames(modelId, mobModel);
     
     timer.print("done");
     
@@ -465,6 +495,65 @@ void ModelResources::loadGeometry(int64_t modelId)
     }
 }
 
+void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype* animModel)
+{
+    Query queryAnimationFrames;
+    Query queryBoneAssignments;
+    
+    gDatabase.prepare(QUERY_ANIMATION_FRAMES, queryAnimationFrames);
+    queryAnimationFrames.bindInt64(1, modelId);
+    
+    while (queryAnimationFrames.select())
+    {
+        int animType        = queryAnimationFrames.getInt(1);
+        int64_t blobId      = queryAnimationFrames.getInt64(2);
+        int milliseconds    = queryAnimationFrames.getInt(3);
+        
+        Blob blob;
+        getBlob(blobId, blob);
+        
+        // "Animation 0" is the base skeleton data
+        if (animType == 0)
+        {
+            animModel->readSkeleton(blob.data, blob.length);
+            continue;
+        }
+    }
+    
+    gDatabase.prepare(QUERY_BONE_ASSIGNMENTS, queryBoneAssignments);
+    queryBoneAssignments.bindInt64(1, modelId);
+    
+    while (queryBoneAssignments.select())
+    {
+        int64_t vertId = queryBoneAssignments.getInt64(1);
+        int64_t blobId = queryBoneAssignments.getInt64(2);
+        
+        if (m_vertices.count(vertId) == 0)
+            continue;
+        
+        VertexBuffer* vb = m_vertices[vertId];
+        
+        Blob blob;
+        getBlob(blobId, blob);
+        
+        int isWeighted = *(int*)blob.data;
+        
+        byte* data      = blob.data + 4;
+        uint32_t length = blob.length - 4;
+        
+        if (isWeighted)
+        {
+            std::vector<WeightedBoneAssignment>& wbas = animModel->readWeightedBoneAssignments(data, length);
+            vb->setWeightedBoneAssignments(&wbas);
+        }
+        else
+        {
+            std::vector<uint32_t>& bas = animModel->readBoneAssignments(data, length);
+            vb->setBoneAssignments(&bas);
+        }
+    }
+}
+
 ModelResources::Blob::~Blob()
 {
     if (needsDelete && data)
@@ -500,4 +589,19 @@ void ModelResources::removeAnimatedTexture(int64_t id)
 void ModelResources::removeVertexBuffer(int64_t id)
 {
     m_vertices.erase(id);
+}
+
+void ModelResources::removeMobModel(int race, uint8_t gender)
+{
+    MobModelSet& set = m_mobModelsByRace[race];
+    
+    set.gender[gender] = nullptr;
+    
+    for (int i = 0; i < 3; i++)
+    {
+        if (set.gender[i])
+            return;
+    }
+    
+    m_mobModelsByRace.erase(race);
 }

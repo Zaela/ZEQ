@@ -36,27 +36,7 @@ bool OpenGL::mipmapFlag()
 }
 
 uint32_t OpenGL::loadTexture(byte* data, int width, int height)
-{
-    /*
-    FIMEMORY* mem           = FreeImage_OpenMemory(data, len);
-    FREE_IMAGE_FORMAT fmt   = FreeImage_GetFileTypeFromMemory(mem);
-    FIBITMAP* base          = FreeImage_LoadFromMemory(fmt, mem);
-    
-    FreeImage_CloseMemory(mem);
-    
-    if (!base)
-    {
-        //throw
-    }
-    
-    FIBITMAP* img   = FreeImage_ConvertTo32Bits(base);
-    FreeImage_Unload(base);
-    
-    byte* bitmap    = FreeImage_GetBits(img);
-    uint32_t width  = FreeImage_GetWidth(img);
-    uint32_t height = FreeImage_GetHeight(img);
-    */
-    
+{    
     uint32_t id;
     glGenTextures(1, &id);
     
@@ -85,8 +65,6 @@ uint32_t OpenGL::loadTexture(byte* data, int width, int height)
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mipmapFlagged ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-    
-    //FreeImage_Unload(img);
     
     return id;
 }

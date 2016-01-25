@@ -123,6 +123,6 @@ void Window::loadZoneModel(const std::string& shortname)
     
     setTitle("ZEQ :: " + shortname);
     
-    AnimatedModelPrototype* model = gModelResources.loadMobModel(1, 2);
+    AnimatedModelPrototype* model = gModelResources.getMobModel(1, 2);
     m_animModel = model;
 }

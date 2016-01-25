@@ -157,7 +157,7 @@ CREATE TABLE AnimationFrames (
     milliseconds    INT
 );
 
-CREATE INDEX Index_AnimationFrames ON AnimationFrames (modelId, animType);
+CREATE INDEX Index_AnimationFrames ON AnimationFrames (modelId);
 
 CREATE TABLE BoneAssignments (
     vertId  INT PRIMARY KEY,

@@ -63,6 +63,18 @@
 #define QUERY_MOB_MODEL_ID                                  \
     "SELECT modelId FROM MobModels "                        \
     "WHERE race = ? AND gender = ?"
+    
+#define QUERY_ANIMATION_FRAMES                              \
+    "SELECT animType, blobId, milliseconds "                \
+    "FROM AnimationFrames WHERE modelId = ? "               \
+    "ORDER BY animType"
+
+#define QUERY_BONE_ASSIGNMENTS                              \
+    "SELECT vertId, blobId "                                \
+    "FROM BoneAssignments "                                 \
+    "WHERE vertId IN "                                      \
+    " (SELECT vertId FROM Models2Vertices "                 \
+    "  WHERE modelId = ?)"
 
 class ModelResources
 {
@@ -70,10 +82,22 @@ private:
     // The model that is currently being loaded
     ModelPrototype* m_buildModel;
 
+    struct MobModelSet
+    {
+        MobModelPrototype* gender[3];
+        
+        MobModelSet()
+        {
+            for (int i = 0; i < 3; i++)
+                gender[i] = nullptr;
+        }
+    };
+
     // Resource mappings - these use primary keys from the database as indices
     std::unordered_map<int64_t, Texture*>           m_textures;
     std::unordered_map<int64_t, AnimatedTexture*>   m_textureSets;
     std::unordered_map<int64_t, VertexBuffer*>      m_vertices;
+    std::unordered_map<int, MobModelSet>            m_mobModelsByRace;
 
 private:
     struct Blob
@@ -125,12 +149,15 @@ private:
     
     void loadCachedOctree(int64_t modelId, ZoneModel* zoneModel);
     
-    ZoneModel*              loadZoneModel_impl(const std::string& shortname);
-    AnimatedModelPrototype* loadMobModel_impl(int race, uint8_t gender);
+    void loadAnimationFrames(int64_t modelId, AnimatedModelPrototype* animModel);
+    
+    ZoneModel*          loadZoneModel_impl(const std::string& shortname);
+    MobModelPrototype*  loadMobModel_impl(int race, uint8_t gender);
+    MobModelPrototype*  loadMobModel(int race, uint8_t gender);
 
 public:
-    ZoneModel*              loadZoneModel(const std::string& shortname);
-    AnimatedModelPrototype* loadMobModel(int race, uint8_t gender);
+    ZoneModel*          loadZoneModel(const std::string& shortname);
+    MobModelPrototype*  getMobModel(int race, uint8_t gender);
 
     void cacheOctree(ZoneModel* zoneModel);
 
@@ -138,6 +165,7 @@ public:
     void removeTexture(int64_t id);
     void removeAnimatedTexture(int64_t id);
     void removeVertexBuffer(int64_t id);
+    void removeMobModel(int race, uint8_t gender);
 };
 
 #endif//_ZEQ_MODEL_RESOURCES_HPP_
