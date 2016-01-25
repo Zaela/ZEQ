@@ -7,14 +7,15 @@
 #include "vertex_buffer.hpp"
 #include "axis_aligned_bounding_box.hpp"
 
-class AnimatedModel : public ModelPrototype
+class AnimatedModelPrototype : public ModelPrototype
 {
 private:
-    int64_t m_id;
+    int     m_race;
+    uint8_t m_gender;
 
 public:
-    AnimatedModel(int64_t id);
-    virtual ~AnimatedModel();
+    AnimatedModelPrototype(int race, uint8_t gender);
+    virtual ~AnimatedModelPrototype();
 };
 
 #endif//_ZEQ_ANIMATED_MODEL_HPP_

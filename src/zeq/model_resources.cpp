@@ -274,9 +274,9 @@ void ModelResources::cacheOctree(ZoneModel* zoneModel)
     timer.print("done");
 }
 
-AnimatedModel* ModelResources::loadMobModel(int race, uint8_t gender)
+AnimatedModelPrototype* ModelResources::loadMobModel(int race, uint8_t gender)
 {
-    AnimatedModel* mobModel = loadMobModel_impl(race, gender);
+    AnimatedModelPrototype* mobModel = loadMobModel_impl(race, gender);
     
     if (mobModel)
         return mobModel;
@@ -294,7 +294,7 @@ AnimatedModel* ModelResources::loadMobModel(int race, uint8_t gender)
     return loadMobModel_impl(race, gender);
 }
 
-AnimatedModel* ModelResources::loadMobModel_impl(int race, uint8_t gender)
+AnimatedModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gender)
 {
     int64_t modelId = -1;
     PerfTimer timer;
@@ -317,7 +317,7 @@ AnimatedModel* ModelResources::loadMobModel_impl(int race, uint8_t gender)
     if (modelId == -1)
         return nullptr;
     
-    AnimatedModel* mobModel = new AnimatedModel(modelId);
+    AnimatedModelPrototype* mobModel = new AnimatedModelPrototype(race, gender);
     m_buildModel = mobModel;
     
     loadEssentials(modelId);

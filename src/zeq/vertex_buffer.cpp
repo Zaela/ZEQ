@@ -12,7 +12,7 @@ VertexBuffer::VertexBuffer(int64_t id, byte* rawData, uint32_t len)
       m_vboId(0),
       m_animTexture(nullptr)
 {
-    
+
 }
 
 VertexBuffer::VertexBuffer(uint32_t vbo, uint32_t count)
@@ -78,6 +78,7 @@ void VertexBuffer::draw()
     }
     else
     {
+        OpenGL::bindVBO(0);
         ptr = (byte*)m_vertices;
     }
     

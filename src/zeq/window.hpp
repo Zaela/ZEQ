@@ -7,6 +7,7 @@
 #include "input.hpp"
 #include "model_resources.hpp"
 #include "zone_model.hpp"
+#include "animated_model.hpp"
 #include "config.hpp"
 #include <vector>
 #include <string>
@@ -22,6 +23,8 @@ private:
     PerfTimer   m_deltaTimer;
 
     ZoneModel* m_zoneModel;
+
+    AnimatedModelPrototype* m_animModel;
 
 private:
     static void clear();

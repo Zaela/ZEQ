@@ -125,12 +125,12 @@ private:
     
     void loadCachedOctree(int64_t modelId, ZoneModel* zoneModel);
     
-    ZoneModel*      loadZoneModel_impl(const std::string& shortname);
-    AnimatedModel*  loadMobModel_impl(int race, uint8_t gender);
+    ZoneModel*              loadZoneModel_impl(const std::string& shortname);
+    AnimatedModelPrototype* loadMobModel_impl(int race, uint8_t gender);
 
 public:
-    ZoneModel*      loadZoneModel(const std::string& shortname);
-    AnimatedModel*  loadMobModel(int race, uint8_t gender);
+    ZoneModel*              loadZoneModel(const std::string& shortname);
+    AnimatedModelPrototype* loadMobModel(int race, uint8_t gender);
 
     void cacheOctree(ZoneModel* zoneModel);
 

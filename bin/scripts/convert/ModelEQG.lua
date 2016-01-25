@@ -63,7 +63,7 @@ function ModelEQG:setSkeleton(skele)
     self._skele = skele
 end
 
-function ModelEQG:getSkeleton()
+function ModelEQG:skeleton()
     return self._skele
 end
 

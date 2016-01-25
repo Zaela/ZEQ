@@ -81,7 +81,7 @@ function ZON.new(pfs, data, len)
             ter     = TER(pfs, data, len)
             model   = ter
         else
-            model   = MOD(pfs, data, len)
+            model   = MOD(pfs, data, len, true)
         end
         
         models[i] = model

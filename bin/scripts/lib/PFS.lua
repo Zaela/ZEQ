@@ -198,7 +198,10 @@ function PFS:names()
 end
 
 function PFS:getEntryByExtension(ext)
-    return self:getEntry(self._byExt[ext][1])
+    local byExt = self._byExt[ext]
+    if byExt then
+        return self:getEntry(byExt[1])
+    end
 end
 
 function PFS:namesByExtension(ext)

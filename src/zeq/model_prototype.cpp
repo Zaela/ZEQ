@@ -39,8 +39,22 @@ void ModelPrototype::draw()
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
+    uint32_t lastDiffuseMap = 0;
     for (VertexBuffer* vb : m_referencedVertexBuffers)
     {
+        //int blendType = vb->getBlendType();
+        
+        //if (blendType == Material::Blend::Invisible)
+        //    continue;
+        
+        uint32_t diffuseMap = vb->getDiffuseMap();
+        
+        if (diffuseMap != lastDiffuseMap)
+        {
+            glBindTexture(GL_TEXTURE_2D, diffuseMap);
+            lastDiffuseMap = diffuseMap;
+        }
+        
         vb->draw();
     }
     

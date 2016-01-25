@@ -53,6 +53,12 @@ Window::Window()
     
     m_input.getCamera().applyView();
     m_prevTime = m_deltaTimer.seconds();
+    
+    
+    
+    
+    
+    m_animModel = nullptr;
 }
 
 Window::~Window()
@@ -72,9 +78,16 @@ bool Window::mainLoop()
     pollInput(delta);
     
     clear();
+
+    Camera* cam = &getCamera();
+    cam->recalculate();
+    cam->applyView();
     
     if (m_zoneModel)
         m_zoneModel->draw(&getCamera());
+    
+    if (m_animModel)
+        m_animModel->draw();
     
     display();
     
@@ -109,4 +122,7 @@ void Window::loadZoneModel(const std::string& shortname)
         prevZone->drop();
     
     setTitle("ZEQ :: " + shortname);
+    
+    AnimatedModelPrototype* model = gModelResources.loadMobModel(1, 2);
+    m_animModel = model;
 }

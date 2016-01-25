@@ -37,7 +37,7 @@ function TER.new(pfs, data, len)
 
     local eqg = EQGCommon(pfs, data, len, header, Header)
     
-    eqg:extractModel(p)
+    eqg:extractModel(p, true)
     
     return TER:instance(eqg)
 end

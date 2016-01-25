@@ -150,15 +150,10 @@ CREATE TABLE MobHeadModels (
     PRIMARY KEY (mainModelId, headModelId)
 );
 
-CREATE TABLE Frames (
-    id      INTEGER PRIMARY KEY,
-    blobId  INT
-);
-
 CREATE TABLE AnimationFrames (
     modelId         INT,
     animType        INT,
-    frameId         INT,
+    blobId          INT,
     milliseconds    INT
 );
 

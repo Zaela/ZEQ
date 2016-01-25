@@ -4,13 +4,14 @@
 
 extern ModelResources gModelResources;
 
-AnimatedModel::AnimatedModel(int64_t id)
-    : m_id(id)
+AnimatedModelPrototype::AnimatedModelPrototype(int race, uint8_t gender)
+    : m_race(race),
+      m_gender(gender)
 {
     
 }
 
-AnimatedModel::~AnimatedModel()
+AnimatedModelPrototype::~AnimatedModelPrototype()
 {
     
 }

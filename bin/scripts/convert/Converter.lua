@@ -41,10 +41,16 @@ function Converter.convertMob(race, gender)
     
     local obj
     
-    if type(mapping) == "string" and mapping:find("%.eqg$") then
-        obj = MobEQG.convert(filename)
-    else
+    local s, err = pcall(function()
+        if type(mapping) == "string" and mapping:find("%.eqg$") then
+            obj = MobEQG.convert(mapping)
+        else
+        
+        end
+    end)
     
+    if not s then
+        io.write(err, "\n")
     end
     
     if obj then
@@ -83,9 +89,7 @@ function Converter.insertBlob(db, q, blob, len, compress)
     return db:getLastInsertId()
 end
 
-function Converter.initCommonQueries(db)
-    local q = {}
-    
+function Converter.initCommonQueries(db, q)
     local stmt = db:prepare("SELECT id FROM Materials WHERE name = 'NULL'")
     if stmt:select() then
         q.nullMaterialId = stmt:getInt64(1)
@@ -152,90 +156,137 @@ function Converter.initCommonQueries(db)
     q.insertModels2Geometry = db:prepare[[
         INSERT OR IGNORE INTO Models2Geometry (modelId, geoId) VALUES (?, ?)
     ]]
-    
-    return q
 end
 
-function Converter.initZoneQueries(db)
-    local q = Converter.initCommonQueries(db)
+function Converter.initAnimQueries(db, q)
+    q.insertAnimationFrames = db:prepare[[
+        INSERT INTO AnimationFrames (modelId, animType, blobId, milliseconds) VALUES (?, ?, ?, ?)
+    ]]
+    
+    q.insertBoneAssignments = db:prepare[[
+        INSERT INTO BoneAssignments (vertId, blobId) VALUES (?, ?)
+    ]]
+end
+
+function Converter.initZoneQueries(db, q)
+    Converter.initCommonQueries(db, q)
     
     q.insertZoneModel = db:prepare[[
         INSERT INTO ZoneModels (shortname, modelId) VALUES (?, ?)
     ]]
-    
-    return q
 end
 
-function Converter.initMobQueries(db)
-    local q = Converter.initCommonQueries(db)
+function Converter.initMobQueries(db, q)
+    Converter.initCommonQueries(db, q)
+    Converter.initAnimQueries(db, q)
     
-    return q
+    q.insertMobModel = db:prepare[[
+        INSERT INTO MobModels (race, gender, modelId) VALUES (?, ?, ?)
+    ]]
+end
+
+function Converter.wrapInsert(typeName, func)
+    local db    = Converter.initDB()
+    local q     = {}
+    
+    io.write("Inserting ", typeName, " data into local database... ")
+    io.flush()
+    
+    local time = os.clock()
+    
+    func(db, q)
+    
+    db:analyze()
+    
+    q.nullMaterialId = nil
+    for k, query in pairs(q) do
+        query:finalize()
+    end
+    
+    q   = nil
+    db  = nil
+    
+    collectgarbage()
+    
+    io.write("done in ", os.clock() - time, " seconds\n")
 end
 
 function Converter.insertZone(obj, shortname)
-    local db    = Converter.initDB()
-    local q     = Converter.initZoneQueries(db)
-    
-    io.write("Inserting zone data into local database... ")
-    io.flush()
-    
-    local time  = os.clock()
-    local id    = Converter.insertStaticModel(db, q, obj.zone, shortname)
-    local stmt  = q.insertZoneModel
-    
-    stmt:bindString(1, shortname)
-    stmt:bindInt64(2, id)
-    stmt:commit()
-    
-    db:analyze()
-    
-    q.nullMaterialId = nil
-    for k, query in pairs(q) do
-        query:finalize()
-    end
-    
-    obj = nil
-    q   = nil
-    db  = nil
-    
-    collectgarbage()
-    
-    io.write("done in ", os.clock() - time, " seconds\n")
+    Converter.wrapInsert("zone", function(db, q)
+        Converter.initZoneQueries(db, q)
+        
+        local id    = Converter.insertStaticModel(db, q, obj.zone)
+        local stmt  = q.insertZoneModel
+        
+        stmt:bindString(1, shortname)
+        stmt:bindInt64(2, id)
+        stmt:commit()
+    end)
 end
 
 function Converter.insertMob(obj, race, gender)
-    local db    = Converter.initDB()
-    local q     = Converter.initMobQueries(db)
+    Converter.wrapInsert("mob", function(db, q)
+        Converter.initMobQueries(db, q)
     
-    io.write("Inserting mob data into local database... ")
-    io.flush()
-    
-    local time  = os.clock()
-    local id    = nil
-    local stmt  = q.insertMobModel
-    
-    stmt:bindInt(1, race)
-    stmt:bindInt(2, gender)
-    stmt:bindInt64(3, id)
-    stmt:commit()
-    
-    db:analyze()
-    
-    q.nullMaterialId = nil
-    for k, query in pairs(q) do
-        query:finalize()
-    end
-    
-    obj = nil
-    q   = nil
-    db  = nil
-    
-    collectgarbage()
-    
-    io.write("done in ", os.clock() - time, " seconds\n")
+        local id    = Converter.insertAnimatedModel(db, q, obj)
+        local stmt  = q.insertMobModel
+        
+        stmt:bindInt(1, race)
+        stmt:bindInt(2, gender)
+        stmt:bindInt64(3, id)
+        stmt:commit()
+    end)
 end
 
-function Converter.insertStaticModel(db, q, model, name)
+function Converter.insertAnimatedModel(db, q, model)
+    local modelId = Converter.insertStaticModel(db, q, model)
+    local stmt
+    
+    local skele = model:skeleton()
+    if skele then
+        db:transaction(function()
+            -- Insert the main bone definitions, aka the base frame
+            stmt = q.insertAnimationFrames
+            
+            local blobId = Converter.insertBlob(db, q, skele:data(), skele:bytes(), true)
+
+            stmt:bindInt64(1, modelId)
+            stmt:bindInt(2, 0)
+            stmt:bindInt64(3, blobId)
+            stmt:bindInt(4, 0)
+            stmt:commit()
+            
+            -- Insert animation frames
+            
+            -- Insert bone assignments
+            stmt = q.insertBoneAssignments
+            
+            local function handleBAs(iter)
+                for wt in iter do
+                    if wt:isEmpty() then goto skip end
+                    
+                    local vb = wt:vertexBuffer()
+                    if not vb or not vb:getId() then goto skip end
+                    
+                    local blobId = Converter.insertBlob(db, q, wt:data(), wt:bytes(), true)
+                    
+                    stmt:bindInt64(1, vb:getId())
+                    stmt:bindInt64(2, blobId)
+                    stmt:commit()
+                    
+                    ::skip::
+                end
+            end
+            
+            handleBAs(model:weightBuffers())
+            handleBAs(model:noCollideWeightBuffers())
+        end)
+    end
+    
+    return modelId
+end
+
+function Converter.insertStaticModel(db, q, model)
     local stmt, st2
     local modelId
     

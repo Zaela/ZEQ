@@ -193,7 +193,7 @@ function EQGCommon:extractMaterials(p)
     return p
 end
 
-function EQGCommon:extractVertexBuffers(p)
+function EQGCommon:extractVertexBuffers(p, isZone)
     local data      = self:data()
     local header    = self:header()
     local model     = self:model()
@@ -219,23 +219,45 @@ function EQGCommon:extractVertexBuffers(p)
     
     self._srcTris = tris
     
-    for i = 0, triCount - 1 do
-        local tri   = tris[i]
-        local index = tri.materialIndex + 1
-        
-        local vb, cvb   = model:getVertexBuffer(index)
-        local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
-        
-        --for j = 2, 0, -1 do
-        for j = 0, 2 do
-            local s = verts[tri.index[j]]
-            local v = use:addVertex()
+    if isZone then
+        for i = 0, triCount - 1 do
+            local tri   = tris[i]
+            local index = tri.materialIndex + 1
             
-            --v.x, v.z, v.y   = s.x, s.y, s.z
-            --v.i, v.k, v.j   = s.i, s.j, s.k
-            v.x, v.y, v.z   = s.x, s.y, s.z
-            v.i, v.j, v.k   = s.i, s.j, s.k
-            v.u, v.v        = s.u, s.v
+            local vb, cvb   = model:getVertexBuffer(index)
+            local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
+            
+            --for j = 2, 0, -1 do
+            for j = 0, 2 do
+                local s = verts[tri.index[j]]
+                local v = use:addVertex()
+                
+                --v.x, v.z, v.y   = s.x, s.y, s.z
+                --v.i, v.k, v.j   = s.i, s.j, s.k
+                v.x, v.y, v.z   = s.x, s.y, s.z
+                v.i, v.j, v.k   = s.i, s.j, s.k
+                v.u, v.v        = s.u, s.v
+            end
+        end
+    else
+        for i = 0, triCount - 1 do
+            local tri   = tris[i]
+            local index = tri.materialIndex + 1
+            
+            local vb, cvb   = model:getVertexBuffer(index)
+            local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
+            
+            for j = 2, 0, -1 do
+            --for j = 0, 2 do
+                local s = verts[tri.index[j]]
+                local v = use:addVertex()
+                
+                v.x, v.z, v.y   = s.x, s.y, s.z
+                v.i, v.k, v.j   = s.i, s.j, s.k
+                --v.x, v.y, v.z   = s.x, s.y, s.z
+                --v.i, v.j, v.k   = s.i, s.j, s.k
+                v.u, v.v        = s.u, s.v
+            end
         end
     end
     
@@ -378,10 +400,10 @@ function EQGCommon:extractBoneAssignments(p)
     --]]
 end
 
-function EQGCommon:extractModel(p)
+function EQGCommon:extractModel(p, isZone)
     p = self:extractStrings(p)
     p = self:extractMaterials(p)
-    p = self:extractVertexBuffers(p)
+    p = self:extractVertexBuffers(p, isZone)
     
     local header = self:header()
     if self._headerType:hasField("boneCount") and header.boneCount > 0 then

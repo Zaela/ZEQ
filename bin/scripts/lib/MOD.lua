@@ -22,7 +22,7 @@ local Signature = BinUtil.toFileSignature("EQGM")
 
 local MOD = Class("MOD", EQGCommon)
 
-function MOD.new(pfs, data, len)
+function MOD.new(pfs, data, len, isZone)
     local p = Header:sizeof()
     
     if len < p then
@@ -37,7 +37,7 @@ function MOD.new(pfs, data, len)
 
     local eqg = EQGCommon(pfs, data, len, header, Header)
     
-    eqg:extractModel(p)
+    eqg:extractModel(p, isZone)
     
     return MOD:instance(eqg)
 end

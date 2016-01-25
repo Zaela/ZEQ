@@ -13,22 +13,19 @@ function MobEQG.convert(path)
     local data, len = pfs:getEntryByExtension("mds")
     
     if data then
-        return MobEQG.convertMDS(pfs, data, len)
+        return MobEQG.convertType(MDS, pfs, data, len)
     end
     
     data, len = pfs:getEntryByExtension("mod")
     
     if data then
-        return MobEQG.convertMOD(pfs, data, len)
+        return MobEQG.convertType(MOD, pfs, data, len)
     end
 end
 
-function MobEQG.convertMOD(pfs, data, len)
-    local mod = MOD(pfs, data, len)
-end
-
-function MobEQG.convertMDS(pfs, data, len)
-
+function MobEQG.convertType(type, pfs, data, len)
+    local data = type(pfs, data, len)
+    return data:model()
 end
 
 return MobEQG
