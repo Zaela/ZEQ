@@ -4,10 +4,10 @@
 
 extern ModelResources gModelResources;
 
-void AnimatedModelPrototype::readSkeleton(byte* binFrames, uint32_t len)
+void AnimatedModelPrototype::readSkeleton(byte* binBones, uint32_t len)
 {
-    DBFrame* frames = (DBFrame*)binFrames;
-    uint32_t count  = len / sizeof(DBFrame);
+    DBBone* frames  = (DBBone*)binBones;
+    uint32_t count  = len / sizeof(DBBone);
     
     m_bones.resize(count);
     
@@ -15,16 +15,36 @@ void AnimatedModelPrototype::readSkeleton(byte* binFrames, uint32_t len)
     readSkeletonRecurse(frames, cur, m_bones[0], count);
 }
 
-void AnimatedModelPrototype::readSkeletonRecurse(DBFrame* frames, uint32_t& cur, Bone& bone, uint32_t count)
+void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count)
 {
     if (cur == count)
         return;
     
-    DBFrame& frame = frames[cur];
+    DBBone& frame = frames[cur];
     
     bone.pos    = frame.pos;
     bone.scale  = frame.scale;
     bone.rot    = frame.rot;
+    
+    Mat4 posMatrix;
+    posMatrix.setTranslation(frame.pos);
+    Mat4 rotMatrix;
+    frame.rot.getMatrixTransposed(rotMatrix);
+    Mat4 scaleMatrix;
+    scaleMatrix.setScale(frame.scale);
+    
+    bone.localMatrix = posMatrix * rotMatrix * scaleMatrix;
+    
+    if (bone.parent)
+        bone.globalMatrix = bone.parent->globalMatrix * bone.localMatrix;
+    else
+        bone.globalMatrix = bone.localMatrix;
+    
+    //bone.localAnimMatrix = bone.localMatrix;
+    bone.globalAnimMatrix = bone.globalMatrix;
+    
+    bone.globalInverseMatrix = bone.globalMatrix;
+    bone.globalInverseMatrix.invert();
     
     uint32_t n = frame.childCount;
     
@@ -39,6 +59,14 @@ void AnimatedModelPrototype::readSkeletonRecurse(DBFrame* frames, uint32_t& cur,
         bone.children.push_back(&child);
         readSkeletonRecurse(frames, cur, child, count);
     }
+}
+
+void AnimatedModelPrototype::readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len)
+{
+    std::vector<Frame>& dst = m_bones[boneIndex].frames[animId];
+    
+    dst.resize(len / sizeof(Frame));
+    memcpy(dst.data(), frames, len);
 }
 
 std::vector<WeightedBoneAssignment>& AnimatedModelPrototype::readWeightedBoneAssignments(byte* binWbas, uint32_t len)

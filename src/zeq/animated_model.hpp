@@ -10,28 +10,36 @@
 #include "axis_aligned_bounding_box.hpp"
 #include "weighted_bone_assignment.hpp"
 #include <vector>
+#include <unordered_map>
 
 class ModelResources;
 
 class AnimatedModelPrototype : public ModelPrototype
 {
-public:
+private:
 #pragma pack(1)
-    struct DBFrame
+    struct DBBone
     {
         uint32_t    childCount;
         Vec3        pos;
         Quaternion  rot;
         Vec3        scale;
     };
-#pragma pack()
 
-private:
+    struct Frame
+    {
+        uint32_t    milliseconds;
+        Vec3        pos;
+        Quaternion  rot;
+        Vec3        scale;
+    };
+#pragma pack()
+    
     struct Bone
     {
         Vec3        pos;
-        Vec3        scale;
         Quaternion  rot;
+        Vec3        scale;
         
         Bone*       parent;
         
@@ -41,6 +49,7 @@ private:
         Mat4        globalInverseMatrix;
         
         std::vector<Bone*> children;
+        std::unordered_map<int, std::vector<Frame>> frames;
         
         Bone()
         {
@@ -56,8 +65,9 @@ private:
     
 private:
     friend class ModelResources;
-    void readSkeleton(byte* frames, uint32_t len);
-    void readSkeletonRecurse(DBFrame* frames, uint32_t& cur, Bone& bone, uint32_t count);
+    void readSkeleton(byte* bones, uint32_t len);
+    void readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count);
+    void readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len);
 
     std::vector<WeightedBoneAssignment>&    readWeightedBoneAssignments(byte* wbas, uint32_t len);
     std::vector<uint32_t>&                  readBoneAssignments(byte* bas, uint32_t len);

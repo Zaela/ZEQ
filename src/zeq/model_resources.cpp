@@ -559,7 +559,7 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
         Blob blob;
         getBlob(blobId, blob);
         
-        //do stuff
+        animModel->readAnimationFrames(animType, boneIndex, blob.data, blob.length);
     }
 }
 

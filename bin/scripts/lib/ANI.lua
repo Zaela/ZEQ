@@ -104,6 +104,19 @@ function ANI:readFrames(model)
         local index     = byName[boneName]:index()
         
         byIndex[index] = frameHeader
+        
+        -- Check for redundant frames and remove them
+        --[=[
+        if not xyz then
+            xyz = true
+            local frame = Frame:cast(data - Frame:sizeof() * frameHeader.frameCount)
+            for j = 0, frameHeader.frameCount - 1 do
+                local f = frame[j]
+                local r, s = f.rot, f.scale
+                io.write(string.format("%g,%g,%g : %g,%g,%g,%g : %g,%g,%g\n", f.x, f.y, f.z, r.x, r.y, r.z, r.w, s.x, s.y, s.z))
+            end
+        end
+        --]=]
     end
     
     model:addAnimation(self)

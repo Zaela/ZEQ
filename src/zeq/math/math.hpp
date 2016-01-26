@@ -21,6 +21,11 @@ public:
     {
         return 1.0f / sqrt(value);
     }
+    
+    static float reciprocal(float value)
+    {
+        return 1.0f / value;
+    }
 };
 
 #endif//_ZEQ_MATH_HPP_
