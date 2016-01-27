@@ -68,7 +68,7 @@
     "SELECT blobId FROM Skeletons WHERE modelId = ?"
 
 #define QUERY_BONE_ASSIGNMENTS                              \
-    "SELECT vertId, blobId "                                \
+    "SELECT vertId, blobId, isWeighted "                    \
     "FROM BoneAssignments "                                 \
     "WHERE vertId IN "                                      \
     " (SELECT vertId FROM Models2Vertices "                 \

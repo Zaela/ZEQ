@@ -3,6 +3,7 @@ local Struct    = require "Struct"
 local Class     = require "Class"
 local EQGCommon = require "EQGCommon"
 local BinUtil   = require "BinUtil"
+local AnimFrame = require "AnimFrame"
 
 local Header = Struct.packed[[
     uint32_t signature;
@@ -97,26 +98,39 @@ function ANI:readFrames(model)
         p = p + FrameHeader:sizeof()
         
         self:checkLength(p)
+        
+        local frames = Frame:cast(data + p)
         p = p + Frame:sizeof() * frameHeader.frameCount
+        
         self:checkLength(p)
         
         local boneName  = strings[frameHeader.boneNameIndex]
         local index     = byName[boneName]:index()
         
-        byIndex[index] = frameHeader
+        local animFrames    = AnimFrame()
+        byIndex[index]      = animFrames
+
+        animFrames:add(frames[0])
         
-        -- Check for redundant frames and remove them
-        --[=[
-        if not xyz then
-            xyz = true
-            local frame = Frame:cast(data - Frame:sizeof() * frameHeader.frameCount)
-            for j = 0, frameHeader.frameCount - 1 do
-                local f = frame[j]
-                local r, s = f.rot, f.scale
-                io.write(string.format("%g,%g,%g : %g,%g,%g,%g : %g,%g,%g\n", f.x, f.y, f.z, r.x, r.y, r.z, r.w, s.x, s.y, s.z))
+        -- Check for redundant frames and skip them
+        if frameHeader.frameCount > 2 then
+            local first = 0
+            for i = 1, frameHeader.frameCount - 2 do
+                local a, b, c = frames[first], frames[i], frames[i + 1]
+                
+                if a.x ~= b.x or a.y ~= b.y or a.z ~= b.z or
+                   a.rot.x ~= b.rot.x or a.rot.y ~= b.rot.y or a.rot.z ~= b.rot.z or a.rot.w ~= b.rot.w or
+                   a.scale.x ~= b.scale.x or a.scale.y ~= b.scale.y or a.scale.z ~= b.scale.z or
+                   c.x ~= b.x or c.y ~= b.y or c.z ~= b.z or
+                   c.rot.x ~= b.rot.x or c.rot.y ~= b.rot.y or c.rot.z ~= b.rot.z or c.rot.w ~= b.rot.w or
+                   c.scale.x ~= b.scale.x or c.scale.y ~= b.scale.y or c.scale.z ~= b.scale.z then
+                    animFrames:add(b)
+                    first = first + 1
+                end
             end
         end
-        --]=]
+        
+        animFrames:add(frames[frameHeader.frameCount - 1])
     end
     
     model:addAnimation(self)

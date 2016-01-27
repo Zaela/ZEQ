@@ -28,7 +28,7 @@ private:
 
     struct Frame
     {
-        uint32_t    milliseconds;
+        float       milliseconds;
         Vec3        pos;
         Quaternion  rot;
         Vec3        scale;

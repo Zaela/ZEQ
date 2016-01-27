@@ -165,6 +165,7 @@ CREATE TABLE AnimationFrames (
 CREATE INDEX Index_AnimationFrames ON AnimationFrames (modelId);
 
 CREATE TABLE BoneAssignments (
-    vertId  INT PRIMARY KEY,
-    blobId  INT
+    vertId      INT PRIMARY KEY,
+    blobId      INT,
+    isWeighted  BOOLEAN
 );

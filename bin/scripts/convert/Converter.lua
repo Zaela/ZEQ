@@ -169,7 +169,7 @@ function Converter.initAnimQueries(db, q)
     ]]
     
     q.insertBoneAssignments = db:prepare[[
-        INSERT INTO BoneAssignments (vertId, blobId) VALUES (?, ?)
+        INSERT INTO BoneAssignments (vertId, blobId, isWeighted) VALUES (?, ?, ?)
     ]]
 end
 
@@ -272,6 +272,7 @@ function Converter.insertAnimatedModel(db, q, model)
                     
                     stmt:bindInt64(1, vb:getId())
                     stmt:bindInt64(2, blobId)
+                    stmt:bindInt(3, wt:isWeighted() and 1 or 0)
                     stmt:commit()
                     
                     ::skip::
@@ -296,13 +297,13 @@ function Converter.insertAnimatedModel(db, q, model)
                 local FrameHeader   = ani.FrameHeader
                 local Frame         = ani.Frame
                 
-                for index, data in pairs(byIndex) do
+                for index, frames in pairs(byIndex) do
                     stmt:bindInt(2, index)
                     
-                    local frameHeader   = data
-                    local frames        = BinUtil.Byte:cast(data) + FrameHeader:sizeof()
+                    --local frameHeader   = data
+                    --local frames        = data--BinUtil.Byte:cast(data) + FrameHeader:sizeof()
                     
-                    local blobId = Converter.insertBlob(db, q, frames, frameHeader.frameCount * Frame:sizeof(), true)
+                    local blobId = Converter.insertBlob(db, q, frames:data(), frames:bytes(), true)-- frameHeader.frameCount * Frame:sizeof(), true)
                     
                     stmt:bindInt64(4, blobId)
                     

@@ -521,6 +521,7 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
     {
         int64_t vertId = queryBoneAssignments.getInt64(1);
         int64_t blobId = queryBoneAssignments.getInt64(2);
+        int isWeighted = queryBoneAssignments.getInt(3);
         
         if (m_vertices.count(vertId) == 0)
             continue;
@@ -530,19 +531,14 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
         Blob blob;
         getBlob(blobId, blob);
         
-        int isWeighted = *(int*)blob.data;
-        
-        byte* data      = blob.data + 4;
-        uint32_t length = blob.length - 4;
-        
         if (isWeighted)
         {
-            std::vector<WeightedBoneAssignment>& wbas = animModel->readWeightedBoneAssignments(data, length);
+            std::vector<WeightedBoneAssignment>& wbas = animModel->readWeightedBoneAssignments(blob.data, blob.length);
             vb->setWeightedBoneAssignments(&wbas);
         }
         else
         {
-            std::vector<uint32_t>& bas = animModel->readBoneAssignments(data, length);
+            std::vector<uint32_t>& bas = animModel->readBoneAssignments(blob.data, blob.length);
             vb->setBoneAssignments(&bas);
         }
     }
