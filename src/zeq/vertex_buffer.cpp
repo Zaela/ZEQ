@@ -4,10 +4,27 @@
 
 extern ModelResources gModelResources;
 
+VertexBuffer::VertexBuffer()
+    : m_id(0),
+      m_materialId(0),
+      m_textureSetId(0),
+      m_vertices(nullptr),
+      m_count(0),
+      m_blendType(0),
+      m_diffuseId(0),
+      m_vboId(0),
+      m_animTexture(nullptr)
+{
+
+}
+
 VertexBuffer::VertexBuffer(int64_t id, byte* rawData, uint32_t len)
     : m_id(id),
+      m_materialId(0),
+      m_textureSetId(0),
       m_vertices((Vertex*)rawData),
       m_count(len / sizeof(Vertex)),
+      m_blendType(0),
       m_diffuseId(0),
       m_vboId(0),
       m_animTexture(nullptr)
@@ -17,8 +34,11 @@ VertexBuffer::VertexBuffer(int64_t id, byte* rawData, uint32_t len)
 
 VertexBuffer::VertexBuffer(uint32_t vbo, uint32_t count)
     : m_id(0),
+      m_materialId(0),
+      m_textureSetId(0),
       m_vertices(nullptr),
       m_count(count),
+      m_blendType(0),
       m_diffuseId(0),
       m_vboId(vbo),
       m_animTexture(nullptr)
@@ -39,6 +59,20 @@ VertexBuffer::~VertexBuffer()
     
     if (m_vertices)
         delete[] m_vertices;
+}
+
+void VertexBuffer::copy(const VertexBuffer& vb)
+{
+    uint32_t count      = vb.m_count;
+    Vertex* vertices    = new Vertex[count];
+    
+    memcpy(vertices, vb.m_vertices, sizeof(Vertex) * count);
+    
+    m_vertices  = vertices;
+    m_count     = count;
+    m_blendType = vb.m_blendType;
+    
+    setAnimatedTexture(vb.m_animTexture);
 }
 
 void VertexBuffer::setAnimatedTexture(AnimatedTexture* animTex)

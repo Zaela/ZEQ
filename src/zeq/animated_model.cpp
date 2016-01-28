@@ -4,23 +4,31 @@
 
 extern ModelResources gModelResources;
 
+AnimatedModelPrototype::~AnimatedModelPrototype()
+{
+    m_animations.destroy();
+}
+
 void AnimatedModelPrototype::readSkeleton(byte* binBones, uint32_t len)
 {
     DBBone* frames  = (DBBone*)binBones;
     uint32_t count  = len / sizeof(DBBone);
     
-    m_bones.resize(count);
+    m_boneCount = count;
+    m_bones = new Bone[count];
     
     uint32_t cur = 0;
     readSkeletonRecurse(frames, cur, m_bones[0], count);
 }
 
-void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count)
+void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent)
 {
     if (cur == count)
         return;
     
     DBBone& frame = frames[cur];
+    
+    bone.hasAnimFrames = false;
     
     bone.pos    = frame.pos;
     bone.scale  = frame.scale;
@@ -35,66 +43,139 @@ void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, 
     
     bone.localMatrix = posMatrix * rotMatrix * scaleMatrix;
     
-    if (bone.parent)
-        bone.globalMatrix = bone.parent->globalMatrix * bone.localMatrix;
+    if (parent)
+        bone.globalMatrix = parent->globalMatrix * bone.localMatrix;
     else
         bone.globalMatrix = bone.localMatrix;
-    
-    //bone.localAnimMatrix = bone.localMatrix;
-    bone.globalAnimMatrix = bone.globalMatrix;
     
     bone.globalInverseMatrix = bone.globalMatrix;
     bone.globalInverseMatrix.invert();
     
     uint32_t n = frame.childCount;
     
-    for (uint32_t i = 0; i < n; i++)
-    {
-        cur++;
-        
-        Bone& child = m_bones[cur];
-        
-        child.parent = &bone;
+    bone.childCount = n;
     
-        bone.children.push_back(&child);
-        readSkeletonRecurse(frames, cur, child, count);
+    if (n)
+    {
+        bone.children = new uint32_t[n];
+        
+        for (uint32_t i = 0; i < n; i++)
+        {
+            cur++;
+            
+            Bone& child         = m_bones[cur];
+            bone.children[i]    = cur;
+
+            readSkeletonRecurse(frames, cur, child, count, &bone);
+        }
     }
 }
 
 void AnimatedModelPrototype::readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len)
 {
-    std::vector<Frame>& dst = m_bones[boneIndex].frames[animId];
-    
-    dst.resize(len / sizeof(Frame));
-    memcpy(dst.data(), frames, len);
+    m_bones[boneIndex].hasAnimFrames = true;
+    m_animations.set(animId, boneIndex, m_boneCount, frames, len);
 }
 
-std::vector<WeightedBoneAssignment>& AnimatedModelPrototype::readWeightedBoneAssignments(byte* binWbas, uint32_t len)
+WeightedBoneAssignmentSet& AnimatedModelPrototype::readWeightedBoneAssignments(byte* binWbas, uint32_t len)
 {
-    WeightedBoneAssignment* wbas    = (WeightedBoneAssignment*)binWbas;
-    uint32_t count                  = len / sizeof(WeightedBoneAssignment);
+    WeightedBoneAssignmentSet set;
     
-    m_weightedBoneAssignments.push_back(std::vector<WeightedBoneAssignment>());
+    set.count       = len / sizeof(WeightedBoneAssignment);
+    set.assignments = (WeightedBoneAssignment*)binWbas;
     
-    std::vector<WeightedBoneAssignment>& vector = m_weightedBoneAssignments.back();
-    vector.resize(count);
-    memcpy(vector.data(), wbas, len);
-    
-    return vector;
+    m_weightedBoneAssignments.push_back(set);
+    return m_weightedBoneAssignments.back();
 }
 
-std::vector<uint32_t>& AnimatedModelPrototype::readBoneAssignments(byte* binBas, uint32_t len)
+BoneAssignmentSet& AnimatedModelPrototype::readBoneAssignments(byte* binBas, uint32_t len)
 {
-    uint32_t* bas   = (uint32_t*)binBas;
-    uint32_t count  = len / sizeof(uint32_t);
+    BoneAssignmentSet set;
     
-    m_boneAssignments.push_back(std::vector<uint32_t>());
+    set.count       = len / sizeof(uint32_t);
+    set.assignments = (uint32_t*)binBas;
     
-    std::vector<uint32_t>& vector = m_boneAssignments.back();
-    vector.resize(count);
-    memcpy(vector.data(), bas, len);
+    m_boneAssignments.push_back(set);
+    return m_boneAssignments.back();
+}
+
+Skeleton* AnimatedModelPrototype::createSkeletonInstance()
+{
+    Skeleton* sk = new Skeleton;
     
-    return vector;
+    // The skeleton gets its own copies of all the bones
+    uint32_t count  = m_boneCount;
+    sk->m_boneCount = count;
+    
+    Skeleton::Bone* bones   = new Skeleton::Bone[count];
+    sk->m_bones             = bones;
+    
+    for (uint32_t i = 0; i < count; i++)
+    {
+        Skeleton::Bone& dst = bones[i];
+        Bone& src           = m_bones[i];
+        
+        dst.hasAnimFrames   = src.hasAnimFrames;
+        
+        dst.pos     = src.pos;
+        dst.rot     = src.rot;
+        dst.scale   = src.scale;
+        
+        dst.localMatrix         = src.localMatrix;
+        dst.localAnimMatrix     = src.localMatrix;
+        dst.globalMatrix        = src.globalMatrix;
+        dst.globalAnimMatrix    = src.globalMatrix;
+        dst.globalInverseMatrix = src.globalInverseMatrix;
+        
+        uint32_t childCount = src.childCount;
+        dst.childCount      = childCount;
+        
+        if (childCount)
+        {
+            uint32_t* children  = new uint32_t[childCount];
+            dst.children        = children;
+            
+            memcpy(children, src.children, sizeof(uint32_t) * childCount);
+            
+            for (uint32_t j = 0; j < childCount; j++)
+            {
+                bones[children[j]].parent = &dst;
+            }
+        }
+    }
+    
+    // The skeleton needs its own copies of all the VertexBuffers, but needs the originals to transform each frame
+    // The bone assignment definitions are centralized, belonging to the prototype
+    count = m_weightedBoneAssignments.size();
+    
+    sk->m_vertexBufferCount = count;
+    
+    Skeleton::VertexBufferSet* sets = new Skeleton::VertexBufferSet[count];
+    VertexBuffer* vbs               = new VertexBuffer[count];
+    
+    sk->m_vertexBufferSets      = sets;
+    sk->m_ownedVertexBuffers    = vbs;
+    
+    for (uint32_t i = 0; i < count; i++)
+    {
+        WeightedBoneAssignmentSet& src = m_weightedBoneAssignments[i];
+        
+        Skeleton::VertexBufferSet& set  = sets[i];
+        VertexBuffer& vb                = vbs[i];
+        
+        vb.copy(*src.vertexBuffer);
+        
+        set.vertexCount     = vb.count();
+        set.target          = vb.array();
+        set.base            = src.vertexBuffer->array();
+        set.assignmentCount = src.count;
+        set.assignments     = src.assignments;
+    }
+    
+    // Animation definitions are centralized, belonging to the prototype
+    sk->m_animations.inherit(m_animations);
+    
+    return sk;
 }
 
 MobModelPrototype::MobModelPrototype(int race, uint8_t gender)

@@ -6,7 +6,6 @@
 #include "ref_counter.hpp"
 #include "texture.hpp"
 #include "opengl.hpp"
-#include "weighted_bone_assignment.hpp"
 
 class VertexBuffer : public RefCounter
 {
@@ -36,14 +35,14 @@ private:
     uint32_t    m_vboId;
     
     AnimatedTexture*    m_animTexture;
-
-    std::vector<WeightedBoneAssignment>*    m_weightedBoneAssignments;
-    std::vector<uint32_t>*                  m_boneAssignments;
     
 public:
+    VertexBuffer();
     VertexBuffer(int64_t, byte* rawData, uint32_t len);
     VertexBuffer(uint32_t vbo, uint32_t count);
     virtual ~VertexBuffer();
+
+    void copy(const VertexBuffer& vb);
 
     int64_t getId() const { return m_id; }
     int64_t getMaterialId() const { return m_materialId; }
@@ -65,9 +64,6 @@ public:
     AnimatedTexture*    getAnimatedTexture() const { return m_animTexture; }
     uint32_t            getDiffuseMap() const { return m_diffuseId; }
     int                 getBlendType() const { return m_blendType; }
-    
-    void setWeightedBoneAssignments(std::vector<WeightedBoneAssignment>* wbas) { m_weightedBoneAssignments = wbas; }
-    void setBoneAssignments(std::vector<uint32_t>* bas) { m_boneAssignments = bas; }
     
     void registerWithOpenGL(bool isDynamic = false);
 };

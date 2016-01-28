@@ -38,7 +38,7 @@ void ModelResources::getBlob(int64_t id, Blob& blob)
 int64_t ModelResources::insertBlob(void* data, uint32_t len, bool compress)
 {
     Query insertBlob;
-    gDatabase.prepare("INSERT INTO Blobs (realLength, data) VALUES (?, ?)", insertBlob);
+    gDatabase.prepare(QUERY_INSERT_BLOB, insertBlob);
     
     uint32_t dbLength;
     byte* blob;
@@ -531,15 +531,18 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
         Blob blob;
         getBlob(blobId, blob);
         
+        byte* data      = blob.takeOwnership();
+        uint32_t length = blob.length;
+        
         if (isWeighted)
         {
-            std::vector<WeightedBoneAssignment>& wbas = animModel->readWeightedBoneAssignments(blob.data, blob.length);
-            vb->setWeightedBoneAssignments(&wbas);
+            WeightedBoneAssignmentSet& set = animModel->readWeightedBoneAssignments(data, length);
+            set.vertexBuffer = vb;
         }
         else
         {
-            std::vector<uint32_t>& bas = animModel->readBoneAssignments(blob.data, blob.length);
-            vb->setBoneAssignments(&bas);
+            BoneAssignmentSet& bas = animModel->readBoneAssignments(data, length);
+            bas.vertexBuffer = vb;
         }
     }
     
@@ -555,7 +558,7 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
         Blob blob;
         getBlob(blobId, blob);
         
-        animModel->readAnimationFrames(animType, boneIndex, blob.data, blob.length);
+        animModel->readAnimationFrames(animType, boneIndex, blob.takeOwnership(), blob.length);
     }
 }
 

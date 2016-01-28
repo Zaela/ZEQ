@@ -59,6 +59,7 @@ Window::Window()
     
     
     m_animModel = nullptr;
+    m_skele = nullptr;
 }
 
 Window::~Window()
@@ -86,8 +87,10 @@ bool Window::mainLoop()
     if (m_zoneModel)
         m_zoneModel->draw(&getCamera());
     
-    if (m_animModel)
-        m_animModel->draw();
+    //if (m_animModel)
+    //    m_animModel->draw();
+    if (m_skele)
+        m_skele->draw();
     
     display();
     
@@ -125,4 +128,6 @@ void Window::loadZoneModel(const std::string& shortname)
     
     AnimatedModelPrototype* model = gModelResources.getMobModel(1, 2);
     m_animModel = model;
+    
+    m_skele = model->createSkeletonInstance();
 }

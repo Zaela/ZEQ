@@ -25,6 +25,7 @@ private:
     ZoneModel* m_zoneModel;
 
     AnimatedModelPrototype* m_animModel;
+    Skeleton* m_skele;
 
 private:
     static void clear();

@@ -13,6 +13,7 @@
 #include "axis_aligned_bounding_box.hpp"
 #include "vec3.hpp"
 #include "lua.hpp"
+#include "bone_assignment.hpp"
 #include <FreeImage.h>
 #include <unordered_map>
 #include <string>
@@ -20,6 +21,9 @@
 #define QUERY_BLOB                                          \
     "SELECT realLength, data FROM Blobs "                   \
     "WHERE id = ?"
+    
+#define QUERY_INSERT_BLOB                                   \
+    "INSERT INTO Blobs (realLength, data) VALUES (?, ?)"
 
 #define QUERY_MODEL_TEXTURES                                \
     "SELECT texId, "                                        \
