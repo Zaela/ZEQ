@@ -9,6 +9,7 @@
 #include "vertex_buffer.hpp"
 #include "animation.hpp"
 #include "bone_assignment.hpp"
+#include "temp_alloc.hpp"
 
 class AnimatedModelPrototype;
 
@@ -25,8 +26,6 @@ private:
         Quaternion  rot;
         Vec3        scale;
         
-        Bone*       parent;
-        
         Mat4        localMatrix;
         Mat4        globalMatrix;
         Mat4        localAnimMatrix;
@@ -35,6 +34,8 @@ private:
         
         uint32_t    childCount;
         uint32_t*   children;
+        
+        uint32_t    animHint;
     };
     
     struct VertexBufferSet
@@ -66,9 +67,10 @@ private:
 private:
     void buildLocalMatrices();
     void buildGlobalMatrices();
-    void getFrameData(float frame, int animId, uint32_t boneIndex, Vec3& pos, Quaternion& rot, Vec3& scale);
+    void buildGlobalMatrixRecurse(Bone& bone);
     
 public:
+    Skeleton();
     ~Skeleton();
 
     void setAnimation(int animId);

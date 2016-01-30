@@ -42,7 +42,7 @@ void ZoneModel::generateOctree()
         for (uint32_t i = 0; i < count; i++)
         {
             VertexBuffer::Vertex& vert = array[i];
-            box.addInternalPoint(Vec3(vert.x, vert.y, vert.z));
+            box.addInternalPoint(vert.pos);
         }
         
         temp.claimed.reserve(triCount);
@@ -115,7 +115,7 @@ void ZoneModel::octreeRecurse(OctreeTemp& temp, VertexBuffer* vb, VertexBuffer::
             for (int j = 0; j < 3; j++)
             {
                 VertexBuffer::Vertex& vert = tri.points[j];
-                if (!box.containsPoint(Vec3(vert.x, vert.y, vert.z)))
+                if (!box.containsPoint(vert.pos))
                     goto skip;
             }
             
@@ -163,7 +163,7 @@ void ZoneModel::octreeMakeNode(OctreeTemp& temp, VertexBuffer* vb, VertexBuffer:
         for (int j = 0; j < 3; j++)
         {
             VertexBuffer::Vertex& vert = tri.points[j];
-            box.addInternalPoint(Vec3(vert.x, vert.y, vert.z));
+            box.addInternalPoint(vert.pos);
         }
     }
     
@@ -190,7 +190,7 @@ bool ZoneModel::octreeCheckSmallVertexBuffer(VertexBuffer* vb, OctreeTemp& temp)
     for (uint32_t i = 0; i < count; i++)
     {
         VertexBuffer::Vertex& vert = array[i];
-        box.addInternalPoint(Vec3(vert.x, vert.y, vert.z));
+        box.addInternalPoint(vert.pos);
     }
     
     if (box.getSphereRadiusSquared() > SMALL_OCTREE_NODE_MAX_RADIUS)

@@ -224,13 +224,10 @@ function EQGCommon:extractVertexBuffers(p, isZone)
             local vb, cvb   = model:getVertexBuffer(index)
             local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
             
-            --for j = 2, 0, -1 do
             for j = 0, 2 do
                 local s = verts[tri.index[j]]
                 local v = use:addVertex()
                 
-                --v.x, v.z, v.y   = s.x, s.y, s.z
-                --v.i, v.k, v.j   = s.i, s.j, s.k
                 v.x, v.y, v.z   = s.x, s.y, s.z
                 v.i, v.j, v.k   = s.i, s.j, s.k
                 v.u, v.v        = s.u, s.v
@@ -244,14 +241,14 @@ function EQGCommon:extractVertexBuffers(p, isZone)
             local vb, cvb   = model:getVertexBuffer(index)
             local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
             
-            for j = 2, 0, -1 do
-            --for j = 0, 2 do
+            --for j = 2, 0, -1 do
+            for j = 0, 2 do
                 local s = verts[tri.index[j]]
                 local v = use:addVertex()
                 
-                v.x, v.z, v.y   = s.x, s.y, s.z
+                --v.x, v.z, v.y   = s.x, s.y, s.z
                 v.i, v.k, v.j   = s.i, s.j, s.k
-                --v.x, v.y, v.z   = s.x, s.y, s.z
+                v.x, v.y, v.z   = s.x, s.y, s.z
                 --v.i, v.j, v.k   = s.i, s.j, s.k
                 v.u, v.v        = s.u, s.v
             end
@@ -315,6 +312,7 @@ function EQGCommon:extractBoneAssignments(p)
     local data      = self:data()
     local header    = self:header()
     local model     = self:model()
+    local indexMap  = model:skeleton():getBoneIndexMap()
     
     local binBAs = EQGBoneAssignment:cast(data + p)
     p = p + EQGBoneAssignment:sizeof() * header.vertexCount
@@ -333,7 +331,7 @@ function EQGCommon:extractBoneAssignments(p)
         vertCountsByMat[i]          = 0
         noCollideVertCountsByMat[i] = 0
     end
-        
+    
     for i = 0, header.triangleCount - 1 do
         local tri   = tris[i]
         local index = tri.materialIndex + 1
@@ -350,7 +348,7 @@ function EQGCommon:extractBoneAssignments(p)
             for k = 0, binBA.count - 1 do
                 local wt = binBA.weights[k]
                 
-                use:add(vcount + j, wt.boneIndex, wt.value)
+                use:add(vcount + j, indexMap[wt.boneIndex], wt.value)
             end
         end
         

@@ -130,4 +130,6 @@ void Window::loadZoneModel(const std::string& shortname)
     m_animModel = model;
     
     m_skele = model->createSkeletonInstance();
+    m_skele->setAnimation(1);
+    m_skele->animate(0.066);
 }

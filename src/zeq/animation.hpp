@@ -27,6 +27,8 @@ public:
         Frame*      frames;
     };
     
+    static const uint32_t DEFAULT_HINT = 1;
+    
 private:
     uint32_t    m_boneCount;
     float       m_durationMs;
@@ -39,6 +41,9 @@ private:
 public:
     static Animation* create(uint32_t boneCount);
     ~Animation();
+
+    float   getDurationMilliseconds() const { return m_durationMs; }
+    void    getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Quaternion& rot, Vec3& scale, uint32_t& hint);
 };
 
 class AnimationSet

@@ -110,7 +110,17 @@ function ANI:readFrames(model)
         local animFrames    = AnimFrame()
         byIndex[index]      = animFrames
 
-        animFrames:add(frames[0])
+
+        local fr = frames[0]
+        local ms = fr.milliseconds
+        
+        if ms > 0 then
+            fr.milliseconds = 0
+            animFrames:add(fr)
+            fr.milliseconds = ms
+        end
+        
+        animFrames:add(fr)
         
         -- Check for redundant frames and skip them
         if frameHeader.frameCount > 2 then

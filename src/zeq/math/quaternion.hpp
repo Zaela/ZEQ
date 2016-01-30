@@ -53,7 +53,7 @@ struct Quaternion
     
     Quaternion operator*(float v)
     {
-        return Quaternion(x*v, y*v, z*v, w*z);
+        return Quaternion(x*v, y*v, z*v, w*v);
     }
     
     float dotProduct(Quaternion& q) const

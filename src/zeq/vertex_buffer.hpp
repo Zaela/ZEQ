@@ -6,15 +6,16 @@
 #include "ref_counter.hpp"
 #include "texture.hpp"
 #include "opengl.hpp"
+#include "vec3.hpp"
 
 class VertexBuffer : public RefCounter
 {
 public:
     struct Vertex
     {
-        float x, y, z;
-        float i, j, k;
-        float u, v;
+        Vec3    pos;
+        Vec3    normal;
+        float   u, v;
         //uint8_t r, g, b, a;
     };
     

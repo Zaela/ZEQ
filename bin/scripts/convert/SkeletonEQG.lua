@@ -14,10 +14,13 @@ local SkeletonEQG = Class("SkeletonEQG")
 function SkeletonEQG.new(root, count, byName)
     local entries   = BoneEntry.Array(count)
     local index     = 0
+    local indexMap  = {}
     
     local function recurse(bone)
         local childCount    = bone:getChildCount()
         local entry         = entries[index]
+        
+        indexMap[bone:index()] = index
         
         index = index + 1
         
@@ -45,10 +48,11 @@ function SkeletonEQG.new(root, count, byName)
     recurse(root)
     
     local s = {
-        _data   = entries,
-        _bytes  = count * BoneEntry:sizeof(),
-        _count  = count,
-        _byName = byName,
+        _data       = entries,
+        _bytes      = count * BoneEntry:sizeof(),
+        _count      = count,
+        _byName     = byName,
+        _indexMap   = indexMap,
     }
     
     return SkeletonEQG:instance(s)
@@ -68,6 +72,10 @@ end
 
 function SkeletonEQG:boneIndicesByName()
     return self._byName
+end
+
+function SkeletonEQG:getBoneIndexMap()
+    return self._indexMap
 end
 
 return SkeletonEQG

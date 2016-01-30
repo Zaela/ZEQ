@@ -30,7 +30,7 @@ function AnimFrame:add(eqgFrame)
     o.rot.w         = eqgFrame.rot.w
     o.scale.x       = eqgFrame.scale.x
     o.scale.y       = eqgFrame.scale.y
-    o.scale.z       = eqgFrame.scale.x
+    o.scale.z       = eqgFrame.scale.z
 end
 
 return AnimFrame

@@ -62,6 +62,24 @@ struct Vec3
         return *this;
     }
     
+    Vec3 operator*(float v)
+    {
+        Vec3 o;
+        o.x = x * v;
+        o.y = y * v;
+        o.z = z * v;
+        return o;
+    }
+    
+    Vec3 operator/(float v)
+    {
+        Vec3 o;
+        o.x = x / v;
+        o.y = y / v;
+        o.z = z / v;
+        return o;
+    }
+    
     float lengthSquared() const
     {
         return x*x + y*y + z*z;

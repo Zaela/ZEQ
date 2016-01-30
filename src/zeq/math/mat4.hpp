@@ -20,6 +20,7 @@ public:
     Mat4()
     {
         memset(m, 0, sizeof(float) * 16);
+        identity();
     }
     
     void identity()
@@ -177,18 +178,32 @@ public:
         vec.set(x, y, z);
     }
     
+    void transformVector(Vec3& dst, const Vec3& src)
+    {
+        dst.x = src.x * m[ 0] + src.y * m[ 4] + src.z * m[ 8] + m[12];
+        dst.y = src.x * m[ 1] + src.y * m[ 5] + src.z * m[ 9] + m[13];
+        dst.z = src.x * m[ 2] + src.y * m[ 6] + src.z * m[10] + m[14];
+    }
+    
+    void rotateVector(Vec3& dst, const Vec3& src)
+    {
+        dst.x = src.x * m[ 0] + src.y * m[ 4] + src.z * m[ 8];
+        dst.y = src.x * m[ 1] + src.y * m[ 5] + src.z * m[ 9];
+        dst.z = src.x * m[ 2] + src.y * m[ 6] + src.z * m[10];
+    }
+    
     bool invert()
     {
         Mat4 temp(1);
         
-        float d = (m[ 0] * m[ 5] - m[ 1] * m[ 4] * m[10] * m[15] - m[11] * m[14]) -
-                  (m[ 0] * m[ 6] - m[ 2] * m[ 4] * m[ 9] * m[15] - m[11] * m[13]) +
-                  (m[ 0] * m[ 7] - m[ 3] * m[ 4] * m[ 9] * m[14] - m[10] * m[13]) +
-                  (m[ 1] * m[ 6] - m[ 2] * m[ 5] * m[ 8] * m[15] - m[11] * m[12]) -
-                  (m[ 1] * m[ 7] - m[ 3] * m[ 5] * m[ 8] * m[14] - m[10] * m[12]) +
-                  (m[ 2] * m[ 7] - m[ 3] * m[ 6] * m[ 8] * m[13] - m[ 9] * m[12]);
+        float d = (m[ 0] * m[ 5] - m[ 1] * m[ 4]) * (m[10] * m[15] - m[11] * m[14]) -
+                  (m[ 0] * m[ 6] - m[ 2] * m[ 4]) * (m[ 9] * m[15] - m[11] * m[13]) +
+                  (m[ 0] * m[ 7] - m[ 3] * m[ 4]) * (m[ 9] * m[14] - m[10] * m[13]) +
+                  (m[ 1] * m[ 6] - m[ 2] * m[ 5]) * (m[ 8] * m[15] - m[11] * m[12]) -
+                  (m[ 1] * m[ 7] - m[ 3] * m[ 5]) * (m[ 8] * m[14] - m[10] * m[12]) +
+                  (m[ 2] * m[ 7] - m[ 3] * m[ 6]) * (m[ 8] * m[13] - m[ 9] * m[12]);
         
-        if (abs(d) < 0.000001f)
+        if (fabsf(d) < 0.000001f)
             return false;
         
         d = Math::reciprocal(d);

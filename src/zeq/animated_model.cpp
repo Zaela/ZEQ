@@ -110,6 +110,8 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
     Skeleton::Bone* bones   = new Skeleton::Bone[count];
     sk->m_bones             = bones;
     
+    memset(bones, 0, sizeof(Skeleton::Bone) * count);
+    
     for (uint32_t i = 0; i < count; i++)
     {
         Skeleton::Bone& dst = bones[i];
@@ -123,28 +125,25 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
         
         dst.localMatrix         = src.localMatrix;
         dst.localAnimMatrix     = src.localMatrix;
-        dst.globalMatrix        = src.globalMatrix;
+        dst.globalMatrix        = src.globalMatrix; //probably not needed
         dst.globalAnimMatrix    = src.globalMatrix;
         dst.globalInverseMatrix = src.globalInverseMatrix;
         
+        dst.animHint = Animation::DEFAULT_HINT;
+        
         uint32_t childCount = src.childCount;
-        dst.childCount      = childCount;
         
         if (childCount)
         {
+            dst.childCount      = childCount;
             uint32_t* children  = new uint32_t[childCount];
             dst.children        = children;
             
             memcpy(children, src.children, sizeof(uint32_t) * childCount);
-            
-            for (uint32_t j = 0; j < childCount; j++)
-            {
-                bones[children[j]].parent = &dst;
-            }
         }
     }
     
-    // The skeleton needs its own copies of all the VertexBuffers, but needs the originals to transform each frame
+    // The skeleton needs its own copies of all the VertexBuffers, but needs the original VertexBuffers to transform each frame
     // The bone assignment definitions are centralized, belonging to the prototype
     count = m_weightedBoneAssignments.size();
     

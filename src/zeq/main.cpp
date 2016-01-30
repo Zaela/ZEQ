@@ -43,6 +43,7 @@ int main(int argc, char** argv)
     std::thread thread(threadProc);
     thread.detach();
     win.loadZoneModel(argc > 1 ? argv[1] : "gfaydark");
+    
     cv.notify_all();
     
     for (;;)
