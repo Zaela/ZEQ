@@ -107,6 +107,8 @@ function ANI:readFrames(model)
         local boneName  = strings[frameHeader.boneNameIndex]
         local index     = byName[boneName]:index()
         
+        --io.write(boneName, " : ", index, " : ", frameHeader.frameCount, "\n")
+        
         local animFrames    = AnimFrame()
         byIndex[index]      = animFrames
 

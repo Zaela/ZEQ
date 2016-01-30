@@ -54,6 +54,15 @@ function ConvModel:initVertexBuffers(count, bindMaterials)
     end
 end
 
+function ConvModel:inheritTextures(from)
+    self._textures              = from._textures
+    self._texturesByName        = from._texturesByName
+    self._maskedTextures        = from._maskedTextures
+    self._maskedTexturesByName  = from._maskedTexturesByName
+    self._normalMaps            = from._normalMaps
+    self._normalMapsByName      = from._normalMapsByName
+end
+
 function ConvModel:getAllMaterials()
     return self._materials
 end

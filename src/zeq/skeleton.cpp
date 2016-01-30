@@ -55,10 +55,11 @@ void Skeleton::animate(double delta)
         }
     }
     
-    m_curAnimFrame  = frame;
-    Animation* anim = m_curAnim;
-    Bone* bones     = m_bones;
-    uint32_t count  = m_boneCount;
+    m_curAnimFrame      = frame;
+    Animation* anim     = m_curAnim;
+    Bone* bones         = m_bones;
+    uint32_t count      = m_boneCount;
+    Mat4* animMatrices  = m_animMatrices;
     
     // Animate bones
     for (uint32_t i = 0; i < count; i++)
@@ -72,8 +73,6 @@ void Skeleton::animate(double delta)
     }
     
     buildMatrices();
-    
-    Mat4* animMatrices = m_animMatrices;
     
     for (uint32_t i = 0; i < count; i++)
     {

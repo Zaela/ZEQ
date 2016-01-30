@@ -188,6 +188,10 @@ function Converter.initMobQueries(db, q)
     q.insertMobModel = db:prepare[[
         INSERT INTO MobModels (race, gender, modelId) VALUES (?, ?, ?)
     ]]
+    
+    q.insertMobHeadModel = db:prepare[[
+        INSERT INTO MobHeadModels (mainModelId, headModelId, headNumber) VALUES (?, ?, ?)
+    ]]
 end
 
 function Converter.wrapInsert(typeName, func)
@@ -249,6 +253,46 @@ function Converter.insertAnimatedModel(db, q, model)
     
     local skele = model:skeleton()
     if skele then
+        local function handleBAs(iter)
+            for wt in iter do
+                if wt:isEmpty() then goto skip end
+                
+                local vb = wt:vertexBuffer()
+                if not vb or not vb:getId() then goto skip end
+                
+                local blobId = Converter.insertBlob(db, q, wt:data(), wt:bytes(), true)
+                
+                stmt:bindInt64(1, vb:getId())
+                stmt:bindInt64(2, blobId)
+                stmt:bindInt(3, wt:isWeighted() and 1 or 0)
+                stmt:commit()
+                
+                ::skip::
+            end
+        end
+            
+        local function insertBoneAssignments(model)
+            stmt = q.insertBoneAssignments
+
+            handleBAs(model:weightBuffers())
+            handleBAs(model:noCollideWeightBuffers())
+        end
+        
+        local function insertHeadModel(head, num)
+            local headId = Converter.insertStaticModel(db, q, head)
+            
+            db:transaction(function()
+                insertBoneAssignments(head)
+                
+                stmt = q.insertMobHeadModel
+                
+                stmt:bindInt64(1, modelId)
+                stmt:bindInt64(2, headId)
+                stmt:bindInt(3, num)
+                stmt:commit()
+            end)
+        end
+        
         db:transaction(function()
             stmt = q.insertSkeletons
             
@@ -259,28 +303,7 @@ function Converter.insertAnimatedModel(db, q, model)
             stmt:commit()
             
             -- Insert bone assignments
-            stmt = q.insertBoneAssignments
-            
-            local function handleBAs(iter)
-                for wt in iter do
-                    if wt:isEmpty() then goto skip end
-                    
-                    local vb = wt:vertexBuffer()
-                    if not vb or not vb:getId() then goto skip end
-                    
-                    local blobId = Converter.insertBlob(db, q, wt:data(), wt:bytes(), true)
-                    
-                    stmt:bindInt64(1, vb:getId())
-                    stmt:bindInt64(2, blobId)
-                    stmt:bindInt(3, wt:isWeighted() and 1 or 0)
-                    stmt:commit()
-                    
-                    ::skip::
-                end
-            end
-            
-            handleBAs(model:weightBuffers())
-            handleBAs(model:noCollideWeightBuffers())
+            insertBoneAssignments(model)
             
             -- Insert animation frames
             stmt = q.insertAnimationFrames
@@ -298,19 +321,19 @@ function Converter.insertAnimatedModel(db, q, model)
                 local Frame         = ani.Frame
                 
                 for index, frames in pairs(byIndex) do
+                    local blobId = Converter.insertBlob(db, q, frames:data(), frames:bytes(), true)
+                    
                     stmt:bindInt(2, index)
-                    
-                    --local frameHeader   = data
-                    --local frames        = data--BinUtil.Byte:cast(data) + FrameHeader:sizeof()
-                    
-                    local blobId = Converter.insertBlob(db, q, frames:data(), frames:bytes(), true)-- frameHeader.frameCount * Frame:sizeof(), true)
-                    
                     stmt:bindInt64(4, blobId)
-                    
                     stmt:commit()
                 end
             end
         end)
+            
+        -- Insert head models
+        for index, head in model:headModels() do
+            insertHeadModel(head, index)
+        end
     end
     
     return modelId
@@ -363,6 +386,8 @@ function Converter.insertStaticModel(db, q, model)
     end
     
     local function handleTexture(tex, normalTex, isMasked)
+        if tex:getId() then return end
+        
         local diffuseId, diffuseDupe = blobTexture(tex, isMasked)
         local normalId, normalDupe = 0
         

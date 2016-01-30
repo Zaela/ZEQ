@@ -47,18 +47,20 @@ function MDS.new(pfs, data, len)
     p = eqg:extractMaterials(p)
     p = eqg:extractBones(p)
     
-    local baseModel = eqg:model()
-    local materials = baseModel:getAllMaterials()
-    local skele     = baseModel:skeleton()
+    local model     = eqg:model()
+    local materials = model:getAllMaterials()
+    local skele     = model:skeleton()
     local strings   = eqg:strings()
     local version   = header.version
     local heads     = {}
+    local baseModel
     
     local function newModel(sub)
         local e = EQGCommon(pfs, data, len, sub, ModelHeader)
         e:setVersion(version)
         local m = e:model()
         m:setAllMaterials(materials)
+        m:inheritTextures(model)
         m:setSkeleton(skele)
         return e
     end
@@ -70,15 +72,10 @@ function MDS.new(pfs, data, len)
         p = p + ModelHeader:sizeof()
         eqg:checkLength(p)
         
-        io.write("verts ", sub.vertexCount, ", bas ", sub.boneAssignmentCount, "\n")
-        
-        print(name)
-        
         local model     = newModel(sub)
         local headIndex = name:match("^...he(%d+)")
         
         if headIndex then
-            io.write("Head ", headIndex, "\n")
             heads[tonumber(headIndex)] = model
         else
             baseModel = model
@@ -88,12 +85,14 @@ function MDS.new(pfs, data, len)
         p = model:extractBoneAssignments(p)
     end
     
-    local model = baseModel:model()
+    model = baseModel:model()
     eqg:setModel(model)
     
     for i, head in pairs(heads) do
         model:addHeadModel(head:model(), i)
     end
+    
+    eqg:extractAnimations()
     
     return MDS:instance(eqg)
 end

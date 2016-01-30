@@ -278,8 +278,9 @@ function EQGCommon:extractBones(p)
     
     self:checkLength(p)
     
-    local listOrder = {}
-    local byName    = {}
+    local listOrder     = {}
+    local byName        = {}
+    local recurseOrder  = {}
     
     for i = 0, header.boneCount - 1 do
         local bone = binBones[i]
@@ -299,6 +300,7 @@ function EQGCommon:extractBones(p)
             recurse(binBone.linkBoneIndex, parent)
         end
         
+        table.insert(recurseOrder, bone)
         bone:setIndex(i)
         
         if parent then
@@ -312,7 +314,7 @@ function EQGCommon:extractBones(p)
     
     recurse(0)
     
-    model:setSkeleton(SkeletonEQG(listOrder[1], #listOrder, byName))
+    model:setSkeleton(SkeletonEQG(listOrder[1], #listOrder, byName, recurseOrder))
 
     return p
 end
@@ -358,6 +360,8 @@ function EQGCommon:extractBoneAssignments(p)
             for k = 0, binBA.count - 1 do
                 local wt = binBA.weights[k]
                 
+                --io.write("wt ", wt.boneIndex, " -> ", vcount + j, "\n")
+                
                 use:add(vcount + j, indexMap[wt.boneIndex], wt.value)
             end
         end
@@ -379,16 +383,22 @@ function EQGCommon:extractModel(p, isZone)
         p = self:extractBones(p)
         p = self:extractBoneAssignments(p)
         
-        local model = self:model()
-        local pfs   = self:getPFS()
+        self:extractAnimations()
+    end
+end
+
+function EQGCommon:extractAnimations()
+    local model = self:model()
+    local pfs   = self:getPFS()
+    
+    ANI = require "ANI"
+    
+    for name in pfs:namesByExtension("ani") do
+        local ani = ANI(pfs, name, pfs:getEntryByName(name))
         
-        ANI = require "ANI"
+        io.write(ani:name(), ": ", ani:boneOrdering(), "\n");
         
-        for name in pfs:namesByExtension("ani") do
-            local ani = ANI(pfs, name, pfs:getEntryByName(name))
-            
-            ani:readFrames(model)
-        end
+        ani:readFrames(model)
     end
 end
 

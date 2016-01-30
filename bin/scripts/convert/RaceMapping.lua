@@ -11,6 +11,7 @@ local gender1 = {
 
 local gender2 = {
     [  1]   = "aro.eqg",
+    [  2]   = "sin.eqg",
 }
 
 function RaceMapping.getFileFor(race, gender)

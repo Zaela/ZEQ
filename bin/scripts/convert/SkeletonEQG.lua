@@ -11,16 +11,18 @@ local BoneEntry = Struct.packed[[
 
 local SkeletonEQG = Class("SkeletonEQG")
 
-function SkeletonEQG.new(root, count, byName)
-    local entries   = BoneEntry.Array(count)
-    local index     = 0
-    local indexMap  = {}
+function SkeletonEQG.new(root, count, byName, recurseOrder)
+    local entries           = BoneEntry.Array(count)
+    local index             = 0
+    local indexMap          = {}
+    local listOrderIndexMap = {}
     
     local function recurse(bone)
         local childCount    = bone:getChildCount()
         local entry         = entries[index]
         
         indexMap[bone:index()] = index
+        io.write(bone:index(), " -> ", index, " (", bone:getName(), ")\n")
         
         index = index + 1
         
@@ -47,12 +49,20 @@ function SkeletonEQG.new(root, count, byName)
     
     recurse(root)
     
+    --[[
+    for i, bone in ipairs(listOrder) do
+        listOrderIndexMap[i - 1] = indexMap[bone:index()]
+        io.write(bone:index(), " -> ", i - 1, " (", bone:getName(), ")\n")
+    end
+    --]]
+    
     local s = {
-        _data       = entries,
-        _bytes      = count * BoneEntry:sizeof(),
-        _count      = count,
-        _byName     = byName,
-        _indexMap   = indexMap,
+        _data           = entries,
+        _bytes          = count * BoneEntry:sizeof(),
+        _count          = count,
+        _byName         = byName,
+        _indexMap       = indexMap,
+        _recurseOrder   = recurseOrder,
     }
     
     return SkeletonEQG:instance(s)
