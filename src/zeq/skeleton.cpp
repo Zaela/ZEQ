@@ -45,6 +45,15 @@ void Skeleton::animate(double delta)
     float frame = m_curAnimFrame + delta;
     
     //check against duration here
+    while (frame > m_curAnimDuration)
+    {
+        frame -= m_curAnimDuration;
+        m_curAnimFrame = frame;
+        for (uint32_t i = 0; i < m_boneCount; i++)
+        {
+            m_bones[i].animHint = Animation::DEFAULT_HINT;
+        }
+    }
     
     m_curAnimFrame  = frame;
     Animation* anim = m_curAnim;
@@ -204,6 +213,14 @@ void Skeleton::draw()
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glRotatef(-90, 1, 0, 0);
+    glScalef(1, -1, 1);
+    //glFrontFace(GL_CCW);
+    
+    
     uint32_t lastDiffuseMap = 0;
     for (uint32_t i = 0; i < m_vertexBufferCount; i++)
     {
@@ -223,6 +240,11 @@ void Skeleton::draw()
         
         vb->draw();
     }
+    
+    
+    //glFrontFace(GL_CW);
+    glPopMatrix();
+    
     
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);

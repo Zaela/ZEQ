@@ -319,7 +319,8 @@ function ZoneWLD.readMesh(model, f36)
             local tri   = wldTris[i]
             local vb    = bit.band(tri.flag, Geo.TRIANGLE_PERMEABLE) == 0 and nvb or cvb
 
-            for i = 0, 2 do
+            for i = 2, 0, -1 do
+            --for i = 0, 2 do
                 local idx   = tri.index[i]
                 local v     = vb:addVertex()
                 

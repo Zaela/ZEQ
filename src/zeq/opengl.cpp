@@ -15,7 +15,7 @@ void OpenGL::loadExtensions()
     gOpenGL.glBufferData    = (BufferData)sf::Context::getFunction("glBufferData");
     gOpenGL.glDeleteBuffers = (DeleteBuffers)sf::Context::getFunction("glDeleteBuffers");
     
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     
     gOpenGL.extensionsLoaded = true;

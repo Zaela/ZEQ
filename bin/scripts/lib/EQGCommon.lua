@@ -224,7 +224,8 @@ function EQGCommon:extractVertexBuffers(p, isZone)
             local vb, cvb   = model:getVertexBuffer(index)
             local use       = bit.band(tri.flag, 0x01) == 0 and vb or cvb
             
-            for j = 0, 2 do
+            --for j = 0, 2 do
+            for j = 2, 0, -1 do
                 local s = verts[tri.index[j]]
                 local v = use:addVertex()
                 
@@ -342,6 +343,7 @@ function EQGCommon:extractBoneAssignments(p)
         local vcounts   = col and vertCountsByMat or noCollideVertCountsByMat
         local vcount    = vcounts[index]
         
+        --for j = 2, 0, -1 do
         for j = 0, 2 do
             local binBA = binBAs[tri.index[j]]
 

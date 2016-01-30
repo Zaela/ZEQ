@@ -90,7 +90,10 @@ bool Window::mainLoop()
     //if (m_animModel)
     //    m_animModel->draw();
     if (m_skele)
+    {
+        m_skele->animate(delta);
         m_skele->draw();
+    }
     
     display();
     
@@ -131,5 +134,5 @@ void Window::loadZoneModel(const std::string& shortname)
     
     m_skele = model->createSkeletonInstance();
     m_skele->setAnimation(1);
-    m_skele->animate(0.066);
+    //m_skele->animate(0.466);
 }
