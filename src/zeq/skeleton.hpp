@@ -26,14 +26,11 @@ private:
         Quaternion  rot;
         Vec3        scale;
         
-        Mat4        localMatrix;
-        Mat4        globalMatrix;
         Mat4        localAnimMatrix;
         Mat4        globalAnimMatrix;
         Mat4        globalInverseMatrix;
         
-        uint32_t    childCount;
-        uint32_t*   children;
+        Mat4*       parentGlobalAnimMatrix;
         
         uint32_t    animHint;
     };
@@ -51,6 +48,7 @@ private:
     
     uint32_t    m_boneCount;
     Bone*       m_bones;
+    Mat4*       m_animMatrices;
     
     uint32_t            m_vertexBufferCount;
     VertexBufferSet*    m_vertexBufferSets;
@@ -65,9 +63,7 @@ private:
     float       m_curAnimFrame;
     
 private:
-    void buildLocalMatrices();
-    void buildGlobalMatrices();
-    void buildGlobalMatrixRecurse(Bone& bone);
+    void buildMatrices();
     
 public:
     Skeleton();

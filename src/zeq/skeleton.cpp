@@ -41,7 +41,7 @@ void Skeleton::setAnimation(int animId)
 
 void Skeleton::animate(double delta)
 {
-    PerfTimer timer;
+    PerfTimer atimer;
     float frame = m_curAnimFrame + delta;
     
     //check against duration here
@@ -71,21 +71,22 @@ void Skeleton::animate(double delta)
         anim->getFrameData(frame, i, bone.pos, bone.rot, bone.scale, bone.animHint);
     }
     
-    // Build matrices
-    buildLocalMatrices();
-    buildGlobalMatrices();
+    buildMatrices();
     
-    TempVector<Mat4> animMatrices;
-    animMatrices.reserve(count);
+    Mat4* animMatrices = m_animMatrices;
     
     for (uint32_t i = 0; i < count; i++)
     {
-        Bone& bone = bones[i];
-        animMatrices.push_back(bone.globalAnimMatrix * bone.globalInverseMatrix);
+        Bone& bone      = bones[i];
+        animMatrices[i] = bone.globalAnimMatrix * bone.globalInverseMatrix;
     }
+    
+    atimer.print("Moved bones");
     
     // Transform vertices
     count = m_vertexBufferCount;
+    
+    PerfTimer timer;
     
     for (uint32_t i = 0; i < count; i++)
     {
@@ -96,11 +97,9 @@ void Skeleton::animate(double delta)
         uint32_t n                      = set.assignmentCount;
         WeightedBoneAssignment* bas     = set.assignments;
         
-        TempVector<bool> moved;
-        moved.reserve(set.vertexCount);
-        for (uint32_t j = 0; j < set.vertexCount; j++)
+        for (uint32_t j = 0; j < n; j++)
         {
-            moved.push_back(false);
+            dst[j].moved = false;
         }
         
         Vec3 pos;
@@ -119,11 +118,11 @@ void Skeleton::animate(double delta)
             VertexBuffer::Vertex& vert  = dst[index];
             float weight                = wt.weight;
             
-            if (!moved[index])
+            if (!vert.moved)
             {
-                moved[index]    = true;
-                vert.pos        = pos * weight;
-                vert.normal     = normal * weight;
+                vert.moved  = true;
+                vert.pos    = pos * weight;
+                vert.normal = normal * weight;
             }
             else
             {
@@ -133,20 +132,17 @@ void Skeleton::animate(double delta)
         }
     }
     
-    timer.print("Animated");
+    timer.print("Moved vertices");
 }
 
-void Skeleton::buildLocalMatrices()
+void Skeleton::buildMatrices()
 {
     for (uint32_t i = 0; i < m_boneCount; i++)
     {
         Bone& bone = m_bones[i];
         
         if (!bone.hasAnimFrames)
-        {
-            bone.localAnimMatrix = bone.localMatrix;
             continue;
-        }
         
         Mat4& mat = bone.localAnimMatrix;
         
@@ -176,30 +172,11 @@ void Skeleton::buildLocalMatrices()
         mat[12] = pos.x;
         mat[13] = pos.y;
         mat[14] = pos.z;
-    }
-}
-
-void Skeleton::buildGlobalMatrices()
-{
-    //should check if bone hierarchy is strictly sequential to avoid recursive call overhead...
-    Bone& root = m_bones[0];
-    
-    root.globalAnimMatrix = root.localAnimMatrix;
-    
-    buildGlobalMatrixRecurse(root);
-}
-
-void Skeleton::buildGlobalMatrixRecurse(Bone& bone)
-{
-    for (uint32_t i = 0; i < bone.childCount; i++)
-    {
-        Bone& child = m_bones[bone.children[i]];
         
-        // Every bone that isn't the root bone has a parent
-        child.globalAnimMatrix = bone.globalAnimMatrix * child.localAnimMatrix;
-        
-        if (child.childCount)
-            buildGlobalMatrixRecurse(child);
+        if (bone.parentGlobalAnimMatrix)
+            bone.globalAnimMatrix = (*bone.parentGlobalAnimMatrix) * mat;
+        else
+            bone.globalAnimMatrix = mat;
     }
 }
 
@@ -218,7 +195,6 @@ void Skeleton::draw()
     glPushMatrix();
     glRotatef(-90, 1, 0, 0);
     glScalef(1, -1, 1);
-    //glFrontFace(GL_CCW);
     
     
     uint32_t lastDiffuseMap = 0;
@@ -242,7 +218,6 @@ void Skeleton::draw()
     }
     
     
-    //glFrontFace(GL_CW);
     glPopMatrix();
     
     

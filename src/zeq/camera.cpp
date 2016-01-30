@@ -7,7 +7,7 @@ Camera::Camera()
     : m_fieldOfViewRadians(Math::toRadians(45)),
       m_aspectRatio(gConfig.getDouble(Config::ScreenWidth, 800.0f) / gConfig.getDouble(Config::ScreenHeight, 600.0f)),
       m_nearZ(0.1f),
-      m_farZ(1000.0f),
+      m_farZ(250.0f),
       m_position(0.0f, 0.0f, 0.0f),
       m_target(0.0f, 0.0f, 100.0f),
       m_up(0.0f, 1.0f, 0.0f)

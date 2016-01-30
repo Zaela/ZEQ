@@ -41,8 +41,7 @@ private:
         Mat4        globalMatrix;
         Mat4        globalInverseMatrix;
         
-        uint32_t    childCount;
-        uint32_t*   children;
+        uint32_t    parentIndex;
     };
     
     uint32_t    m_boneCount;
@@ -56,7 +55,7 @@ private:
 private:
     friend class ModelResources;
     void readSkeleton(byte* bones, uint32_t len);
-    void readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent = nullptr);
+    void readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent = nullptr, uint32_t parentIndex = 0);
     void readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len);
 
     WeightedBoneAssignmentSet&  readWeightedBoneAssignments(byte* wbas, uint32_t len);

@@ -21,7 +21,7 @@ void AnimatedModelPrototype::readSkeleton(byte* binBones, uint32_t len)
     readSkeletonRecurse(frames, cur, m_bones[0], count);
 }
 
-void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent)
+void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent, uint32_t parentIndex)
 {
     if (cur == count)
         return;
@@ -51,22 +51,18 @@ void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, 
     bone.globalInverseMatrix = bone.globalMatrix;
     bone.globalInverseMatrix.invert();
     
-    uint32_t n = frame.childCount;
+    bone.parentIndex = parentIndex;
     
-    bone.childCount = n;
+    uint32_t n = frame.childCount;
     
     if (n)
     {
-        bone.children = new uint32_t[n];
+        uint32_t index = cur;
         
         for (uint32_t i = 0; i < n; i++)
         {
-            cur++;
-            
-            Bone& child         = m_bones[cur];
-            bone.children[i]    = cur;
-
-            readSkeletonRecurse(frames, cur, child, count, &bone);
+            Bone& child = m_bones[++cur];
+            readSkeletonRecurse(frames, cur, child, count, &bone, index);
         }
     }
 }
@@ -109,6 +105,7 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
     
     Skeleton::Bone* bones   = new Skeleton::Bone[count];
     sk->m_bones             = bones;
+    sk->m_animMatrices      = new Mat4[count];
     
     memset(bones, 0, sizeof(Skeleton::Bone) * count);
     
@@ -123,24 +120,15 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
         dst.rot     = src.rot;
         dst.scale   = src.scale;
         
-        dst.localMatrix         = src.localMatrix;
+        //dst.localMatrix         = src.localMatrix;
         dst.localAnimMatrix     = src.localMatrix;
-        dst.globalMatrix        = src.globalMatrix; //probably not needed
+        //dst.globalMatrix        = src.globalMatrix; //probably not needed
         dst.globalAnimMatrix    = src.globalMatrix;
         dst.globalInverseMatrix = src.globalInverseMatrix;
         
+        dst.parentGlobalAnimMatrix = (i != 0) ? &bones[src.parentIndex].globalAnimMatrix : nullptr;
+        
         dst.animHint = Animation::DEFAULT_HINT;
-        
-        uint32_t childCount = src.childCount;
-        
-        if (childCount)
-        {
-            dst.childCount      = childCount;
-            uint32_t* children  = new uint32_t[childCount];
-            dst.children        = children;
-            
-            memcpy(children, src.children, sizeof(uint32_t) * childCount);
-        }
     }
     
     // The skeleton needs its own copies of all the VertexBuffers, but needs the original VertexBuffers to transform each frame

@@ -4,6 +4,8 @@ local ConvObject    = require "ConvObject"
 local VertexBuffer  = require "VertexBuffer"
 local ConvMaterial  = require "ConvMaterial"
 
+local pairs = pairs
+
 local ConvModel = Class("ConvModel", ConvObject)
 
 function ConvModel.new()
@@ -18,6 +20,7 @@ function ConvModel.new()
     m._normalMapsByName         = {}
     m._vertexBuffers            = {}
     m._noCollideVertexBuffers   = {}
+    m._headModels               = {}
     
     return ConvModel:instance(m)
 end
@@ -51,6 +54,14 @@ function ConvModel:initVertexBuffers(count, bindMaterials)
     end
 end
 
+function ConvModel:getAllMaterials()
+    return self._materials
+end
+
+function ConvModel:setAllMaterials(mats)
+    self._materials = mats
+end
+
 function ConvModel:getMaterial(index)
     return self._materials[index]
 end
@@ -61,6 +72,12 @@ end
 
 function ConvModel:addMaterial(mat)
     table.insert(self._materials, mat)
+end
+
+function ConvModel:addHeadModel(model, i)
+    local heads = self._headModels
+    i = i or #heads + 1
+    heads[i] = model
 end
 
 function ConvModel:addTexture(tex, isMasked)
@@ -138,6 +155,10 @@ end
 
 function ConvModel:noCollideVertexBuffers()
     return iterator(self._noCollideVertexBuffers)
+end
+
+function ConvModel:headModels()
+    return pairs(self._headModels)
 end
 
 function ConvModel:resetVertexBuffers()

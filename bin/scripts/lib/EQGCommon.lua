@@ -92,8 +92,12 @@ function EQGCommon:getPFS()
     return self._pfs
 end
 
+function EQGCommon:setVersion(n)
+    self._version = n
+end
+
 function EQGCommon:version()
-    return self._header.version
+    return self._version or self._header.version
 end
 
 function EQGCommon:getStringBlockLength()
@@ -118,6 +122,10 @@ end
 
 function EQGCommon:header()
     return self._header
+end
+
+function EQGCommon:setModel(model)
+    self._model = model
 end
 
 function EQGCommon:model()
@@ -248,9 +256,9 @@ function EQGCommon:extractVertexBuffers(p, isZone)
                 local v = use:addVertex()
                 
                 --v.x, v.z, v.y   = s.x, s.y, s.z
-                v.i, v.k, v.j   = s.i, s.j, s.k
+                --v.i, v.k, v.j   = s.i, s.j, s.k
                 v.x, v.y, v.z   = s.x, s.y, s.z
-                --v.i, v.j, v.k   = s.i, s.j, s.k
+                v.i, v.j, v.k   = s.i, s.j, s.k
                 v.u, v.v        = s.u, s.v
             end
         end
@@ -358,6 +366,7 @@ function EQGCommon:extractBoneAssignments(p)
     end
     
     model:sortWeights()
+    return p
 end
 
 function EQGCommon:extractModel(p, isZone)
