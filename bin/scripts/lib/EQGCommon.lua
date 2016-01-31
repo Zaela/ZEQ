@@ -359,9 +359,7 @@ function EQGCommon:extractBoneAssignments(p)
 
             for k = 0, binBA.count - 1 do
                 local wt = binBA.weights[k]
-                
-                --io.write("wt ", wt.boneIndex, " -> ", vcount + j, "\n")
-                
+
                 use:add(vcount + j, indexMap[wt.boneIndex], wt.value)
             end
         end
@@ -396,7 +394,7 @@ function EQGCommon:extractAnimations()
     for name in pfs:namesByExtension("ani") do
         local ani = ANI(pfs, name, pfs:getEntryByName(name))
         
-        io.write(ani:name(), ": ", ani:boneOrdering(), "\n");
+        --io.write(ani:name(), ": ", ani:boneOrdering(), "\n");
         
         ani:readFrames(model)
     end

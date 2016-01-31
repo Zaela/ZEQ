@@ -89,29 +89,46 @@ function ANI:readFrames(model)
     local header    = self:header()
     local data      = self:data()
     
+    local skele     = model:skeleton()
     local strings   = self:strings()
-    local byName    = model:skeleton():boneIndicesByName()
+    local byName    = skele:boneIndicesByName()
+    local indexMap  = skele:getBoneIndexMap()
     local byIndex   = self._animData
+    
+    -- Before reading frame data, find out the actual length of this animation
+    local animMs    = 0
+    local x         = p
+    
+    for i = 0, header.count - 1 do
+        local frameHeader = FrameHeader:cast(data + x)
+        x = x + FrameHeader:sizeof()
+        
+        self:checkLength(x)
+        
+        local frames = Frame:cast(data + x)
+        x = x + Frame:sizeof() * frameHeader.frameCount
+        
+        self:checkLength(x)
+        
+        local dur = frames[frameHeader.frameCount - 1].milliseconds
+        
+        if dur > animMs then
+            animMs = dur
+        end
+    end
     
     for i = 0, header.count - 1 do
         local frameHeader = FrameHeader:cast(data + p)
         p = p + FrameHeader:sizeof()
         
-        self:checkLength(p)
-        
         local frames = Frame:cast(data + p)
         p = p + Frame:sizeof() * frameHeader.frameCount
         
-        self:checkLength(p)
-        
         local boneName  = strings[frameHeader.boneNameIndex]
-        local index     = byName[boneName]:index()
-        
-        --io.write(boneName, " : ", index, " : ", frameHeader.frameCount, "\n")
+        local index     = indexMap[byName[boneName]:index()]
         
         local animFrames    = AnimFrame()
         byIndex[index]      = animFrames
-
 
         local fr = frames[0]
         local ms = fr.milliseconds
@@ -142,7 +159,13 @@ function ANI:readFrames(model)
             end
         end
         
-        animFrames:add(frames[frameHeader.frameCount - 1])
+        fr = frames[frameHeader.frameCount - 1]
+        animFrames:add(fr)
+        
+        if fr.milliseconds < animMs then
+            fr.milliseconds = animMs
+            animFrames:add(fr)
+        end
     end
     
     model:addAnimation(self)

@@ -91,12 +91,13 @@ void Skeleton::animate(double delta)
     {
         VertexBufferSet& set = m_vertexBufferSets[i];
         
+        uint32_t vcount                 = set.vertexCount;
         const VertexBuffer::Vertex* src = set.base;
         VertexBuffer::Vertex* dst       = set.target;
         uint32_t n                      = set.assignmentCount;
         WeightedBoneAssignment* bas     = set.assignments;
         
-        for (uint32_t j = 0; j < n; j++)
+        for (uint32_t j = 0; j < vcount; j++)
         {
             dst[j].moved = false;
         }

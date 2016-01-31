@@ -30,12 +30,8 @@ Animation::~Animation()
 
 void Animation::getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Quaternion& rot, Vec3& scale, uint32_t& hint)
 {
-    FrameSet& set = m_framesByBoneIndex[boneIndex];
-    
-    if (set.count == 0)
-        return;
-    
-    uint32_t index = 0;
+    FrameSet& set   = m_framesByBoneIndex[boneIndex];
+    uint32_t index  = 0;
     
     for (uint32_t i = hint; i < set.count; i++)
     {
@@ -49,6 +45,9 @@ void Animation::getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Quatern
         
         hint++;
     }
+    
+    if (set.count <= hint)
+        return;
     
     Frame& a = set.frames[index];
     Frame& b = set.frames[index - 1];

@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     gLua.init();
     gConfig.init();
     gDatabase.init();
-    
+
     Window win;
     
     std::thread thread(threadProc);

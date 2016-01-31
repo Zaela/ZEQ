@@ -22,7 +22,7 @@ function SkeletonEQG.new(root, count, byName, recurseOrder)
         local entry         = entries[index]
         
         indexMap[bone:index()] = index
-        io.write(bone:index(), " -> ", index, " (", bone:getName(), ")\n")
+        --io.write(bone:index(), " -> ", index, " (", bone:getName(), ")\n")
         
         index = index + 1
         
