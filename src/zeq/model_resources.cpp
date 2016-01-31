@@ -425,6 +425,7 @@ void ModelResources::loadTextureSets(int64_t modelId)
         {
             animTex = new AnimatedTexture(setId, animDelay);
             m_textureSets[setId] = animTex;
+            m_buildModel->addAnimatedTexture(animTex);
         }
         
         if (m_textures.count(texId) == 0)
@@ -433,7 +434,6 @@ void ModelResources::loadTextureSets(int64_t modelId)
         }
         
         animTex->addTexture(m_textures[texId]);
-        m_buildModel->addAnimatedTexture(animTex);
     }
 }
 

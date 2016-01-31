@@ -394,8 +394,6 @@ function EQGCommon:extractAnimations()
     for name in pfs:namesByExtension("ani") do
         local ani = ANI(pfs, name, pfs:getEntryByName(name))
         
-        --io.write(ani:name(), ": ", ani:boneOrdering(), "\n");
-        
         ani:readFrames(model)
     end
 end

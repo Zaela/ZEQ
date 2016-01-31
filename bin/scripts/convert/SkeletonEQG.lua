@@ -22,7 +22,6 @@ function SkeletonEQG.new(root, count, byName, recurseOrder)
         local entry         = entries[index]
         
         indexMap[bone:index()] = index
-        --io.write(bone:index(), " -> ", index, " (", bone:getName(), ")\n")
         
         index = index + 1
         
@@ -48,13 +47,6 @@ function SkeletonEQG.new(root, count, byName, recurseOrder)
     end
     
     recurse(root)
-    
-    --[[
-    for i, bone in ipairs(listOrder) do
-        listOrderIndexMap[i - 1] = indexMap[bone:index()]
-        io.write(bone:index(), " -> ", i - 1, " (", bone:getName(), ")\n")
-    end
-    --]]
     
     local s = {
         _data           = entries,
