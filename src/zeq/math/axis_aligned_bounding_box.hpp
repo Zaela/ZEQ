@@ -6,6 +6,20 @@
 #include "vec3.hpp"
 #include "plane.hpp"
 
+// Windows...
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#ifdef near
+#undef near
+#endif
+#ifdef far
+#undef far
+#endif
+
 class AABB
 {
 private:

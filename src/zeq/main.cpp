@@ -34,6 +34,8 @@ static void threadProc()
 
 int main(int argc, char** argv)
 {
+    FreeImage_Initialise();
+
     gLua.init();
     gConfig.init();
     gDatabase.init();
@@ -57,5 +59,6 @@ int main(int argc, char** argv)
         Clock::sleepMilliseconds(25);
     }
     
+    FreeImage_DeInitialise();
     return 0;
 }

@@ -1,5 +1,6 @@
 
 #include "clock.hpp"
+#include "define.hpp"
 
 #ifdef ZEQ_WINDOWS
 static LARGE_INTEGER sFrequency;

@@ -45,10 +45,17 @@ __stdcall void*     FreeImage_ConvertFromRawBits(uint8_t*, int, int, int, uint32
 
 __stdcall int       FreeImage_AcquireMemory(void*, uint8_t**, uint32_t*);
 
-__stdcall uint32_t  FreeImage_ZLibCompress(uint8_t* dst, uint32_t dstsize, uint8_t* src, uint32_t srcsize); 
+__stdcall uint32_t  FreeImage_ZLibCompress(uint8_t* dst, uint32_t dstsize, uint8_t* src, uint32_t srcsize);
+__stdcall uint32_t  FreeImage_ZLibUncompress(uint8_t* dst, uint32_t dstsize, uint8_t* src, uint32_t srcsize);
 ]]
 
-local C = ffi.C
+local C
+
+if ffi.os == "Windows" then
+    C = ffi.load("FreeImage.dll")
+else
+    C = ffi.C
+end
 
 local Image = Class("Image")
 
@@ -57,7 +64,7 @@ function Image.new(data, len)
         _data   = data,
         _len    = len,
     }
-    
+
     return Image:instance(img)
 end
 
@@ -65,18 +72,18 @@ function Image:open()
     local mem   = C.FreeImage_OpenMemory(self._data, self._len)
     local fmt   = C.FreeImage_GetFileTypeFromMemory(mem, 0)
     local ptr   = C.FreeImage_LoadFromMemory(fmt, mem, 0)
-    
+
     C.FreeImage_CloseMemory(mem)
     if ptr == nil then error "FreeImage_LoadFromMemory failed" end
-    
+
     if fmt ~= FIF_DDS then
         C.FreeImage_FlipVertical(ptr)
     end
-    
+
     local img = C.FreeImage_ConvertTo32Bits(ptr)
-    
+
     if img == nil then error "FreeImage_ConvertTo32Bits failed" end
-    
+
     self._ptr       = img
     self._base      = ptr
     self._format    = formatMap[fmt]
@@ -84,12 +91,12 @@ end
 
 function Image:close()
     if self._base == nil then return end
-    
+
     C.FreeImage_Unload(self._base)
     self._base = nil
-    
+
     if self._ptr == nil then return end
-    
+
     C.FreeImage_Unload(self._ptr)
     self._ptr = nil
 end
@@ -103,7 +110,7 @@ function Image:normalize()
     local data      = C.FreeImage_GetBits(ptr)
     local width     = C.FreeImage_GetWidth(ptr)
     local height    = C.FreeImage_GetHeight(ptr)
-    
+
     return data, width * height * 4, width, height
 end
 
@@ -114,23 +121,23 @@ function Image:convertToPng()
     -- make a copy that isn't owned by FreeImage
     local ptr = ffi.new("uint8_t*[1]")
     local len = BinUtil.Uint32.Arg()
-    
+
     C.FreeImage_AcquireMemory(buf, ptr, len)
-    
+
     len         = len[0]
     local copy  = BinUtil.Byte.Array(len)
-    
+
     ffi.copy(copy, ptr[0], len)
-    
+
     C.FreeImage_CloseMemory(buf)
-    
+
     return copy, len
 end
 
 function Image:mask()
     if self:getFormat() ~= "bmp" then return end
     -- BMP images need to have the alpha of their masked pixels set manually
-    
+
     local ptr       = self._ptr
     local data      = C.FreeImage_GetBits(ptr)
     local width     = C.FreeImage_GetWidth(ptr)
@@ -139,7 +146,7 @@ function Image:mask()
     -- Assuming the first color in the palette is the mask color
     local pixels    = Pixel:cast(data)
     local p         = C.FreeImage_GetPalette(self._base)
-    
+
     for i = 0, (width * height) - 1 do
         local c = pixels[i]
         if c.r == p.r and c.g == p.g and c.b == p.b then
@@ -149,9 +156,9 @@ function Image:mask()
             c.a = 255
         end
     end
-    
+
     return data, width * height * 4
-    
+
 --[[
     local buf = C.FreeImage_OpenMemory(nil, 0)
     C.FreeImage_SaveToMemory(FIF_PNG, self._ptr, buf, 0)
@@ -159,16 +166,16 @@ function Image:mask()
     -- make a copy that isn't owned by FreeImage
     local ptr = ffi.new("uint8_t*[1]")
     local len = BinUtil.Uint32.Arg()
-    
+
     C.FreeImage_AcquireMemory(buf, ptr, len)
-    
+
     len         = len[0]
     local copy  = BinUtil.Byte.Array(len)
-    
+
     ffi.copy(copy, ptr[0], len)
-    
+
     C.FreeImage_CloseMemory(buf)
-    
+
     return copy, len
 --]]
 end
@@ -186,12 +193,28 @@ function Image.compress(data, len)
     local buflen    = len * 2
     local buf       = BinUtil.Byte.Array(buflen)
     data            = BinUtil.Byte:cast(data)
-    
+
     len = C.FreeImage_ZLibCompress(buf, buflen, data, len)
-    
+
     if len == 0 then error "Compression failed" end
-    
+
     return buf, len
+end
+
+function Image.compressToBuffer(data, len, outbuf, outbufLen)
+	len = C.FreeImage_ZLibCompress(outbuf, outbufLen, data, len)
+
+	if len == 0 then error "Compression failed" end
+
+	return outbuf, len
+end
+
+function Image.decompressToBuffer(data, len, outbuf, outbufLen)
+	len = C.FreeImage_ZLibUncompress(outbuf, outbufLen, data, len)
+
+	if len == 0 then error "Decompression failed" end
+
+	return outbuf, len
 end
 
 return Image

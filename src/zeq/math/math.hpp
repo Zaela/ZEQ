@@ -14,7 +14,7 @@ public:
     
     static float toDegrees(float radians)
     {
-        return radians * 180.0f / 3.14159;
+        return radians * 180.0f / 3.14159f;
     }
     
     static float sqrtReciprocal(float value)

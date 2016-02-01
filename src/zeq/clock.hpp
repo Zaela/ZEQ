@@ -7,7 +7,7 @@
 #include <chrono>
 #include <time.h>
 
-#ifdef ZEQ_WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <poll.h>
