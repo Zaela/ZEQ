@@ -3,9 +3,13 @@
 #define _ZEQ_CLOCKS_HPP_
 
 #include <cstdint>
+#include <thread>
+#include <chrono>
 #include <time.h>
 
-#ifndef ZEQ_WINDOWS
+#ifdef ZEQ_WINDOWS
+#include <windows.h>
+#else
 #include <poll.h>
 #endif
 
