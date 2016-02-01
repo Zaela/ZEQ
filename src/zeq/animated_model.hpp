@@ -11,14 +11,16 @@
 #include "bone_assignment.hpp"
 #include "animation.hpp"
 #include "skeleton.hpp"
+#include "temp_alloc.hpp"
 #include <vector>
 #include <unordered_map>
 
 class ModelResources;
+class MobModelPrototype;
 
 class AnimatedModelPrototype : public ModelPrototype
 {
-private:
+protected:
 #pragma pack(1)
     struct DBBone
     {
@@ -54,6 +56,7 @@ private:
     
 private:
     friend class ModelResources;
+    friend class MobModelPrototype;
     void readSkeleton(byte* bones, uint32_t len);
     void readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent = nullptr, uint32_t parentIndex = 0);
     void readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len);
@@ -64,18 +67,37 @@ private:
 public:
     virtual ~AnimatedModelPrototype();
 
-    Skeleton* createSkeletonInstance();
+    virtual Skeleton* createSkeletonInstance();
 };
 
 class MobModelPrototype : public AnimatedModelPrototype
 {
 private:
+    struct WeightedHeadModel
+    {
+        uint32_t count;
+        union
+        {
+            WeightedBoneAssignmentSet   setSingle;
+            WeightedBoneAssignmentSet*  setArray;
+        };
+    };
+    
+private:
     int     m_race;
     uint8_t m_gender;
+
+    std::vector<WeightedHeadModel> m_weightedHeads;
+
+private:
+    friend class ModelResources;
+    void addHeadModel(AnimatedModelPrototype& headModel, int headIndex);
 
 public:
     MobModelPrototype(int race, uint8_t gender);
     virtual ~MobModelPrototype();
+
+    virtual Skeleton* createSkeletonInstance();
 };
 
 #endif//_ZEQ_ANIMATED_MODEL_HPP_

@@ -120,9 +120,7 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
         dst.rot     = src.rot;
         dst.scale   = src.scale;
         
-        //dst.localMatrix         = src.localMatrix;
         dst.localAnimMatrix     = src.localMatrix;
-        //dst.globalMatrix        = src.globalMatrix; //probably not needed
         dst.globalAnimMatrix    = src.globalMatrix;
         dst.globalInverseMatrix = src.globalInverseMatrix;
         
@@ -135,28 +133,27 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
     // The bone assignment definitions are centralized, belonging to the prototype
     count = m_weightedBoneAssignments.size();
     
-    sk->m_vertexBufferCount = count;
-    
-    Skeleton::VertexBufferSet* sets = new Skeleton::VertexBufferSet[count];
-    VertexBuffer* vbs               = new VertexBuffer[count];
-    
-    sk->m_vertexBufferSets      = sets;
-    sk->m_ownedVertexBuffers    = vbs;
+    auto& sets  = sk->m_vertexBufferSets;
+    auto& vbs   = sk->m_ownedVertexBuffers;
     
     for (uint32_t i = 0; i < count; i++)
     {
         WeightedBoneAssignmentSet& src = m_weightedBoneAssignments[i];
         
-        Skeleton::VertexBufferSet& set  = sets[i];
-        VertexBuffer& vb                = vbs[i];
+        vbs.push_back(VertexBuffer());
+        VertexBuffer& vb = vbs.back();
         
         vb.copy(*src.vertexBuffer);
+        
+        Skeleton::VertexBufferSet set;
         
         set.vertexCount     = vb.count();
         set.target          = vb.array();
         set.base            = src.vertexBuffer->array();
         set.assignmentCount = src.count;
         set.assignments     = src.assignments;
+        
+        sets.push_back(set);
     }
     
     // Animation definitions are centralized, belonging to the prototype
@@ -175,4 +172,107 @@ MobModelPrototype::MobModelPrototype(int race, uint8_t gender)
 MobModelPrototype::~MobModelPrototype()
 {
     gModelResources.removeMobModel(m_race, m_gender);
+}
+
+void MobModelPrototype::addHeadModel(AnimatedModelPrototype& headModel, int headIndex)
+{
+    (void)headIndex; // At the moment we are assuming indices are sequential starting from 0
+    
+    for (Texture* tex : headModel.m_referencedTextures)
+    {
+        m_referencedTextures.push_back(tex);
+    }
+    
+    headModel.m_referencedTextures.clear();
+    
+    for (AnimatedTexture* animTex : headModel.m_referencedAnimatedTextures)
+    {
+        m_referencedAnimatedTextures.push_back(animTex);
+    }
+    
+    headModel.m_referencedAnimatedTextures.clear();
+    
+    for (VertexBuffer* vb : headModel.m_referencedVertexBuffers)
+    {
+        m_referencedVertexBuffers.push_back(vb);
+    }
+    
+    headModel.m_referencedVertexBuffers.clear();
+    
+    auto& wbas      = headModel.m_weightedBoneAssignments;
+    uint32_t count  = wbas.size();
+    
+    if (count != 0)
+    {
+        WeightedHeadModel head;
+        
+        if (count == 1)
+        {
+            head.count = 1;
+            head.setSingle = wbas[0];
+        }
+        else
+        {
+            head.count = count;
+            head.setArray = new WeightedBoneAssignmentSet[count];
+            
+            count = 0;
+            for (WeightedBoneAssignmentSet& set : wbas)
+            {
+                head.setArray[count++] = set;
+            }
+        }
+        
+        m_weightedHeads.push_back(head);
+        
+        wbas.clear();
+        return;
+    }
+}
+
+Skeleton* MobModelPrototype::createSkeletonInstance()
+{
+    Skeleton* sk = AnimatedModelPrototype::createSkeletonInstance();
+    
+    if (m_weightedHeads.size())
+    {
+        WeightedHeadModel& head = m_weightedHeads[0];
+        
+        TempVector<WeightedBoneAssignmentSet> wbas;
+        
+        if (head.count == 1)
+        {
+            wbas.push_back(head.setSingle);
+        }
+        else
+        {
+            for (uint32_t i = 0; i < head.count; i++)
+            {
+                wbas.push_back(head.setArray[i]);
+            }
+        }
+        
+        auto& sets  = sk->m_vertexBufferSets;
+        auto& vbs   = sk->m_ownedVertexBuffers;
+        
+        for (WeightedBoneAssignmentSet& src : wbas)
+        {
+            vbs.push_back(VertexBuffer());
+            VertexBuffer& vb = vbs.back();
+            
+            vb.copy(*src.vertexBuffer);
+            
+            Skeleton::VertexBufferSet set;
+            
+            set.vertexCount     = vb.count();
+            set.target          = vb.array();
+            set.base            = src.vertexBuffer->array();
+            set.assignmentCount = src.count;
+            set.assignments     = src.assignments;
+            
+            sets.push_back(set);
+        }
+    }
+    
+    return sk;
 }

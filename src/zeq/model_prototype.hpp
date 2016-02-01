@@ -12,14 +12,16 @@ class ModelResources;
 
 class ModelPrototype : public RefCounter
 {
-private:
+protected:
     std::vector<Texture*>           m_referencedTextures;
     std::vector<AnimatedTexture*>   m_referencedAnimatedTextures;
     std::vector<VertexBuffer*>      m_referencedVertexBuffers;
 
 protected:
     friend class ModelResources;
-    std::vector<VertexBuffer*>& getReferencedVertexBuffers() { return m_referencedVertexBuffers; }
+    std::vector<Texture*>&          getReferencedTextures() { return m_referencedTextures; }
+    std::vector<AnimatedTexture*>&  getReferencedAnimatedTextures() { return m_referencedAnimatedTextures; }
+    std::vector<VertexBuffer*>&     getReferencedVertexBuffers() { return m_referencedVertexBuffers; }
     
     void clearReferencedVertexBuffers();
     

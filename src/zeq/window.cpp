@@ -135,5 +135,5 @@ void Window::loadZoneModel(const std::string& shortname)
     m_animModel = model;
     
     m_skele = model->createSkeletonInstance();
-    m_skele->setAnimation(2);
+    m_skele->setAnimation(5);
 }

@@ -351,6 +351,8 @@ MobModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gender)
     
     loadEssentials(modelId);
     loadAnimationFrames(modelId, mobModel);
+    loadBoneAssignments(modelId, mobModel);
+    loadHeadModels(modelId, mobModel);
     
     timer.print("done");
     
@@ -498,7 +500,6 @@ void ModelResources::loadGeometry(int64_t modelId)
 void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype* animModel)
 {
     Query querySkeletons;
-    Query queryBoneAssignments;
     Query queryAnimationFrames;
     
     gDatabase.prepare(QUERY_SKELETONS, querySkeletons);
@@ -513,6 +514,26 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
         
         animModel->readSkeleton(blob.data, blob.length);
     }
+    
+    gDatabase.prepare(QUERY_ANIMATION_FRAMES, queryAnimationFrames);
+    queryAnimationFrames.bindInt64(1, modelId);
+    
+    while (queryAnimationFrames.select())
+    {
+        int boneIndex       = queryAnimationFrames.getInt(1);
+        int animType        = queryAnimationFrames.getInt(2);
+        int64_t blobId      = queryAnimationFrames.getInt64(3);
+        
+        Blob blob;
+        getBlob(blobId, blob);
+        
+        animModel->readAnimationFrames(animType, boneIndex, blob.takeOwnership(), blob.length);
+    }
+}
+
+void ModelResources::loadBoneAssignments(int64_t modelId, AnimatedModelPrototype* animModel)
+{
+    Query queryBoneAssignments;
     
     gDatabase.prepare(QUERY_BONE_ASSIGNMENTS, queryBoneAssignments);
     queryBoneAssignments.bindInt64(1, modelId);
@@ -545,35 +566,36 @@ void ModelResources::loadAnimationFrames(int64_t modelId, AnimatedModelPrototype
             bas.vertexBuffer = vb;
         }
     }
+}
+
+void ModelResources::loadHeadModels(int64_t modelId, MobModelPrototype* animModel)
+{
+    Query queryMobHeadModels;
     
-    gDatabase.prepare(QUERY_ANIMATION_FRAMES, queryAnimationFrames);
-    queryAnimationFrames.bindInt64(1, modelId);
+    gDatabase.prepare(QUERY_MOB_HEADS, queryMobHeadModels);
+    queryMobHeadModels.bindInt64(1, modelId);
     
-    while (queryAnimationFrames.select())
+    AnimatedModelPrototype headModel;
+    m_buildModel = &headModel;
+    
+    while (queryMobHeadModels.select())
     {
-        int boneIndex       = queryAnimationFrames.getInt(1);
-        int animType        = queryAnimationFrames.getInt(2);
-        int64_t blobId      = queryAnimationFrames.getInt64(3);
+        int64_t headId  = queryMobHeadModels.getInt64(1);
+        int headIndex   = queryMobHeadModels.getInt(2);
         
-        Blob blob;
-        getBlob(blobId, blob);
+        loadEssentials(headId);
+        loadBoneAssignments(headId, &headModel);
         
-        animModel->readAnimationFrames(animType, boneIndex, blob.takeOwnership(), blob.length);
+        animModel->addHeadModel(headModel, headIndex);
     }
+    
+    m_buildModel = animModel;
 }
 
 ModelResources::Blob::~Blob()
 {
     if (needsDelete && data)
         delete[] data;
-    
-    // There are some cases (e.g. Textures) where we want to avoid making an intermediate copy of a blob,
-    // because we know Irrlicht is going to make its own copy immediately anyway. However, the memory that
-    // SQLite hands us will be immediately invalidated as soon as the query is reset. So we need to make
-    // sure the query is not reset until we are done using the blob, which is why this line is here.
-    // Note that this also means you can only have one blob active at a time; the current blob must be
-    // destructed before the query can be safely re-run.
-    //gModelResources.m_queryBlob.reset();
 }
 
 uint32_t ModelResources::getTextureBlob(int64_t id, int width, int height)

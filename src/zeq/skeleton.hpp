@@ -12,11 +12,13 @@
 #include "temp_alloc.hpp"
 
 class AnimatedModelPrototype;
+class MobModelPrototype;
 
 class Skeleton
 {
 private:
     friend class AnimatedModelPrototype;
+    friend class MobModelPrototype;
 
     struct Bone
     {
@@ -50,10 +52,9 @@ private:
     Bone*       m_bones;
     Mat4*       m_animMatrices;
     
-    uint32_t            m_vertexBufferCount;
-    VertexBufferSet*    m_vertexBufferSets;
-    VertexBuffer*       m_ownedVertexBuffers;
-    
+    std::vector<VertexBufferSet>    m_vertexBufferSets;
+    std::vector<VertexBuffer>       m_ownedVertexBuffers;
+
     AnimationSet m_animations;
     
     // Active animation info

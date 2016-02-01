@@ -82,6 +82,11 @@
     "SELECT boneIndex, animType, blobId "                   \
     "FROM AnimationFrames WHERE modelId = ? "               \
     "ORDER BY boneIndex"
+    
+#define QUERY_MOB_HEADS                                     \
+    "SELECT headModelId, headNumber "                       \
+    "FROM MobHeadModels WHERE mainModelId = ? "             \
+    "ORDER BY headNumber"
 
 class ModelResources
 {
@@ -157,6 +162,8 @@ private:
     void loadCachedOctree(int64_t modelId, ZoneModel* zoneModel);
     
     void loadAnimationFrames(int64_t modelId, AnimatedModelPrototype* animModel);
+    void loadBoneAssignments(int64_t modelId, AnimatedModelPrototype* animModel);
+    void loadHeadModels(int64_t modelId, MobModelPrototype* animModel);
     
     ZoneModel*          loadZoneModel_impl(const std::string& shortname);
     MobModelPrototype*  loadMobModel_impl(int race, uint8_t gender);

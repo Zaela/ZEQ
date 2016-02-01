@@ -4,9 +4,6 @@
 Skeleton::Skeleton()
     : m_boneCount(0),
       m_bones(nullptr),
-      m_vertexBufferCount(0),
-      m_vertexBufferSets(nullptr),
-      m_ownedVertexBuffers(nullptr),
       m_curAnimId(0),
       m_curAnim(nullptr),
       m_curAnimDuration(0.0f),
@@ -17,11 +14,7 @@ Skeleton::Skeleton()
 
 Skeleton::~Skeleton()
 {
-    if (m_vertexBufferSets)
-        delete[] m_vertexBufferSets;
-    
-    if (m_ownedVertexBuffers)
-        delete[] m_ownedVertexBuffers;
+
 }
 
 void Skeleton::setAnimation(int animId)
@@ -83,14 +76,10 @@ void Skeleton::animate(double delta)
     atimer.print("Moved bones");
     
     // Transform vertices
-    count = m_vertexBufferCount;
-    
     PerfTimer timer;
     
-    for (uint32_t i = 0; i < count; i++)
+    for (VertexBufferSet& set : m_vertexBufferSets)
     {
-        VertexBufferSet& set = m_vertexBufferSets[i];
-        
         uint32_t vcount                 = set.vertexCount;
         const VertexBuffer::Vertex* src = set.base;
         VertexBuffer::Vertex* dst       = set.target;
@@ -198,15 +187,14 @@ void Skeleton::draw()
     
     
     uint32_t lastDiffuseMap = 0;
-    for (uint32_t i = 0; i < m_vertexBufferCount; i++)
+    for (VertexBuffer& vb : m_ownedVertexBuffers)
     {
-        VertexBuffer* vb = &m_ownedVertexBuffers[i];
         //int blendType = vb->getBlendType();
         
         //if (blendType == Material::Blend::Invisible)
         //    continue;
         
-        uint32_t diffuseMap = vb->getDiffuseMap();
+        uint32_t diffuseMap = vb.getDiffuseMap();
         
         if (diffuseMap != lastDiffuseMap)
         {
@@ -214,7 +202,7 @@ void Skeleton::draw()
             lastDiffuseMap = diffuseMap;
         }
         
-        vb->draw();
+        vb.draw();
     }
     
     

@@ -92,7 +92,10 @@ void AnimationSet::destroy()
         Animation* anim = m_animations[i];
         
         if (anim)
+        {
             delete anim;
+            m_animations[i] = nullptr;
+        }
     }
 }
 
