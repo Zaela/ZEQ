@@ -18,6 +18,29 @@ VertexBuffer::VertexBuffer()
 
 }
 
+VertexBuffer::VertexBuffer(VertexBuffer&& vb)
+{
+    m_id            = vb.m_id;
+    m_materialId    = vb.m_materialId;
+    m_textureSetId  = vb.m_textureSetId;
+    m_vertices      = vb.m_vertices;
+    m_count         = vb.m_count;
+    m_blendType     = vb.m_blendType;
+    m_diffuseId     = vb.m_diffuseId;
+    m_vboId         = vb.m_vboId;
+    m_animTexture   = vb.m_animTexture;
+    
+    vb.m_id             = 0;
+    vb.m_materialId     = 0;
+    vb.m_textureSetId   = 0;
+    vb.m_vertices       = nullptr;
+    vb.m_count          = 0;
+    vb.m_blendType      = 0;
+    vb.m_diffuseId      = 0;
+    vb.m_vboId          = 0;
+    vb.m_animTexture    = nullptr;
+}
+
 VertexBuffer::VertexBuffer(int64_t id, byte* rawData, uint32_t len)
     : m_id(id),
       m_materialId(0),

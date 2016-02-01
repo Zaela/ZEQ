@@ -40,6 +40,7 @@ private:
     
 public:
     VertexBuffer();
+    VertexBuffer(VertexBuffer&& vb);
     VertexBuffer(int64_t, byte* rawData, uint32_t len);
     VertexBuffer(uint32_t vbo, uint32_t count);
     virtual ~VertexBuffer();
