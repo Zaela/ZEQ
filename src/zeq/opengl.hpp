@@ -19,25 +19,31 @@
 
 #define GL_INTERNAL_PIXEL_FORMAT GL_BGRA
 
+#ifdef ZEQ_WINDOWS
+#define GL_API __stdcall
+#else
+#define GL_API
+#endif
+
 class OpenGL
 {
 private:
     bool extensionsLoaded;
 
-    typedef void (__stdcall *GenerateMipmap)(int);
+    typedef void (GL_API *GenerateMipmap)(int);
     GenerateMipmap glGenerateMipmap;
 
     // VBO
-    typedef void (__stdcall *GenBuffers)(uint32_t, uint32_t*);
+    typedef void (GL_API *GenBuffers)(uint32_t, uint32_t*);
     GenBuffers glGenBuffers;
 
-    typedef void (__stdcall *BindBuffer)(int, uint32_t);
+    typedef void (GL_API *BindBuffer)(int, uint32_t);
     BindBuffer glBindBuffer;
 
-    typedef void (__stdcall *BufferData)(int, int, const void*, int);
+    typedef void (GL_API *BufferData)(int, int, const void*, int);
     BufferData glBufferData;
 
-    typedef void (__stdcall *DeleteBuffers)(uint32_t, const uint32_t*);
+    typedef void (GL_API *DeleteBuffers)(uint32_t, const uint32_t*);
     DeleteBuffers glDeleteBuffers;
 
 private:
