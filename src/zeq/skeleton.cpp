@@ -34,7 +34,7 @@ void Skeleton::setAnimation(int animId)
 
 void Skeleton::animate(double delta)
 {
-    PerfTimer atimer;
+    //PerfTimer atimer;
     float frame = m_curAnimFrame + delta;
     
     //check against duration here
@@ -73,10 +73,10 @@ void Skeleton::animate(double delta)
         animMatrices[i] = bone.globalAnimMatrix * bone.globalInverseMatrix;
     }
     
-    atimer.print("Moved bones");
+    //atimer.print("Moved bones");
     
     // Transform vertices
-    PerfTimer timer;
+    //PerfTimer timer;
     
     for (VertexBufferSet& set : m_vertexBufferSets)
     {
@@ -121,7 +121,7 @@ void Skeleton::animate(double delta)
         }
     }
     
-    timer.print("Moved vertices");
+    //timer.print("Moved vertices");
 }
 
 void Skeleton::buildMatrices()

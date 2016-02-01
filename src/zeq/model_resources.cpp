@@ -114,9 +114,8 @@ ZoneModel* ModelResources::loadZoneModel_impl(const std::string& shortname)
         return nullptr;
     
     ZoneModel* zoneModel = new ZoneModel(modelId);
-    m_buildModel = zoneModel;
-    
-    loadEssentials(modelId);
+
+    loadEssentials(modelId, zoneModel);
     
     timer.print("done");
     
@@ -128,8 +127,7 @@ ZoneModel* ModelResources::loadZoneModel_impl(const std::string& shortname)
     {
         loadCachedOctree(modelId, zoneModel);
     }
-    
-    m_buildModel = nullptr;
+
     return zoneModel;
 }
 
@@ -347,28 +345,26 @@ MobModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gender)
         return nullptr;
     
     MobModelPrototype* mobModel = new MobModelPrototype(race, gender);
-    m_buildModel = mobModel;
     
-    loadEssentials(modelId);
+    loadEssentials(modelId, mobModel);
     loadAnimationFrames(modelId, mobModel);
     loadBoneAssignments(modelId, mobModel);
     loadHeadModels(modelId, mobModel);
     
     timer.print("done");
-    
-    m_buildModel = nullptr;
+
     return mobModel;
 }
 
-void ModelResources::loadEssentials(int64_t modelId)
+void ModelResources::loadEssentials(int64_t modelId, ModelPrototype* model)
 {
-    loadTextures(modelId);
-    loadTextureSets(modelId);
-    loadVertices(modelId);
+    loadTextures(modelId, model);
+    loadTextureSets(modelId, model);
+    loadVertices(modelId, model);
     loadGeometry(modelId);
 }
 
-void ModelResources::loadTextures(int64_t modelId)
+void ModelResources::loadTextures(int64_t modelId, ModelPrototype* model)
 {
     Query queryModelTextures;
     
@@ -401,12 +397,12 @@ void ModelResources::loadTextures(int64_t modelId)
             height
         );
         
-        m_buildModel->addTexture(tex);
+        model->addTexture(tex);
         m_textures[texId] = tex;
     }
 }
 
-void ModelResources::loadTextureSets(int64_t modelId)
+void ModelResources::loadTextureSets(int64_t modelId, ModelPrototype* model)
 {
     Query queryModelTextureSets;
     
@@ -427,7 +423,7 @@ void ModelResources::loadTextureSets(int64_t modelId)
         {
             animTex = new AnimatedTexture(setId, animDelay);
             m_textureSets[setId] = animTex;
-            m_buildModel->addAnimatedTexture(animTex);
+            model->addAnimatedTexture(animTex);
         }
         
         if (m_textures.count(texId) == 0)
@@ -439,7 +435,7 @@ void ModelResources::loadTextureSets(int64_t modelId)
     }
 }
 
-void ModelResources::loadVertices(int64_t modelId)
+void ModelResources::loadVertices(int64_t modelId, ModelPrototype* model)
 {
     Query queryModelVertices;
     
@@ -466,7 +462,7 @@ void ModelResources::loadVertices(int64_t modelId)
         
         VertexBuffer* vb = new VertexBuffer(vertId, blob.takeOwnership(), blob.length);
         
-        m_buildModel->addVertexBuffer(vb);
+        model->addVertexBuffer(vb);
         m_vertices[vertId] = vb;
     }
 }
@@ -576,20 +572,17 @@ void ModelResources::loadHeadModels(int64_t modelId, MobModelPrototype* animMode
     queryMobHeadModels.bindInt64(1, modelId);
     
     AnimatedModelPrototype headModel;
-    m_buildModel = &headModel;
     
     while (queryMobHeadModels.select())
     {
         int64_t headId  = queryMobHeadModels.getInt64(1);
         int headIndex   = queryMobHeadModels.getInt(2);
         
-        loadEssentials(headId);
+        loadEssentials(headId, &headModel);
         loadBoneAssignments(headId, &headModel);
         
         animModel->addHeadModel(headModel, headIndex);
     }
-    
-    m_buildModel = animModel;
 }
 
 ModelResources::Blob::~Blob()

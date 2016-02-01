@@ -91,9 +91,6 @@
 class ModelResources
 {
 private:
-    // The model that is currently being loaded
-    ModelPrototype* m_buildModel;
-
     struct MobModelSet
     {
         MobModelPrototype* gender[3];
@@ -152,11 +149,11 @@ private:
     void        getBlob(int64_t id, Blob& blob);
     uint32_t    getTextureBlob(int64_t id, int width, int height);
     
-    void loadEssentials(int64_t modelId);
+    void loadEssentials(int64_t modelId, ModelPrototype* model);
     
-    void loadTextures(int64_t modelId);
-    void loadTextureSets(int64_t modelId);
-    void loadVertices(int64_t modelId);
+    void loadTextures(int64_t modelId, ModelPrototype* model);
+    void loadTextureSets(int64_t modelId, ModelPrototype* model);
+    void loadVertices(int64_t modelId, ModelPrototype* model);
     void loadGeometry(int64_t modelId);
     
     void loadCachedOctree(int64_t modelId, ZoneModel* zoneModel);
