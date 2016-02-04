@@ -2,6 +2,7 @@
 #include "window.hpp"
 
 WindowSet gWindowSet;
+extern Log gLog;
 extern Config gConfig;
 extern ModelResources gModelResources;
 
@@ -47,7 +48,7 @@ Window::Window()
     
     settings = getSettings();
     
-    printf("OpenGL %u.%u\n", settings.majorVersion, settings.minorVersion);
+    gLog.printf("OpenGL %u.%u\n", settings.majorVersion, settings.minorVersion);
     
     OpenGL::loadExtensions();
     

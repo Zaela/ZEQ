@@ -3,6 +3,7 @@
 
 ModelResources gModelResources;
 extern Lua gLua;
+extern Log gLog;
 extern Database gDatabase;
 
 void ModelResources::getBlob(int64_t id, Blob& blob)
@@ -78,8 +79,7 @@ ZoneModel* ModelResources::loadZoneModel(const std::string& shortname)
         return zoneModel;
     
     // Wasn't already loaded, attempt to do a conversion from the EQ folder
-    printf("no data found\nAttempting to convert zone from original data files...\n");
-    fflush(stdout);
+    gLog.printf("no data found\nAttempting to convert zone from original data files...\n");
     
     if (!gLua.convertZone(shortname))
     {
@@ -97,8 +97,7 @@ ZoneModel* ModelResources::loadZoneModel_impl(const std::string& shortname)
     PerfTimer timer;
     Query queryZoneModelId;
     
-    printf("Loading zone data for '%s'... ", shortname.c_str());
-    fflush(stdout);
+    gLog.printf("Loading zone data for '%s'... ", shortname.c_str());
     
     // Retrieve model ID for the zone
     gDatabase.prepare(QUERY_ZONE_MODEL_ID, queryZoneModelId);
@@ -137,8 +136,8 @@ void ModelResources::loadCachedOctree(int64_t modelId, ZoneModel* zoneModel)
     std::vector<VertexBuffer*>& dest    = zoneModel->getVertexBuffers();
     std::vector<AABB>& boxes            = zoneModel->getBoundingBoxes();
     
-    printf("Loading cached Octree... ");
-    fflush(stdout);
+    gLog.printf("Loading cached Octree... ");
+
     PerfTimer timer;
     Query queryZoneCachedOctrees;
     
@@ -179,8 +178,8 @@ void ModelResources::cacheOctree(ZoneModel* zoneModel)
     std::vector<VertexBuffer*>& vertexBuffers   = zoneModel->getVertexBuffers();
     std::vector<AABB>& boundingBoxes            = zoneModel->getBoundingBoxes();
     
-    printf("Caching Octree... ");
-    fflush(stdout);
+    gLog.printf("Caching Octree... ");
+
     PerfTimer timer;
     
     // These queries are not cached because we don't expect this to happen often
@@ -309,8 +308,7 @@ MobModelPrototype* ModelResources::loadMobModel(int race, uint8_t gender)
         return mobModel;
     
     // Wasn't already loaded, attempt to do a conversion from the EQ folder
-    printf("no data found\nAttempting to convert mob from original data files...\n");
-    fflush(stdout);
+    gLog.printf("no data found\nAttempting to convert mob from original data files...\n");
     
     if (!gLua.convertMob(race, gender))
     {
@@ -327,8 +325,7 @@ MobModelPrototype* ModelResources::loadMobModel_impl(int race, uint8_t gender)
     PerfTimer timer;
     Query queryMobModelId;
     
-    printf("Loading mob data for race %i gender %u... ", race, gender);
-    fflush(stdout);
+    gLog.printf("Loading mob data for race %i gender %u... ", race, gender);
     
     // Retrieve model ID for the mob
     gDatabase.prepare(QUERY_MOB_MODEL_ID, queryMobModelId);

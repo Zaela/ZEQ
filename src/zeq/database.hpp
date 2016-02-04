@@ -7,6 +7,7 @@
 #include <sqlite3.h>
 #include "define.hpp"
 #include "lua.hpp"
+#include "log.hpp"
 
 #define ZEQ_DATABASE_FILE "zeq.db"
 

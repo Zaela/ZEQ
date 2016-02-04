@@ -1,7 +1,9 @@
 
 #include "lua.hpp"
+#include "log.hpp"
 
 Lua gLua;
+extern Log gLog;
 
 void Lua::init()
 {
@@ -31,7 +33,7 @@ bool Lua::runScript(const std::string& path, int numReturns)
 {
     if (luaL_loadfile(L, path.c_str()) || lua_pcall(L, 0, numReturns, TRACEBACK_INDEX))
     {
-        printf("Lua::runScript error: %s\n", lua_tostring(L, -1));
+        gLog.printf("Lua::runScript error: %s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
         return false;
     }
@@ -43,7 +45,7 @@ bool Lua::runFunc(int numArgs, int numReturns)
 {
     if (lua_pcall(L, numArgs, numReturns, TRACEBACK_INDEX))
     {
-        printf("Lua::runFunc error: %s\n", lua_tostring(L, -1));
+        gLog.printf("Lua::runFunc error: %s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
         return false;
     }
@@ -132,7 +134,7 @@ bool Lua::convertZone(const std::string& shortname)
     if (!runScript(LUA_GET_ZONE_CONVERTER_PATH, 1))
     {
         //throw
-        printf("failed to get zone converter func\n");
+        gLog.printf("failed to get zone converter func\n");
         return false;
     }
     
@@ -146,7 +148,7 @@ bool Lua::convertMob(int race, uint8_t gender)
     if (!runScript(LUA_GET_MOB_CONVERTER_PATH, 1))
     {
         //throw
-        printf("failed to get mob converter func\n");
+        gLog.printf("failed to get mob converter func\n");
         return false;
     }
     

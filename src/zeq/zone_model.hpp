@@ -11,6 +11,7 @@
 #include "opengl.hpp"
 #include "config.hpp"
 #include "material.hpp"
+#include "log.hpp"
 
 #define SMALL_OCTREE_NODE_MAX_RADIUS (250.0f * 250.0f)
 

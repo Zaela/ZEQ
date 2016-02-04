@@ -9,6 +9,7 @@
 #include "opengl.hpp"
 #include "model_prototype.hpp"
 #include "zone_model.hpp"
+#include "log.hpp"
 #include "animated_model.hpp"
 #include "axis_aligned_bounding_box.hpp"
 #include "vec3.hpp"

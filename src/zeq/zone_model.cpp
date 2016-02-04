@@ -2,6 +2,7 @@
 #include "zone_model.hpp"
 #include "model_resources.hpp"
 
+extern Log gLog;
 extern Config gConfig;
 extern ModelResources gModelResources;
 
@@ -24,8 +25,7 @@ void ZoneModel::generateOctree()
     OctreeTemp temp;
     PerfTimer timer;
     
-    printf("Generating Octree... ");
-    fflush(stdout);
+    gLog.printf("Generating Octree... ");
     
     for (VertexBuffer* vb : getReferencedVertexBuffers())
     {
@@ -77,8 +77,8 @@ void ZoneModel::generateOctree()
         gModelResources.cacheOctree(this);
     }
     
-    printf("Creating VBOs... ");
-    fflush(stdout);
+    gLog.printf("Creating VBOs... ");
+
     PerfTimer timerVbo;
     
     for (VertexBuffer* vb : m_vertexBuffers)
@@ -215,17 +215,18 @@ void ZoneModel::draw(Camera* camera)
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
-    /*
+    /**/
+    //float clr[4] = {0.1f, 0.65f, 0.7f, 1.0f};
     glEnable(GL_FOG);
-    //glFogi(GL_FOG_MODE, GL_LINEAR);
-    //glFogf(GL_FOG_START, 1.0f);
-    //glFogf(GL_FOG_END, 500.0f);
     glFogi(GL_FOG_MODE, GL_EXP);
-    glFogf(GL_FOG_DENSITY, 0.01f);
+    glFogf(GL_FOG_DENSITY, 0.02f);
     glHint(GL_FOG_HINT, GL_NICEST);
-    */
+    //float clr[4] = {0.05, 0.0f, 0.0f, 1.0f};
+    //glFogfv(GL_FOG_COLOR, clr);
+    /**/
     
-    //glColor3f(0.1f, 0.1f, 0.1f);
+    //glColor3f(0.1f, 0.65f, 0.7f);
+    glColor3f(0.5f, 0.25f, 0.25f);
     
     int lastBlendType       = -1;
     uint32_t lastDiffuseMap = 0;
@@ -274,6 +275,7 @@ void ZoneModel::draw(Camera* camera)
     //timer.printf("Octree: checked %u nodes and drew %u with %u textures", m_boundingBoxes.size(), count, texCount);
     
     glDisable(GL_FOG);
+    glColor3f(1.0f, 1.0f, 1.0f);
     
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);

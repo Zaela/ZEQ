@@ -9,6 +9,7 @@
 #include "zone_model.hpp"
 #include "animated_model.hpp"
 #include "config.hpp"
+#include "log.hpp"
 #include <vector>
 #include <string>
 

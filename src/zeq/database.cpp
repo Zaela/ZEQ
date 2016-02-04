@@ -3,6 +3,7 @@
 
 Database gDatabase;
 extern Lua gLua;
+extern Log gLog;
 
 Database::Database()
     : m_Sqlite(nullptr)
@@ -100,7 +101,7 @@ bool Query::select()
         return false;
     default:
         //throw
-        printf("QUERY ERR\n"); fflush(stdout);
+        gLog.printf("QUERY ERR\n");
         break;
     }
     

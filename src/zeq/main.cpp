@@ -10,27 +10,14 @@
 #include "temp.hpp"
 #include "lua.hpp"
 #include "config.hpp"
+#include "log.hpp"
 
 extern Database gDatabase;
 extern TimerPool gTimerPool;
 extern Temp gTemp;
 extern Lua gLua;
 extern Config gConfig;
-
-#include <thread>
-#include <condition_variable>
-#include <mutex>
-
-std::mutex mutex;
-std::condition_variable cv;
-
-static void threadProc()
-{
-    std::unique_lock<std::mutex> lock(mutex);
-    cv.wait(lock);
-    
-    printf("Loading done!!!\n");
-}
+extern Log gLog;
 
 int main(int argc, char** argv)
 {
@@ -39,14 +26,11 @@ int main(int argc, char** argv)
     gLua.init();
     gConfig.init();
     gDatabase.init();
+    gLog.init();
 
     Window win;
     
-    std::thread thread(threadProc);
-    thread.detach();
     win.loadZoneModel(argc > 1 ? argv[1] : "gfaydark");
-    
-    cv.notify_all();
     
     for (;;)
     {
@@ -58,6 +42,9 @@ int main(int argc, char** argv)
         gTemp.reset();
         Clock::sleepMilliseconds(25);
     }
+    
+    gLog.signalClose();
+    gLog.waitUntilClosed();
     
     FreeImage_DeInitialise();
     return 0;
