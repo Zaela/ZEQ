@@ -8,3 +8,5 @@ local paths = {
 }
 
 package.path = table.concat(paths, ";")
+
+require "output"

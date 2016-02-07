@@ -177,7 +177,7 @@ function EQGCommon:extractMaterials(p)
 
         self:checkLength(p)
         
-        local mat = MaterialEQG(strings[binMat.nameIndex])
+        local mat = MaterialEQG(strings[binMat.nameIndex], strings[binMat.shaderIndex])
         
         model:addMaterial(mat)
         
@@ -280,7 +280,6 @@ function EQGCommon:extractBones(p)
     
     local listOrder     = {}
     local byName        = {}
-    local recurseOrder  = {}
     
     for i = 0, header.boneCount - 1 do
         local bone = binBones[i]
@@ -300,7 +299,6 @@ function EQGCommon:extractBones(p)
             recurse(binBone.linkBoneIndex, parent)
         end
         
-        table.insert(recurseOrder, bone)
         bone:setIndex(i)
         
         if parent then
@@ -314,7 +312,7 @@ function EQGCommon:extractBones(p)
     
     recurse(0)
     
-    model:setSkeleton(SkeletonEQG(listOrder[1], #listOrder, byName, recurseOrder))
+    model:setSkeleton(SkeletonEQG(listOrder[1], #listOrder, byName))
 
     return p
 end

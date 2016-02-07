@@ -3,25 +3,25 @@ local Class     = require "Class"
 local BoneEntry = require "BoneEntry"
 local ConvSkele = require "ConvSkeleton"
 
-local SkeletonEQG = Class("SkeletonEQG", ConvSkele)
+local SkeletonWLD = Class("SkeletonWLD", ConvSkele)
 
-function SkeletonEQG.new(root, count, byName)
-    local entries           = BoneEntry.Array(count)
-    local index             = 0
-    local indexMap          = {}
-    local listOrderIndexMap = {}
+function SkeletonWLD.new(root, count)
+    local entries   = BoneEntry.Array(count)
+    local index     = 0
+    local indexMap  = {}
+    local byName    = {}
     
     local function recurse(bone)
         local childCount    = bone:getChildCount()
         local entry         = entries[index]
         
         indexMap[bone:index()] = index
+        byName[bone:getName()] = index
         
         index = index + 1
         
-        local pos   = bone:pos()
-        local rot   = bone:rot()
-        local scale = bone:scale()
+        local pos = bone:pos()
+        local rot = bone:rot()
         
         entry.childCount    = childCount
         entry.x             = pos.x
@@ -31,9 +31,9 @@ function SkeletonEQG.new(root, count, byName)
         entry.rot.y         = rot.y
         entry.rot.z         = rot.z
         entry.rot.w         = rot.w
-        entry.scale.x       = scale.x
-        entry.scale.y       = scale.y
-        entry.scale.z       = scale.z
+        entry.scale.x       = 1
+        entry.scale.y       = 1
+        entry.scale.z       = 1
         
         for child in bone:children() do
             recurse(child)
@@ -50,7 +50,7 @@ function SkeletonEQG.new(root, count, byName)
         _indexMap       = indexMap,
     }
     
-    return SkeletonEQG:instance(s)
+    return SkeletonWLD:instance(s)
 end
 
-return SkeletonEQG
+return SkeletonWLD

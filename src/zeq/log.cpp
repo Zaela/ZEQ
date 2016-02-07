@@ -76,6 +76,15 @@ void Log::printf(const char* fmt, ...)
     va_end(check);
 }
 
+void Log::print(const char* str)
+{
+    m_stdoutMutex.lock();
+    m_stdoutQueue.push_back(std::string(str));
+    m_stdoutMutex.unlock();
+    
+    m_conditionVar.notify_all();
+}
+
 void Log::queue(const char* fmt, va_list check, std::vector<std::string>& queue, AtomicMutex& mutex)
 {
     va_list args;
@@ -94,4 +103,10 @@ void Log::queue(const char* fmt, va_list check, std::vector<std::string>& queue,
     mutex.unlock();
     
     m_conditionVar.notify_all();
+}
+
+// Exports for LuaJIT
+void Log_print(const char* str)
+{
+    gLog.print(str);
 }

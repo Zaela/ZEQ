@@ -1,7 +1,7 @@
 
 local Struct = require "Struct"
 
-return {
+local Geo = {
     Vertex = Struct.packed[[
         int16_t x, y, z;
     ]],
@@ -32,5 +32,9 @@ return {
         uint16_t index;
     ]],
     
-    TRIANGLE_PERMEABLE  = 0x10,
+    TRIANGLE_PERMEABLE = 0x10,
 }
+
+Geo.BoneAssignment = Geo.TextureEntry
+
+return Geo

@@ -2,7 +2,7 @@
 local RaceMapping = {}
 
 local gender0 = {
-    [  1]   = {"global_chr.s3d", "HUM"},
+    [  1]   = {"global_chr", "HUM"},
 }
 
 local gender1 = {
@@ -12,6 +12,7 @@ local gender1 = {
 local gender2 = {
     [  1]   = "aro.eqg",
     [  2]   = "sin.eqg",
+    [ 75]   = {"global_chr", "ELE"},
 }
 
 function RaceMapping.getFileFor(race, gender)

@@ -2,6 +2,7 @@
 local ZoneEQG       = require "ZoneEQG"
 local ZoneWLD       = require "ZoneWLD"
 local MobEQG        = require "MobEQG"
+local MobWLD        = require "MobWLD"
 local Database      = require "Database"
 local File          = require "File"
 local Image         = require "Image"
@@ -46,7 +47,7 @@ function Converter.convertMob(race, gender)
         if type(mapping) == "string" and mapping:find("%.eqg$") then
             obj = MobEQG.convert(mapping)
         else
-        
+            obj = MobWLD.convert(mapping)
         end
     end)
     
@@ -199,7 +200,6 @@ function Converter.wrapInsert(typeName, func)
     local q     = {}
     
     io.write("Inserting ", typeName, " data into local database... ")
-    io.flush()
     
     local time = os.clock()
     

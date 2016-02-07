@@ -27,18 +27,22 @@ private:
     std::condition_variable m_conditionVar;
 
 private:
-    virtual void threadProc();
+    virtual void threadProc() override;
 
     void queue(const char* fmt, va_list check, std::vector<std::string>& queue, AtomicMutex& mutex);
 
 public:
     Log();
 
-    virtual void init();
-    virtual void signalClose();
+    virtual void init() override;
+    virtual void signalClose() override;
 
     void operator()(const char* fmt, ...);
     void printf(const char* fmt, ...);
+    void print(const char* str);
 };
+
+// Exports for LuaJIT
+ZEQ_EXPORT void Log_print(const char* str);
 
 #endif//_ZEQ_LOG_HPP_

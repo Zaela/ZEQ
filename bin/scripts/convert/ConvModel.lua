@@ -175,4 +175,12 @@ function ConvModel:resetVertexBuffers()
     self._noCollideVertexBuffers    = {}
 end
 
+function ConvModel:setSkeleton(skele)
+    self._skele = skele
+end
+
+function ConvModel:skeleton()
+    return self._skele
+end
+
 return ConvModel

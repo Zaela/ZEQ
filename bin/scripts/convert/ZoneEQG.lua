@@ -14,6 +14,7 @@ function ZoneEQG.convert(shortname)
     local obj
     
     local s, err = pcall(function()
+        local time      = os.clock()
         local pfs       = PFS(shortname .. ".eqg")
         local data, len = pfs:getEntryByExtension("zon")
         
@@ -26,9 +27,7 @@ function ZoneEQG.convert(shortname)
             end
         end
         
-        local time = os.clock()
         io.write("Loading raw zone data from EQG... ")
-        io.flush()
         
         local zon = ZON(pfs, data, len)
         
@@ -38,10 +37,6 @@ function ZoneEQG.convert(shortname)
         
         io.write("done in ", os.clock() - time, " seconds\n")
     end)
-    
-    if not s then
-        io.write(err, "\n")
-    end
     
     return obj
 end

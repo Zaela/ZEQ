@@ -44,18 +44,6 @@ function Frag:getMeshRefCount()
     return self.size[1]
 end
 
-function Frag:addChildren(vw)
-    self.refA = vw:addByRef(self.refA)
-    self.refB = vw:addByRef(self.refB)
-
-    if not self:hasMeshRefs() then return end
-
-    local ptr = self:getFirstRefPtr()
-    for i = 0, self:getMeshRefCount() - 1 do
-        ptr[i] = vw:addByRef(ptr[i])
-    end
-end
-
 Frag14 = Struct([[
     WLDFragHeader   header;
     uint32_t        flag;

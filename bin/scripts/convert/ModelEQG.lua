@@ -62,14 +62,6 @@ function ModelEQG:sortWeights()
     sort(self:noCollideWeightBuffers())
 end
 
-function ModelEQG:setSkeleton(skele)
-    self._skele = skele
-end
-
-function ModelEQG:skeleton()
-    return self._skele
-end
-
 function ModelEQG:addAnimation(ani)
     table.insert(self._animations, ani) --fixme, should translate the ANI name to the animId first and use that as index
 end

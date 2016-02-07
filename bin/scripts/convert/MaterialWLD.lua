@@ -14,6 +14,7 @@ local blendMapping = {
     [0x8000000a] = BlendTypes.Additive,
     [0x8000000b] = BlendTypes.Particle,
     [0x80000013] = BlendTypes.Masked,
+    [0x80000014] = BlendTypes.Solid,
     [0x80000017] = BlendTypes.Particle,
 }
 
@@ -27,8 +28,8 @@ function MaterialWLD:setVisibility(flag)
     
     if not bt then
         io.write(string.format("Warning: No MaterialWLD mapping for visibility flag %8x (material: %s)\n", flag, self:getName()))
-    elseif bt ~= BlendTypes.Solid and bt ~= BlendTypes.Masked then
-        io.write(string.format("Material flag %8x (%s)\n", flag, self:getName()))
+    --elseif bt ~= BlendTypes.Solid and bt ~= BlendTypes.Masked then
+    --    io.write(string.format("Material flag %8x (%s)\n", flag, self:getName()))
     end
     
     self._blendType = bt or BlendTypes.Solid

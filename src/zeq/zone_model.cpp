@@ -215,7 +215,7 @@ void ZoneModel::draw(Camera* camera)
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
-    /**/
+    /*
     //float clr[4] = {0.1f, 0.65f, 0.7f, 1.0f};
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_EXP);
@@ -223,10 +223,10 @@ void ZoneModel::draw(Camera* camera)
     glHint(GL_FOG_HINT, GL_NICEST);
     //float clr[4] = {0.05, 0.0f, 0.0f, 1.0f};
     //glFogfv(GL_FOG_COLOR, clr);
-    /**/
+    */
     
     //glColor3f(0.1f, 0.65f, 0.7f);
-    glColor3f(0.5f, 0.25f, 0.25f);
+    //glColor3f(0.5f, 0.25f, 0.25f);
     
     int lastBlendType       = -1;
     uint32_t lastDiffuseMap = 0;

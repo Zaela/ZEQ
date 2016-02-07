@@ -8,10 +8,12 @@ local table = table
 
 local MaterialEQG = Class("MaterialEQG", ConvMaterial)
 
-function MaterialEQG.new(name)
+function MaterialEQG.new(name, shader)
     local mat = ConvMaterial(name)
     
     mat._normalMaps = {}
+    
+    --io.write("Shader for ", name, ": ", shader, "\n")
     
     return MaterialEQG:instance(mat)
 end
