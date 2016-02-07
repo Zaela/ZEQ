@@ -33,4 +33,20 @@ function AnimFrame:add(eqgFrame)
     o.scale.z       = eqgFrame.scale.z
 end
 
+function AnimFrame:addWLD(ms, pos, rot)
+    local o = self:pushBack()
+    
+    o.milliseconds  = ms
+    o.x             = pos.x
+    o.y             = pos.y
+    o.z             = pos.z
+    o.rot.x         = rot.x
+    o.rot.y         = rot.y
+    o.rot.z         = rot.z
+    o.rot.w         = rot.w
+    o.scale.x       = 1
+    o.scale.y       = 1
+    o.scale.z       = 1
+end
+
 return AnimFrame

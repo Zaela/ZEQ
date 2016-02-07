@@ -65,6 +65,43 @@ void Animation::getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Quatern
     rot.slerp(a.rot, b.rot, f1 / f2);
 }
 
+void Animation::getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Vec3& rot, uint32_t& hint)
+{
+    FrameSet& set   = m_framesByBoneIndex[boneIndex];
+    uint32_t index  = 0;
+    
+    for (uint32_t i = hint; i < set.count; i++)
+    {
+        Frame& fr = set.frames[i];
+        
+        if (fr.milliseconds >= frame)
+        {
+            index = i;
+            break;
+        }
+        
+        hint++;
+    }
+    
+    if (set.count <= hint)
+        return;
+    
+    Frame& a = set.frames[index];
+    Frame& b = set.frames[index - 1];
+    
+    float f1 = frame - a.milliseconds;
+    float f2 = b.milliseconds - frame + f1;
+    
+    // Position
+    pos = ((b.pos - a.pos) / f2) * f1 + a.pos;
+    
+    Vec3 ra(a.rot.x, a.rot.y, a.rot.z);
+    Vec3 rb(b.rot.x, b.rot.y, b.rot.z);
+    
+    // Rotation
+    rot = ((rb - ra) / f2) * f1 + ra;
+}
+
 void Animation::readFrameData(int boneIndex, byte* data, uint32_t len)
 {
     FrameSet& set   = m_framesByBoneIndex[boneIndex];

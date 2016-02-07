@@ -23,11 +23,4 @@ struct WeightedBoneAssignmentSet
     VertexBuffer*           vertexBuffer;
 };
 
-struct BoneAssignmentSet
-{
-    uint32_t        count;
-    uint32_t*       assignments;
-    VertexBuffer*   vertexBuffer;
-};
-
 #endif//_ZEQ_WEIGHTED_BONE_ASSIGNMENT_HPP_

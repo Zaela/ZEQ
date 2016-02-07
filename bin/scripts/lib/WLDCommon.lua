@@ -131,11 +131,11 @@ function WLDCommon.readAllMeshes(model)
     local wld = model:getWLD()
     
     for i, f36 in wld:getFragsByType(0x36) do
-        WLDCommon.readMesh(model, f36)
+        WLDCommon.readMesh(model, f36, true)
     end
 end
 
-function WLDCommon.readMesh(model, f36)
+function WLDCommon.readMesh(model, f36, isZone)
     local wld   = model:getWLD()
     local len   = f36:length()
     local data  = BinUtil.Byte:cast(f36)
@@ -204,8 +204,10 @@ function WLDCommon.readMesh(model, f36)
             end
         end
         
+        local indexMap = model:skeleton():getBoneIndexMap()
+        
         function triBA(idx)
-            return vert2ba[idx + 1]
+            return indexMap[vert2ba[idx + 1]]
         end
     else
         function triBA(idx)
@@ -276,14 +278,26 @@ function WLDCommon.readMesh(model, f36)
             local tri   = wldTris[i]
             local vb    = bit.band(tri.flag, Geo.TRIANGLE_PERMEABLE) == 0 and nvb or cvb
 
-            for i = 2, 0, -1 do
-            --for i = 0, 2 do
-                local idx   = tri.index[i]
-                local v     = vb:addVertex()
-                
-                v.x, v.z, v.y, v.i, v.k, v.j    = triVertNorm(idx)
-                v.u, v.v                        = triUV(idx)
-                v.boneIndex                     = triBA(idx)
+            if isZone then
+                for i = 2, 0, -1 do
+                --for i = 0, 2 do
+                    local idx   = tri.index[i]
+                    local v     = vb:addVertex()
+                    
+                    v.x, v.z, v.y, v.i, v.k, v.j    = triVertNorm(idx)
+                    v.u, v.v                        = triUV(idx)
+                    v.boneIndex                     = triBA(idx)
+                end
+            else
+                for i = 0, 2 do
+                --for i = 2, 0, -1 do
+                    local idx   = tri.index[i]
+                    local v     = vb:addVertex()
+                    
+                    v.x, v.z, v.y, v.i, v.k, v.j    = triVertNorm(idx)
+                    v.u, v.v                        = triUV(idx)
+                    v.boneIndex                     = triBA(idx)
+                end
             end
         end
 

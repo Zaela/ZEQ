@@ -37,11 +37,15 @@ private:
         uint32_t    animHint;
     };
     
-    struct VertexBufferSet
+    struct SimpleVertexBufferSet
     {
         uint32_t                    vertexCount;
         const VertexBuffer::Vertex* base;
         VertexBuffer::Vertex*       target;
+    };
+    
+    struct VertexBufferSet : public SimpleVertexBufferSet
+    {
         uint32_t                    assignmentCount;
         WeightedBoneAssignment*     assignments;
     };
@@ -52,8 +56,9 @@ private:
     Bone*       m_bones;
     Mat4*       m_animMatrices;
     
-    std::vector<VertexBufferSet>    m_vertexBufferSets;
-    std::vector<VertexBuffer>       m_ownedVertexBuffers;
+    std::vector<VertexBufferSet>        m_vertexBufferSets;
+    std::vector<SimpleVertexBufferSet>  m_simpleVertexBufferSets;
+    std::vector<VertexBuffer>           m_ownedVertexBuffers;
 
     AnimationSet m_animations;
     
@@ -64,7 +69,12 @@ private:
     float       m_curAnimFrame;
     
 private:
-    void buildMatrices();
+    void buildMatricesEQG();
+    void buildMatricesWLD();
+    void animateEQG(float frame);
+    void animateWLD(float frame);
+    void moveVerticesEQG(Mat4* animMatrices);
+    void moveVerticesWLD(Mat4* animMatrices);
     
 public:
     Skeleton();

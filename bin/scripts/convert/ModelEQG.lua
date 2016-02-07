@@ -62,12 +62,8 @@ function ModelEQG:sortWeights()
     sort(self:noCollideWeightBuffers())
 end
 
-function ModelEQG:addAnimation(ani)
-    table.insert(self._animations, ani) --fixme, should translate the ANI name to the animId first and use that as index
-end
-
-function ModelEQG:animations()
-    return iter(self._animations)
+function ModelEQG:hasSeparateBoneAssignments()
+    return true
 end
 
 return ModelEQG

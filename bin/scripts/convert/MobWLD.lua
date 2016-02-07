@@ -4,8 +4,12 @@ local WLD       = require "WLD"
 local Model     = require "ModelWLD"
 local Bone      = require "BoneWLD"
 local Skeleton  = require "SkeletonWLD"
+local Anim      = require "AnimWLD"
+local Common    = require "WLDCommon"
 
-local pcall = pcall
+local pcall     = pcall
+local pairs     = pairs
+local tonumber  = tonumber
 
 local MobWLD = {}
 
@@ -51,6 +55,7 @@ function MobWLD.findModelFragment(wld, modelName)
 end
 
 function MobWLD.readModelData(model, f14)
+    local pfs = model:getPFS()
     local wld = model:getWLD()
     
     -- f14 -> f11 -> f10 -> f13 -> f12
@@ -64,12 +69,13 @@ function MobWLD.readModelData(model, f14)
     
     if not f10 or f10:type() ~= 0x10 or not f10:hasRefList() then return end
     
+    local boneCount = f10:boneCount()
     local rootBone  = f10:boneList()
     local binBone   = rootBone
     local bones     = {}
     
     -- Read and convert bones
-    for i = 0, f10:boneCount() - 1 do
+    for i = 0, boneCount - 1 do
         local f13 = wld:getFragByRef(binBone.refA)
         
         if not f13 or f13:type() ~= 0x13 then error "bad skeleton data" end
@@ -89,7 +95,7 @@ function MobWLD.readModelData(model, f14)
     
     -- Read bone hierarchy
     binBone = rootBone
-    for i = 0, f10:boneCount() - 1 do
+    for i = 0, boneCount - 1 do
         if binBone.size > 0 then
             local bone  = bones[i]
             local ptr   = binBone:indexList()
@@ -102,14 +108,88 @@ function MobWLD.readModelData(model, f14)
         binBone = binBone:next()
     end
     
-    local skele = Skeleton(bones[0], f10:boneCount())
+    local skele = Skeleton(bones[0], boneCount)
     model:setSkeleton(skele)
     
     -- Animations
+    local animByCode    = {}
+    local indexByName   = skele:boneIndicesByName()
+    
+    for i, f13 in wld:getFragsByType(0x13) do
+        local name = wld:getFragName(f13)
+        local code, bname = name:match("(...)(.+)")
+        
+        local index = indexByName[bname]
+        
+        if not index then goto skip end
+        
+        local anim = animByCode[code]
+        if not anim then
+            anim = {}
+            animByCode[code] = anim
+        end
+        
+        local f12 = wld:getFragByRefVar(f13)
+        
+        if not f12 or f12:type() ~= 0x12 then goto skip end
+        
+        anim[index] = f12
+        
+        io.write(code, " ", bname, ": ", index, ": ", f12.count, "\n")
+        
+        ::skip::
+    end
+    
+    for code, f12s in pairs(animByCode) do
+        -- Find actual length of anim
+        local count = 0
+        for index, f12 in pairs(f12s) do
+            if f12.count > count then
+                count = f12.count
+            end
+        end
+        
+        local anim = Anim(code, count)
+        
+        for index, f12 in pairs(f12s) do
+            anim:addFrames(index, f12)
+        end
+        
+        model:addAnimation(anim)
+    end
     
     -- Models/VertexBuffers
+    local baseModel     = model
+    local ptr, count    = f10:refList()
     
-    --return model
+    for i = 0, count - 1 do
+        local f2d = wld:getFragByRef(ptr[i])
+        
+        if not f2d or f2d:type() ~= 0x2d then goto skip end
+        
+        local f36 = wld:getFragByRefVar(f2d)
+        
+        if not f36 or f36:type() ~= 0x36 then goto skip end
+        
+        local name = wld:getFragName(f36)
+        local model
+        
+        local headId = name:match("...HE(%d+)")
+        if headId then
+            model = Model(pfs, wld)
+            model:setSkeleton(baseModel:skeleton())
+            baseModel:addHeadModel(model, tonumber(headId))
+        else
+            model = baseModel
+        end
+        
+        Common.readAllMaterials(model)
+        Common.readMesh(model, f36)
+        
+        ::skip::
+    end
+    
+    return model
 end
 
 return MobWLD

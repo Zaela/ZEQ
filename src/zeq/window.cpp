@@ -125,7 +125,7 @@ void Window::loadZoneModel(const std::string& shortname)
 {
     ZoneModel* prevZone = m_zoneModel;
     
-    m_zoneModel = gModelResources.loadZoneModel(shortname);
+    //m_zoneModel = gModelResources.loadZoneModel(shortname);
     
     if (prevZone)
         prevZone->drop();

@@ -67,7 +67,7 @@ end
 function Converter.insertBlob(db, q, blob, len, compress)
     local clen = len
     
-    if compress then
+    if compress and len >= 256 then
         blob, clen = Image.compress(blob, len)
     else
         len = 0
@@ -272,6 +272,8 @@ function Converter.insertAnimatedModel(db, q, model)
         end
             
         local function insertBoneAssignments(model)
+            if not model:hasSeparateBoneAssignments() then return end
+            
             stmt = q.insertBoneAssignments
 
             handleBAs(model:weightBuffers())

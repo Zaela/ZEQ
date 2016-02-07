@@ -44,6 +44,7 @@ public:
 
     float   getDurationMilliseconds() const { return m_durationMs; }
     void    getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Quaternion& rot, Vec3& scale, uint32_t& hint);
+    void    getFrameData(float frame, uint32_t boneIndex, Vec3& pos, Vec3& rot, uint32_t& hint);
 };
 
 class AnimationSet

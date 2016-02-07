@@ -9,6 +9,16 @@ function BoneWLD.new(name, entry, index)
     
     b:setIndex(index)
     
+    local pos, rot = BoneWLD.f12EntryToPosRot(entry)
+    
+    b._children = {}
+    b._pos      = pos
+    b._rot      = rot
+    
+    return BoneWLD:instance(b)
+end
+
+function BoneWLD.f12EntryToPosRot(entry)
     local pos = {
         x = 0,
         y = 0,
@@ -21,10 +31,6 @@ function BoneWLD.new(name, entry, index)
         z = 0,
         w = 1,
     }
-    
-    b._children = {}
-    b._pos      = pos
-    b._rot      = rot
 
     if entry.shiftDenom ~= 0 then
         local denom = entry.shiftDenom
@@ -37,12 +43,13 @@ function BoneWLD.new(name, entry, index)
     if entry.rotDenom ~= 0 then
         local denom = entry.rotDenom
     
-        local x = entry.rotX / denom * 90.0
-        local y = entry.rotZ / denom * 90.0
-        local z = entry.rotY / denom * 90.0
-        local w
+        local x = -entry.rotX / denom * 90.0
+        local y = -entry.rotZ / denom * 90.0
+        local z = -entry.rotY / denom * 90.0
+        local w = 0
         
         -- Convert euler angles to quaternion
+        --[[
         x = x * 0.5
         local sr = math.sin(x)
         local cr = math.cos(x)
@@ -67,6 +74,7 @@ function BoneWLD.new(name, entry, index)
         
         -- Normalize
         local n = x*x + y*y + z*z + w*w
+        
         if n ~= 1.0 then
             n = 1.0 / math.sqrt(n)
             
@@ -75,6 +83,7 @@ function BoneWLD.new(name, entry, index)
             z = z * n
             w = w * n
         end
+        --]]
         
         rot.x = x
         rot.y = y
@@ -82,7 +91,7 @@ function BoneWLD.new(name, entry, index)
         rot.w = w
     end
     
-    return BoneWLD:instance(b)
+    return pos, rot
 end
 
 return BoneWLD

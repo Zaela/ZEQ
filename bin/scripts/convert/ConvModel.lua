@@ -21,6 +21,7 @@ function ConvModel.new()
     m._vertexBuffers            = {}
     m._noCollideVertexBuffers   = {}
     m._headModels               = {}
+    m._animations               = {}
     
     return ConvModel:instance(m)
 end
@@ -181,6 +182,18 @@ end
 
 function ConvModel:skeleton()
     return self._skele
+end
+
+function ConvModel:addAnimation(ani)
+    table.insert(self._animations, ani) --fixme, should translate the ANI name to the animId first and use that as index
+end
+
+function ConvModel:animations()
+    return iterator(self._animations)
+end
+
+function ConvModel:hasSeparateBoneAssignments()
+    return false
 end
 
 return ConvModel

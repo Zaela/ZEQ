@@ -4,6 +4,7 @@
 
 #include "define.hpp"
 #include "math.hpp"
+#include "vec3.hpp"
 
 class Mat4
 {
@@ -228,6 +229,109 @@ public:
         *this = temp;
         
         return true;
+    }
+    
+    static Mat4 angleX(float angle)
+    {
+        angle = Math::toRadians(angle);
+        float cosX = cos(angle);
+        float sinX = sin(angle);
+
+        Mat4 m;
+
+        m.m[ 0] = 1;
+        m.m[ 1] = 0;
+        m.m[ 2] = 0;
+        m.m[ 3] = 0;
+
+        m.m[ 4] = 0;
+        m.m[ 5] = cosX;
+        m.m[ 6] = sinX;
+        m.m[ 7] = 0;
+
+        m.m[ 8] = 0;
+        m.m[ 9] = -sinX;
+        m.m[10] = cosX;
+        m.m[11] = 0;
+
+        m.m[12] = 0;
+        m.m[13] = 0;
+        m.m[14] = 0;
+        m.m[15] = 1;
+
+        return m;
+    }
+
+    static Mat4 angleY(float angle)
+    {
+        angle = Math::toRadians(angle);
+        float cosY = cos(angle);
+        float sinY = sin(angle);
+
+        Mat4 m;
+
+        m.m[ 0] = cosY;
+        m.m[ 1] = 0;
+        m.m[ 2] = -sinY;
+        m.m[ 3] = 0;
+
+        m.m[ 4] = 0;
+        m.m[ 5] = 1;
+        m.m[ 6] = 0;
+        m.m[ 7] = 0;
+
+        m.m[ 8] = sinY;
+        m.m[ 9] = 0;
+        m.m[10] = cosY;
+        m.m[11] = 0;
+
+        m.m[12] = 0;
+        m.m[13] = 0;
+        m.m[14] = 0;
+        m.m[15] = 1;
+
+        return m;
+    }
+
+    static Mat4 angleZ(float angle)
+    {
+        angle = Math::toRadians(angle);
+        float cosZ = cos(angle);
+        float sinZ = sin(angle);
+
+        Mat4 m;
+
+        m.m[ 0] = cosZ;
+        m.m[ 1] = sinZ;
+        m.m[ 2] = 0;
+        m.m[ 3] = 0;
+
+        m.m[ 4] = -sinZ;
+        m.m[ 5] = cosZ;
+        m.m[ 6] = 0;
+        m.m[ 7] = 0;
+
+        m.m[ 8] = 0;
+        m.m[ 9] = 0;
+        m.m[10] = 1;
+        m.m[11] = 0;
+
+        m.m[12] = 0;
+        m.m[13] = 0;
+        m.m[14] = 0;
+        m.m[15] = 1;
+
+        return m;
+    }
+
+    static Mat4 angleYZ(float yAngle, float zAngle)
+    {
+        return angleY(yAngle) * angleZ(zAngle);
+    }
+
+    static Mat4 angleXYZ(Vec3& v)
+    {
+        return angleX(v.x) * angleY(v.y) * angleZ(v.z);
     }
 };
 

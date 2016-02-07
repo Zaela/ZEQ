@@ -52,7 +52,7 @@ protected:
     AnimationSet    m_animations;
     
     std::vector<WeightedBoneAssignmentSet>  m_weightedBoneAssignments;
-    std::vector<BoneAssignmentSet>          m_boneAssignments;
+    //std::vector<BoneAssignmentSet>          m_boneAssignments;
     
 private:
     friend class ModelResources;
@@ -62,7 +62,7 @@ private:
     void readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len);
 
     WeightedBoneAssignmentSet&  readWeightedBoneAssignments(byte* wbas, uint32_t len);
-    BoneAssignmentSet&          readBoneAssignments(byte* bas, uint32_t len);
+    //BoneAssignmentSet&          readBoneAssignments(byte* bas, uint32_t len);
 
 public:
     virtual ~AnimatedModelPrototype();

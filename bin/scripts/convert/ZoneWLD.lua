@@ -111,7 +111,7 @@ function ZoneWLD.readObjectDefinitions(defModel, objectModelDefs)
         if t == 0x11 then
             goto skip --fixme
         else
-            WLDCommon.readMesh(defModel, wld:getFragByRefVar(f2d))
+            WLDCommon.readMesh(defModel, wld:getFragByRefVar(f2d), true)
         end
         
         takeVBs(objModel, vbs, objModel:getVertexBuffers())

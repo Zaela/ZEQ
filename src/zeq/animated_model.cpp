@@ -83,7 +83,7 @@ WeightedBoneAssignmentSet& AnimatedModelPrototype::readWeightedBoneAssignments(b
     m_weightedBoneAssignments.push_back(set);
     return m_weightedBoneAssignments.back();
 }
-
+/*
 BoneAssignmentSet& AnimatedModelPrototype::readBoneAssignments(byte* binBas, uint32_t len)
 {
     BoneAssignmentSet set;
@@ -94,7 +94,7 @@ BoneAssignmentSet& AnimatedModelPrototype::readBoneAssignments(byte* binBas, uin
     m_boneAssignments.push_back(set);
     return m_boneAssignments.back();
 }
-
+*/
 Skeleton* AnimatedModelPrototype::createSkeletonInstance()
 {
     Skeleton* sk = new Skeleton;
@@ -131,29 +131,52 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
     
     // The skeleton needs its own copies of all the VertexBuffers, but needs the original VertexBuffers to transform each frame
     // The bone assignment definitions are centralized, belonging to the prototype
-    count = m_weightedBoneAssignments.size();
-    
-    auto& sets  = sk->m_vertexBufferSets;
     auto& vbs   = sk->m_ownedVertexBuffers;
+    count       = m_weightedBoneAssignments.size();
     
-    for (uint32_t i = 0; i < count; i++)
+    if (count)
     {
-        WeightedBoneAssignmentSet& src = m_weightedBoneAssignments[i];
+        auto& sets = sk->m_vertexBufferSets;
+
+        for (uint32_t i = 0; i < count; i++)
+        {
+            WeightedBoneAssignmentSet& src = m_weightedBoneAssignments[i];
+            
+            vbs.push_back(VertexBuffer());
+            VertexBuffer& vb = vbs.back();
+            
+            vb.copy(*src.vertexBuffer);
+            
+            Skeleton::VertexBufferSet set;
+            
+            set.vertexCount     = vb.count();
+            set.target          = vb.array();
+            set.base            = src.vertexBuffer->array();
+            set.assignmentCount = src.count;
+            set.assignments     = src.assignments;
+            
+            sets.push_back(set);
+        }
+    }
+    else
+    {
+        auto& sets = sk->m_simpleVertexBufferSets;
         
-        vbs.push_back(VertexBuffer());
-        VertexBuffer& vb = vbs.back();
-        
-        vb.copy(*src.vertexBuffer);
-        
-        Skeleton::VertexBufferSet set;
-        
-        set.vertexCount     = vb.count();
-        set.target          = vb.array();
-        set.base            = src.vertexBuffer->array();
-        set.assignmentCount = src.count;
-        set.assignments     = src.assignments;
-        
-        sets.push_back(set);
+        for (VertexBuffer* src : getReferencedVertexBuffers())
+        {
+            vbs.push_back(VertexBuffer());
+            VertexBuffer& vb = vbs.back();
+            
+            vb.copy(*src);
+            
+            Skeleton::SimpleVertexBufferSet set;
+            
+            set.vertexCount = vb.count();
+            set.target      = vb.array();
+            set.base        = src->array();
+            
+            sets.push_back(set);
+        }
     }
     
     // Animation definitions are centralized, belonging to the prototype
