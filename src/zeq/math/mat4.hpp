@@ -47,6 +47,33 @@ public:
         return m[i];
     }
     
+    Mat4 operator+(const Mat4& o)
+    {
+        Mat4 ret(1);
+        
+        ret.m[ 0] = m[ 0] + o.m[ 0];
+        ret.m[ 1] = m[ 1] + o.m[ 1];
+        ret.m[ 2] = m[ 2] + o.m[ 2];
+        ret.m[ 3] = m[ 3] + o.m[ 3];
+        
+        ret.m[ 4] = m[ 4] + o.m[ 4];
+        ret.m[ 5] = m[ 5] + o.m[ 5];
+        ret.m[ 6] = m[ 6] + o.m[ 6];
+        ret.m[ 7] = m[ 7] + o.m[ 7];
+        
+        ret.m[ 8] = m[ 8] + o.m[ 8];
+        ret.m[ 9] = m[ 9] + o.m[ 9];
+        ret.m[10] = m[10] + o.m[10];
+        ret.m[11] = m[11] + o.m[11];
+        
+        ret.m[12] = m[12] + o.m[12];
+        ret.m[13] = m[13] + o.m[13];
+        ret.m[14] = m[14] + o.m[14];
+        ret.m[15] = m[15] + o.m[15];
+        
+        return ret;
+    }
+    
     Mat4 operator*(const Mat4& o)
     {
         Mat4 ret(1);

@@ -52,7 +52,6 @@ protected:
     AnimationSet    m_animations;
     
     std::vector<WeightedBoneAssignmentSet>  m_weightedBoneAssignments;
-    //std::vector<BoneAssignmentSet>          m_boneAssignments;
     
 private:
     friend class ModelResources;
@@ -61,8 +60,7 @@ private:
     void readSkeletonRecurse(DBBone* frames, uint32_t& cur, Bone& bone, uint32_t count, Bone* parent = nullptr, uint32_t parentIndex = 0);
     void readAnimationFrames(int animId, int boneIndex, byte* frames, uint32_t len);
 
-    WeightedBoneAssignmentSet&  readWeightedBoneAssignments(byte* wbas, uint32_t len);
-    //BoneAssignmentSet&          readBoneAssignments(byte* bas, uint32_t len);
+    WeightedBoneAssignmentSet& readWeightedBoneAssignments(byte* wbas, uint32_t len);
 
 public:
     virtual ~AnimatedModelPrototype();
@@ -83,11 +81,22 @@ private:
         };
     };
     
+    struct SimpleHeadModel
+    {
+        uint32_t count;
+        union
+        {
+            VertexBuffer*   vbSingle;
+            VertexBuffer**  vbArray;
+        };
+    };
+    
 private:
     int     m_race;
     uint8_t m_gender;
 
-    std::vector<WeightedHeadModel> m_weightedHeads;
+    std::vector<WeightedHeadModel>  m_weightedHeads;
+    std::vector<SimpleHeadModel>    m_simpleHeads;
 
 private:
     friend class ModelResources;

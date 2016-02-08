@@ -59,7 +59,7 @@ function MobWLD.readModelData(model, f14)
     local wld = model:getWLD()
     
     -- f14 -> f11 -> f10 -> f13 -> f12
-    --                   |> f2d -> f36
+    --                  |-> f2d -> f36
     
     local f11 = wld:getFragByRef(f14:getFirstRef())
     
@@ -85,7 +85,7 @@ function MobWLD.readModelData(model, f14)
         if not f12 or f12:type() ~= 0x12 then error "bad skeleton data" end
         
         local name = wld:getFragName(f13)
-        io.write(string.format("[%2i] %s\n", i, name))
+        --io.write(string.format("[%2i] %s\n", i, name))
         
         local bone = Bone(name, f12.entry[0], i)
         
@@ -135,7 +135,7 @@ function MobWLD.readModelData(model, f14)
         
         anim[index] = f12
         
-        io.write(code, " ", bname, ": ", index, ": ", f12.count, "\n")
+        --io.write(code, " ", bname, ": ", index, ": ", f12.count, "\n")
         
         ::skip::
     end
@@ -148,7 +148,7 @@ function MobWLD.readModelData(model, f14)
                 count = f12.count
             end
         end
-        
+        io.write(code, "\n")
         local anim = Anim(code, count)
         
         for index, f12 in pairs(f12s) do
@@ -189,7 +189,7 @@ function MobWLD.readModelData(model, f14)
         ::skip::
     end
     
-    return model
+    return baseModel
 end
 
 return MobWLD

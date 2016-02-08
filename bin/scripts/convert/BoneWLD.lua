@@ -36,16 +36,23 @@ function BoneWLD.f12EntryToPosRot(entry)
         local denom = entry.shiftDenom
         
         pos.x = entry.shiftX / denom
-        pos.y = entry.shiftZ / denom
-        pos.z = entry.shiftY / denom
+        pos.y = entry.shiftY / denom
+        pos.z = entry.shiftZ / denom
     end
     
     if entry.rotDenom ~= 0 then
         local denom = entry.rotDenom
     
-        local x = -entry.rotX / denom * 90.0
-        local y = -entry.rotZ / denom * 90.0
+    --[[
+        local x = -entry.rotX / denom * 45.0
+        local y = -entry.rotZ / denom * 45.0
         local z = -entry.rotY / denom * 90.0
+        local w = 0
+    --]]
+    
+        local x = entry.rotX / denom * 90.0
+        local y = entry.rotY / denom * 90.0
+        local z = entry.rotZ / denom * 90.0--67.5
         local w = 0
         
         -- Convert euler angles to quaternion

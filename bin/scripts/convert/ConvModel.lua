@@ -196,4 +196,8 @@ function ConvModel:hasSeparateBoneAssignments()
     return false
 end
 
+function ConvModel:clearUnusedBuffers()
+
+end
+
 return ConvModel

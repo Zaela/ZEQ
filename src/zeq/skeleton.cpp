@@ -195,6 +195,14 @@ void Skeleton::animateWLD(float frame)
         
         anim->getFrameData(frame, i, bone.pos, rot, bone.animHint);
         
+        //printf("Bone %u rot %g, %g, %g\n", i, rot.x, rot.y, rot.z);
+        
+        /*
+        if (bone.rot.x > 90.0f) bone.rot.x = 90.0f;
+        if (bone.rot.y > 90.0f) bone.rot.y = 90.0f;
+        if (bone.rot.z > 90.0f) bone.rot.z = 90.0f;
+        */
+        
         bone.rot.x = rot.x;
         bone.rot.y = rot.y;
         bone.rot.z = rot.z;
@@ -298,7 +306,32 @@ void Skeleton::buildMatricesWLD()
         if (!bone.hasAnimFrames)
             continue;
         
-        //Mat4& mat = bone.localAnimMatrix;
+        /*
+        Vec3 rot(bone.rot.x, bone.rot.y, bone.rot.z);
+        
+        if (bone.parentGlobalAnimMatrix)
+        {
+            Mat4& pMat = *bone.parentGlobalAnimMatrix;
+            
+            Vec3 tmp = bone.pos;
+            pMat.rotateVector(bone.pos, tmp);
+            
+            bone.pos.x += pMat[12];
+            bone.pos.y += pMat[13];
+            bone.pos.z += pMat[14];
+            
+            Mat4 mat = Mat4::angleXYZ(rot);
+            mat = pMat * mat;
+            mat.setTranslation(bone.pos);
+            bone.globalAnimMatrix = mat;
+            continue;
+        }
+        
+        Mat4 mat = Mat4::angleXYZ(rot);
+        mat.setTranslation(bone.pos);
+        bone.globalAnimMatrix = mat;
+        */
+        
         Vec3 rot(bone.rot.x, bone.rot.y, bone.rot.z);
         
         Mat4 mat = Mat4::angleXYZ(rot);
@@ -326,10 +359,9 @@ void Skeleton::draw()
     glPushMatrix();
     if (!m_vertexBufferSets.empty())
     {
-        glRotatef(-90, 1, 0, 0);
         glScalef(1, -1, 1);
     }
-    glScalef(-1, 1, 1);
+    glRotatef(-90, 1, 0, 0);
     
     uint32_t lastDiffuseMap = 0;
     for (VertexBuffer& vb : m_ownedVertexBuffers)

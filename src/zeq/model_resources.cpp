@@ -535,7 +535,7 @@ void ModelResources::loadBoneAssignments(int64_t modelId, AnimatedModelPrototype
     {
         int64_t vertId = queryBoneAssignments.getInt64(1);
         int64_t blobId = queryBoneAssignments.getInt64(2);
-        int isWeighted = queryBoneAssignments.getInt(3);
+        //int isWeighted = queryBoneAssignments.getInt(3);
         
         if (m_vertices.count(vertId) == 0)
             continue;
@@ -548,16 +548,8 @@ void ModelResources::loadBoneAssignments(int64_t modelId, AnimatedModelPrototype
         byte* data      = blob.takeOwnership();
         uint32_t length = blob.length;
         
-        //if (isWeighted)
-        //{
-            WeightedBoneAssignmentSet& set = animModel->readWeightedBoneAssignments(data, length);
-            set.vertexBuffer = vb;
-        /*}
-        else
-        {
-            BoneAssignmentSet& bas = animModel->readBoneAssignments(data, length);
-            bas.vertexBuffer = vb;
-        }*/
+        WeightedBoneAssignmentSet& set = animModel->readWeightedBoneAssignments(data, length);
+        set.vertexBuffer = vb;
     }
 }
 
@@ -569,7 +561,7 @@ void ModelResources::loadHeadModels(int64_t modelId, MobModelPrototype* animMode
     queryMobHeadModels.bindInt64(1, modelId);
     
     AnimatedModelPrototype headModel;
-    /*
+
     while (queryMobHeadModels.select())
     {
         int64_t headId  = queryMobHeadModels.getInt64(1);
@@ -579,7 +571,7 @@ void ModelResources::loadHeadModels(int64_t modelId, MobModelPrototype* animMode
         loadBoneAssignments(headId, &headModel);
         
         animModel->addHeadModel(headModel, headIndex);
-    }*/
+    }
 }
 
 ModelResources::Blob::~Blob()

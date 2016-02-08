@@ -3,6 +3,7 @@ local RaceMapping = {}
 
 local gender0 = {
     [  1]   = {"global_chr", "HUM"},
+    [  4]   = {"global_chr", "ELM"},
 }
 
 local gender1 = {
@@ -12,6 +13,7 @@ local gender1 = {
 local gender2 = {
     [  1]   = "aro.eqg",
     [  2]   = "sin.eqg",
+    [ 54]   = {"sro_chr", "ORC"},
     [ 75]   = {"global_chr", "ELE"},
 }
 

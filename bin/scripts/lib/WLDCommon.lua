@@ -18,9 +18,13 @@ function WLDCommon.readAllMaterials(model)
     
     if matCount == 0 then error "no materials" end
     
-    for i, f03 in wld:getFragsByType(0x03) do
-        if f03.stringLen > 0 then
-            WLD.encodeString(f03.string, f03.stringLen)
+    if not wld._f03sTranslated then
+        wld._f03sTranslated = true
+        
+        for i, f03 in wld:getFragsByType(0x03) do
+            if f03.stringLen > 0 then
+                WLD.encodeString(f03.string, f03.stringLen)
+            end
         end
     end
 
@@ -294,7 +298,7 @@ function WLDCommon.readMesh(model, f36, isZone)
                     local idx   = tri.index[i]
                     local v     = vb:addVertex()
                     
-                    v.x, v.z, v.y, v.i, v.k, v.j    = triVertNorm(idx)
+                    v.x, v.y, v.z, v.i, v.j, v.k    = triVertNorm(idx)
                     v.u, v.v                        = triUV(idx)
                     v.boneIndex                     = triBA(idx)
                 end

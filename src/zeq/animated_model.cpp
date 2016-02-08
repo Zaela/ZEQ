@@ -83,18 +83,7 @@ WeightedBoneAssignmentSet& AnimatedModelPrototype::readWeightedBoneAssignments(b
     m_weightedBoneAssignments.push_back(set);
     return m_weightedBoneAssignments.back();
 }
-/*
-BoneAssignmentSet& AnimatedModelPrototype::readBoneAssignments(byte* binBas, uint32_t len)
-{
-    BoneAssignmentSet set;
-    
-    set.count       = len / sizeof(uint32_t);
-    set.assignments = (uint32_t*)binBas;
-    
-    m_boneAssignments.push_back(set);
-    return m_boneAssignments.back();
-}
-*/
+
 Skeleton* AnimatedModelPrototype::createSkeletonInstance()
 {
     Skeleton* sk = new Skeleton;
@@ -220,23 +209,22 @@ void MobModelPrototype::addHeadModel(AnimatedModelPrototype& headModel, int head
         m_referencedVertexBuffers.push_back(vb);
     }
     
-    headModel.m_referencedVertexBuffers.clear();
-    
     auto& wbas      = headModel.m_weightedBoneAssignments;
     uint32_t count  = wbas.size();
     
     if (count != 0)
     {
+        // EQG head model
         WeightedHeadModel head;
+        
+        head.count = count;
         
         if (count == 1)
         {
-            head.count = 1;
             head.setSingle = wbas[0];
         }
         else
         {
-            head.count = count;
             head.setArray = new WeightedBoneAssignmentSet[count];
             
             count = 0;
@@ -249,13 +237,41 @@ void MobModelPrototype::addHeadModel(AnimatedModelPrototype& headModel, int head
         m_weightedHeads.push_back(head);
         
         wbas.clear();
-        return;
     }
+    else
+    {
+        // WLD head model
+        SimpleHeadModel head;
+        
+        count = headModel.m_referencedVertexBuffers.size();
+        
+        head.count = count;
+        
+        if (count == 1)
+        {
+            head.vbSingle = headModel.m_referencedVertexBuffers[0];
+        }
+        else
+        {
+            head.vbArray = new VertexBuffer*[count];
+            
+            count = 0;
+            for (VertexBuffer* vb : headModel.m_referencedVertexBuffers)
+            {
+                head.vbArray[count++] = vb;
+            }
+        }
+        
+        m_simpleHeads.push_back(head);
+    }
+        
+    headModel.m_referencedVertexBuffers.clear();
 }
 
 Skeleton* MobModelPrototype::createSkeletonInstance()
 {
-    Skeleton* sk = AnimatedModelPrototype::createSkeletonInstance();
+    Skeleton* sk    = AnimatedModelPrototype::createSkeletonInstance();
+    auto& vbs       = sk->m_ownedVertexBuffers;
     
     if (m_weightedHeads.size())
     {
@@ -275,8 +291,7 @@ Skeleton* MobModelPrototype::createSkeletonInstance()
             }
         }
         
-        auto& sets  = sk->m_vertexBufferSets;
-        auto& vbs   = sk->m_ownedVertexBuffers;
+        auto& sets = sk->m_vertexBufferSets;
         
         for (WeightedBoneAssignmentSet& src : wbas)
         {
@@ -292,6 +307,42 @@ Skeleton* MobModelPrototype::createSkeletonInstance()
             set.base            = src.vertexBuffer->array();
             set.assignmentCount = src.count;
             set.assignments     = src.assignments;
+            
+            sets.push_back(set);
+        }
+    }
+    else if (m_simpleHeads.size())
+    {
+        SimpleHeadModel& head = m_simpleHeads[0];
+        
+        TempVector<VertexBuffer*> tvbs;
+        
+        if (head.count == 1)
+        {
+            tvbs.push_back(head.vbSingle);
+        }
+        else
+        {
+            for (uint32_t i = 0; i < head.count; i++)
+            {
+                tvbs.push_back(head.vbArray[i]);
+            }
+        }
+        
+        auto& sets = sk->m_simpleVertexBufferSets;
+        
+        for (VertexBuffer* src : tvbs)
+        {
+            vbs.push_back(VertexBuffer());
+            VertexBuffer& vb = vbs.back();
+            
+            vb.copy(*src);
+            
+            Skeleton::SimpleVertexBufferSet set;
+            
+            set.vertexCount = vb.count();
+            set.target      = vb.array();
+            set.base        = src->array();
             
             sets.push_back(set);
         }
