@@ -26,32 +26,71 @@ void Log::threadProc()
     std::mutex mutex;
     std::unique_lock<std::mutex> lock(mutex);
     
+    bool stdoutEmpty    = true;
+    bool logEmpty       = true;
+    
     while (run())
     {
-        m_conditionVar.wait(lock);
+        if (stdoutEmpty && logEmpty)
+            m_conditionVar.wait(lock);
+        
+        stdoutEmpty = false;
+        logEmpty    = false;
         
         if (m_stdoutMutex.try_lock())
         {
-            for (std::string& str : m_stdoutQueue)
+            if (m_stdoutQueue.empty())
             {
-                ::printf(str.c_str());
+                stdoutEmpty = true;
+                m_stdoutMutex.unlock();
             }
-            
-            fflush(stdout);
-            m_stdoutQueue.clear();
-            m_stdoutMutex.unlock();
+            else
+            {
+                for (const char* str : m_stdoutQueue)
+                {
+                    m_stdoutInnerQueue.push_back(str);
+                }
+                
+                m_stdoutQueue.clear();
+                m_stdoutMutex.unlock();
+                // We don't set stdoutEmpty = true here because m_stdoutQueue may be refilled by the time we finish our loop
+                
+                for (const char* str : m_stdoutInnerQueue)
+                {
+                    ::printf("%s", str);
+                    delete[] str;
+                }
+                
+                m_stdoutInnerQueue.clear();
+            }
         }
         
-        if (m_logFile && m_logMutex.try_lock())
+        if (m_logMutex.try_lock())
         {
-            for (std::string& str : m_logQueue)
+            if (m_logQueue.empty())
             {
-                fprintf(m_logFile, "%s", str.c_str());
+                logEmpty = true;
+                m_logMutex.unlock();
             }
-            
-            fflush(m_logFile);
-            m_logQueue.clear();
-            m_logMutex.unlock();
+            else
+            {
+                for (const char* str : m_logQueue)
+                {
+                    m_logInnerQueue.push_back(str);
+                }
+                
+                m_logQueue.clear();
+                m_logMutex.unlock();
+                // We don't set logEmpty = true here because m_logQueue may be refilled by the time we finish our loop
+                
+                for (const char* str : m_logInnerQueue)
+                {
+                    fprintf(m_logFile, "%s", str);
+                    delete[] str;
+                }
+                
+                m_logInnerQueue.clear();
+            }
         }
     }
 }
@@ -76,25 +115,27 @@ void Log::printf(const char* fmt, ...)
     va_end(check);
 }
 
-void Log::print(const char* str)
+void Log::print(const char* str, int len)
 {
+    char* copy = new char[len];
+    memcpy(copy, str, len);
+    
     m_stdoutMutex.lock();
-    m_stdoutQueue.push_back(std::string(str));
+    m_stdoutQueue.push_back(copy);
     m_stdoutMutex.unlock();
     
     m_conditionVar.notify_all();
 }
 
-void Log::queue(const char* fmt, va_list check, std::vector<std::string>& queue, AtomicMutex& mutex)
+void Log::queue(const char* fmt, va_list check, std::vector<const char*>& queue, AtomicMutex& mutex)
 {
     va_list args;
     va_copy(args, check);
     
     int len = vsnprintf(nullptr, 0, fmt, check) + 1;
     
-    std::string str;
-    str.resize(len);
-    vsnprintf((char*)str.c_str(), len, fmt, args);
+    char* str = new char[len];
+    vsnprintf(str, len, fmt, args);
     
     va_end(args);
     
@@ -106,7 +147,7 @@ void Log::queue(const char* fmt, va_list check, std::vector<std::string>& queue,
 }
 
 // Exports for LuaJIT
-void Log_print(const char* str)
+void Log_print(const char* str, int len)
 {
-    gLog.print(str);
+    gLog.print(str, len);
 }
