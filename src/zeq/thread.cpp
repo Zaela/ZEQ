@@ -17,7 +17,7 @@ void Thread::init()
 
 void Thread::startThread(Thread* thread)
 {
-    std::lock_guard<std::mutex> lock(thread->m_threadLifetimeMutex);
+    std::lock_guard<AtomicMutex> lock(thread->m_threadLifetimeMutex);
     thread->threadProc();
 }
 
@@ -28,5 +28,5 @@ void Thread::signalClose()
 
 void Thread::waitUntilClosed()
 {
-    std::lock_guard<std::mutex> lock(m_threadLifetimeMutex);
+    std::lock_guard<AtomicMutex> lock(m_threadLifetimeMutex);
 }

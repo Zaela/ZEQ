@@ -69,12 +69,9 @@ private:
     float       m_curAnimFrame;
     
 private:
-    void buildMatricesEQG();
-    void buildMatricesWLD();
-    void animateEQG(float frame);
-    void animateWLD(float frame);
-    void moveVerticesEQG(Mat4* animMatrices);
-    void moveVerticesWLD(Mat4* animMatrices);
+    void buildMatrices();
+    void moveVerticesEQG();
+    void moveVerticesWLD();
     
 public:
     Skeleton();

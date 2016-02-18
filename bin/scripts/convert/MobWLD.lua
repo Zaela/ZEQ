@@ -85,7 +85,6 @@ function MobWLD.readModelData(model, f14)
         if not f12 or f12:type() ~= 0x12 then error "bad skeleton data" end
         
         local name = wld:getFragName(f13)
-        --io.write(string.format("[%2i] %s\n", i, name))
         
         local bone = Bone(name, f12.entry[0], i)
         
@@ -135,8 +134,6 @@ function MobWLD.readModelData(model, f14)
         
         anim[index] = f12
         
-        --io.write(code, " ", bname, ": ", index, ": ", f12.count, "\n")
-        
         ::skip::
     end
     
@@ -148,11 +145,14 @@ function MobWLD.readModelData(model, f14)
                 count = f12.count
             end
         end
-        io.write(code, "\n")
+
         local anim = Anim(code, count)
         
-        for index, f12 in pairs(f12s) do
-            anim:addFrames(index, f12)
+        for i = 0, boneCount - 1 do
+            local f12 = f12s[i]
+            if f12 then
+                anim:addFrames(i, f12, skele:getParentIndexByBoneIndex(i))
+            end
         end
         
         model:addAnimation(anim)

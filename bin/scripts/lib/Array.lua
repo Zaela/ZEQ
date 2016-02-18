@@ -74,4 +74,21 @@ function Array:sort(sorter)
     BinUtil.sortArray(self._arrayData, self._arrayCount, sorter, self._arrayType.Type)
 end
 
+function Array:iterator()
+    local i     = 0
+    local n     = self._arrayCount
+    local array = self._arrayData
+    return function()
+        i = i + 1
+        if i < n then return array[i] end
+    end
+end
+
+function Array:foreach(func)
+    local data = self._arrayData
+    for i = 0, self._arrayCount - 1 do
+        func(data[i], i, data)
+    end
+end
+
 return Array

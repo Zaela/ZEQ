@@ -3,7 +3,7 @@ local Struct        = require "Struct"
 local FragHeader    = require "wld/FragHeader"
 
 Struct.named("WLDFrag12Entry", [[
-    int16_t    rotDenom;
+    int16_t    rotW;
     int16_t    rotX, rotY, rotZ;
     int16_t    shiftX, shiftY, shiftZ;
     int16_t    shiftDenom;

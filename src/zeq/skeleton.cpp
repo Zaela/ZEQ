@@ -48,17 +48,11 @@ void Skeleton::animate(double delta)
         }
     }
     
-    if (!m_vertexBufferSets.empty())
-        animateEQG(frame);
-    else
-        animateWLD(frame);
+    m_curAnimFrame  = frame;
     
-    /*
-    m_curAnimFrame      = frame;
-    Animation* anim     = m_curAnim;
-    Bone* bones         = m_bones;
-    uint32_t count      = m_boneCount;
-    Mat4* animMatrices  = m_animMatrices;
+    Animation* anim = m_curAnim;
+    Bone* bones     = m_bones;
+    uint32_t count  = m_boneCount;
     
     // Animate bones
     for (uint32_t i = 0; i < count; i++)
@@ -73,65 +67,24 @@ void Skeleton::animate(double delta)
     
     buildMatrices();
     
-    for (uint32_t i = 0; i < count; i++)
-    {
-        Bone& bone      = bones[i];
-        animMatrices[i] = bone.globalAnimMatrix * bone.globalInverseMatrix;
-    }
-    
-    //atimer.print("Moved bones");
-    
-    // Transform vertices
-    //PerfTimer timer;
-    
     if (!m_vertexBufferSets.empty())
-        moveVerticesEQG(animMatrices);
+        moveVerticesEQG();
     else
-        moveVerticesWLD(animMatrices);
-    
-    //timer.print("Moved vertices");
-    */
+        moveVerticesWLD();
 }
 
-void Skeleton::animateEQG(float frame)
+void Skeleton::moveVerticesEQG()
 {
-    m_curAnimFrame      = frame;
-    Animation* anim     = m_curAnim;
     Bone* bones         = m_bones;
     uint32_t count      = m_boneCount;
     Mat4* animMatrices  = m_animMatrices;
     
-    // Animate bones
-    for (uint32_t i = 0; i < count; i++)
-    {
-        Bone& bone = bones[i];
-        
-        if (!bone.hasAnimFrames)
-            continue;
-        
-        anim->getFrameData(frame, i, bone.pos, bone.rot, bone.scale, bone.animHint);
-    }
-    
-    buildMatricesEQG();
-    
     for (uint32_t i = 0; i < count; i++)
     {
         Bone& bone      = bones[i];
         animMatrices[i] = bone.globalAnimMatrix * bone.globalInverseMatrix;
     }
     
-    //atimer.print("Moved bones");
-    
-    // Transform vertices
-    //PerfTimer timer;
-
-    moveVerticesEQG(animMatrices);
-    
-    //timer.print("Moved vertices");
-}
-
-void Skeleton::moveVerticesEQG(Mat4* animMatrices)
-{
     for (VertexBufferSet& set : m_vertexBufferSets)
     {
         uint32_t vcount                 = set.vertexCount;
@@ -176,39 +129,11 @@ void Skeleton::moveVerticesEQG(Mat4* animMatrices)
     }
 }
 
-void Skeleton::animateWLD(float frame)
+void Skeleton::moveVerticesWLD()
 {
-    m_curAnimFrame      = frame;
-    Animation* anim     = m_curAnim;
     Bone* bones         = m_bones;
     uint32_t count      = m_boneCount;
     Mat4* animMatrices  = m_animMatrices;
-    
-    // Animate bones
-    Vec3 rot;
-    for (uint32_t i = 0; i < count; i++)
-    {
-        Bone& bone = bones[i];
-        
-        if (!bone.hasAnimFrames)
-            continue;
-        
-        anim->getFrameData(frame, i, bone.pos, rot, bone.animHint);
-        
-        //printf("Bone %u rot %g, %g, %g\n", i, rot.x, rot.y, rot.z);
-        
-        /*
-        if (bone.rot.x > 90.0f) bone.rot.x = 90.0f;
-        if (bone.rot.y > 90.0f) bone.rot.y = 90.0f;
-        if (bone.rot.z > 90.0f) bone.rot.z = 90.0f;
-        */
-        
-        bone.rot.x = rot.x;
-        bone.rot.y = rot.y;
-        bone.rot.z = rot.z;
-    }
-    
-    buildMatricesWLD();
     
     for (uint32_t i = 0; i < count; i++)
     {
@@ -216,18 +141,6 @@ void Skeleton::animateWLD(float frame)
         animMatrices[i] = bone.globalAnimMatrix;
     }
     
-    //atimer.print("Moved bones");
-    
-    // Transform vertices
-    //PerfTimer timer;
-
-    moveVerticesWLD(animMatrices);
-    
-    //timer.print("Moved vertices");
-}
-
-void Skeleton::moveVerticesWLD(Mat4* animMatrices)
-{
     for (SimpleVertexBufferSet& set : m_simpleVertexBufferSets)
     {
         uint32_t vcount                 = set.vertexCount;
@@ -252,7 +165,7 @@ void Skeleton::moveVerticesWLD(Mat4* animMatrices)
     }
 }
 
-void Skeleton::buildMatricesEQG()
+void Skeleton::buildMatrices()
 {
     for (uint32_t i = 0; i < m_boneCount; i++)
     {
@@ -297,53 +210,6 @@ void Skeleton::buildMatricesEQG()
     }
 }
 
-void Skeleton::buildMatricesWLD()
-{
-    for (uint32_t i = 0; i < m_boneCount; i++)
-    {
-        Bone& bone = m_bones[i];
-        
-        if (!bone.hasAnimFrames)
-            continue;
-        
-        /*
-        Vec3 rot(bone.rot.x, bone.rot.y, bone.rot.z);
-        
-        if (bone.parentGlobalAnimMatrix)
-        {
-            Mat4& pMat = *bone.parentGlobalAnimMatrix;
-            
-            Vec3 tmp = bone.pos;
-            pMat.rotateVector(bone.pos, tmp);
-            
-            bone.pos.x += pMat[12];
-            bone.pos.y += pMat[13];
-            bone.pos.z += pMat[14];
-            
-            Mat4 mat = Mat4::angleXYZ(rot);
-            mat = pMat * mat;
-            mat.setTranslation(bone.pos);
-            bone.globalAnimMatrix = mat;
-            continue;
-        }
-        
-        Mat4 mat = Mat4::angleXYZ(rot);
-        mat.setTranslation(bone.pos);
-        bone.globalAnimMatrix = mat;
-        */
-        
-        Vec3 rot(bone.rot.x, bone.rot.y, bone.rot.z);
-        
-        Mat4 mat = Mat4::angleXYZ(rot);
-        mat.setTranslation(bone.pos);
-        
-        if (bone.parentGlobalAnimMatrix)
-            bone.globalAnimMatrix = (*bone.parentGlobalAnimMatrix) * mat;
-        else
-            bone.globalAnimMatrix = mat;
-    }
-}
-
 void Skeleton::draw()
 {
     glEnable(GL_DEPTH_TEST);
@@ -361,7 +227,11 @@ void Skeleton::draw()
     {
         glScalef(1, -1, 1);
     }
-    glRotatef(-90, 1, 0, 0);
+    else
+    {
+        glScalef(-1, 1, 1);
+        glRotatef(-90, 1, 0, 0);
+    }
     
     uint32_t lastDiffuseMap = 0;
     for (VertexBuffer& vb : m_ownedVertexBuffers)

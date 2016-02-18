@@ -293,8 +293,8 @@ function WLDCommon.readMesh(model, f36, isZone)
                     v.boneIndex                     = triBA(idx)
                 end
             else
-                for i = 0, 2 do
-                --for i = 2, 0, -1 do
+                --for i = 0, 2 do
+                for i = 2, 0, -1 do
                     local idx   = tri.index[i]
                     local v     = vb:addVertex()
                     

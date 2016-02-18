@@ -2,6 +2,8 @@
 local Class     = require "Class"
 local Bone      = require "BoneWLD"
 local AnimFrame = require "AnimFrame"
+local Util      = require "Util"
+local Matrix    = require "Matrix"
 
 local AnimWLD = Class("AnimWLD")
 
@@ -22,15 +24,16 @@ function AnimWLD:count()
     return self._count
 end
 
-function AnimWLD:addFrames(index, f12)
+function AnimWLD:addFrames(index, f12, parentIndex)
     local frames    = AnimFrame()
     local entries   = f12.entry
     local len       = self:count()
     local count     = f12.count
     
     local function add(ent, i)
-        local pos, rot = Bone.f12EntryToPosRot(ent)
-        frames:addWLD(i * 0.1, pos, rot)
+        local ms        = i * 0.1
+        local pos, rot  = Bone.f12EntryToPosRot(ent)
+        frames:addWLD(ms, pos, rot)
     end
     
     add(entries[0], 0)
@@ -40,9 +43,9 @@ function AnimWLD:addFrames(index, f12)
         for i = 1, count - 2 do
             local a, b, c = entries[first], entries[i], entries[i + 1]
             
-            if a.rotDenom ~= b.rotDenom or a.rotX ~= b.rotX or a.rotY ~= b.rotY or a.rotZ ~= b.rotZ or
+            if a.rotW ~= b.rotW or a.rotX ~= b.rotX or a.rotY ~= b.rotY or a.rotZ ~= b.rotZ or
                a.shiftDenom ~= b.shiftDenom or a.shiftX ~= b.shiftX or a.shiftY ~= b.shiftY or a.shiftZ ~= b.shiftZ or
-               c.rotDenom ~= b.rotDenom or c.rotX ~= b.rotX or c.rotY ~= b.rotY or c.rotZ ~= b.rotZ or
+               c.rotW ~= b.rotW or c.rotX ~= b.rotX or c.rotY ~= b.rotY or c.rotZ ~= b.rotZ or
                c.shiftDenom ~= b.shiftDenom or c.shiftX ~= b.shiftX or c.shiftY ~= b.shiftY or c.shiftZ ~= b.shiftZ then
                 add(b, i)
                 first = first + 1

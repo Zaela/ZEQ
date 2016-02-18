@@ -23,6 +23,30 @@ function Matrix.identity()
     return mat
 end
 
+function Matrix.fromValues(a0, a1, a2, a3, b0, b1, b2, b3, c0, c1, c2, c3, d0, d1, d2, d3)
+    local mat = Mat4()
+    local m   = mat.m
+    
+    m[ 0] = a0
+    m[ 1] = a1
+    m[ 2] = a2
+    m[ 3] = a3
+    m[ 4] = b0
+    m[ 5] = b1
+    m[ 6] = b2
+    m[ 7] = b3
+    m[ 8] = c0
+    m[ 9] = c1
+    m[10] = c2
+    m[11] = c3
+    m[12] = d0
+    m[13] = d1
+    m[14] = d2
+    m[15] = d3
+    
+    return mat
+end
+
 function Matrix.copy(mat)
     local new = Mat4()
     ffi.copy(new, mat, ffi.sizeof(Mat4))
@@ -188,6 +212,40 @@ function Matrix.angleXYZ(x, y, z)
     return Matrix.angleX(x) * Matrix.angleY(y) * Matrix.angleZ(z)
 end
 
+function Matrix:getRotationNoScale()
+    local m = self.m
+    
+    local y = -math.asin(math.max(math.min(m[2], 1.0), -1.0)) -- min and max to clamp to -1..1
+    local c = math.cos(y)
+    
+    local x, z, rx, ry
+    
+    if math.abs(c) >= 0.000001 then
+        local invC = 1 / c
+        print(invC)
+        
+        rx = m[10] * invC
+        ry = m[ 6] * invC
+        print(rx, ry)
+        x  = math.atan2(ry, rx)
+        rx = m[ 0] * invC
+        ry = m[ 1] * invC
+        print(rx, ry)
+        z  = math.atan2(ry, rx)
+    else
+        x  = 0
+        rx =  m[ 5]
+        ry = -m[ 4]
+        z  = math.atan2(ry, rx)
+    end
+    
+    if x < 0 then x = x + math.pi * 2 end
+    if y < 0 then y = y + math.pi * 2 end
+    if z < 0 then z = z + math.pi * 2 end
+    
+    return x, y, z
+end
+
 -- Transposed, technically
 function Matrix.fromQuaternion(q)
 	local mat = Mat4()
@@ -273,6 +331,16 @@ function Matrix:transformVector(vec)
     local x = vec.x * m[ 0] + vec.y * m[ 4] + vec.z * m[ 8] + m[12]
     local y = vec.x * m[ 1] + vec.y * m[ 5] + vec.z * m[ 9] + m[13]
     local z = vec.x * m[ 2] + vec.y * m[ 6] + vec.z * m[10] + m[14]
+
+    vec.x, vec.y, vec.z = x, y, z
+end
+
+function Matrix:rotateVector(vec)
+    local m = self.m
+
+    local x = vec.x * m[ 0] + vec.y * m[ 4] + vec.z * m[ 8]
+    local y = vec.x * m[ 1] + vec.y * m[ 5] + vec.z * m[ 9]
+    local z = vec.x * m[ 2] + vec.y * m[ 6] + vec.z * m[10]
 
     vec.x, vec.y, vec.z = x, y, z
 end

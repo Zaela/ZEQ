@@ -10,6 +10,14 @@ Log::Log()
     
 }
 
+Log::~Log()
+{
+    if (m_logFile)
+    {
+        fclose(m_logFile);
+    }
+}
+
 void Log::init()
 {
     Thread::init();

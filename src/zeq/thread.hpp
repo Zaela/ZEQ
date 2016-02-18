@@ -12,7 +12,7 @@ class Thread
 {
 private:
     bool        m_runThread;
-    std::mutex  m_threadLifetimeMutex;
+    AtomicMutex m_threadLifetimeMutex;
 
 public:
     static  void startThread(Thread* thread);

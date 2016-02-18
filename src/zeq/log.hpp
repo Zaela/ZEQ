@@ -36,6 +36,7 @@ private:
 
 public:
     Log();
+    ~Log();
 
     virtual void init() override;
     virtual void signalClose() override;
