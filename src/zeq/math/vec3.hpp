@@ -139,6 +139,14 @@ struct Vec3
         
         return v;
     }
+    
+    float getDistanceSquared(const Vec3& o) const
+    {
+        float dx = x - o.x;
+        float dy = y - o.y;
+        float dz = z - o.z;
+        return dx*dx + dy*dy + dz*dz;
+    }
 };
 
 #endif//_ZEQ_VEC3_HPP_

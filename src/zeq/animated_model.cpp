@@ -41,12 +41,12 @@ void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, 
     Mat4 scaleMatrix;
     scaleMatrix.setScale(frame.scale);
     
-    bone.localMatrix = posMatrix * rotMatrix * scaleMatrix;
+    Mat4 localMatrix = posMatrix * rotMatrix * scaleMatrix;
     
     if (parent)
-        bone.globalMatrix = parent->globalMatrix * bone.localMatrix;
+        bone.globalMatrix = parent->globalMatrix * localMatrix;
     else
-        bone.globalMatrix = bone.localMatrix;
+        bone.globalMatrix = localMatrix;
     
     bone.globalInverseMatrix = bone.globalMatrix;
     bone.globalInverseMatrix.invert();
@@ -109,7 +109,7 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
         dst.rot     = src.rot;
         dst.scale   = src.scale;
         
-        dst.localAnimMatrix     = src.localMatrix;
+        //dst.localAnimMatrix     = src.localMatrix;
         dst.globalAnimMatrix    = src.globalMatrix;
         dst.globalInverseMatrix = src.globalInverseMatrix;
         

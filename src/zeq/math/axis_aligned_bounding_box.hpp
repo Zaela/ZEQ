@@ -114,6 +114,13 @@ public:
         
         return (p.normal.dotProduct(near) + p.d) > 0 || (p.normal.dotProduct(far) + p.d) > 0;
     }
+    
+    AABB& operator+=(const Vec3& pos)
+    {
+        m_maxCorner += pos;
+        m_minCorner += pos;
+        return *this;
+    }
 };
 
 #endif//_ZEQ_AXIS_ALIGNED_BOUNDING_BOX_HPP_

@@ -1,7 +1,6 @@
 
 #include "window.hpp"
 
-WindowSet gWindowSet;
 extern Log gLog;
 extern Config gConfig;
 extern ModelResources gModelResources;
@@ -54,13 +53,6 @@ Window::Window()
     
     m_input.getCamera().applyView();
     m_prevTime = m_deltaTimer.seconds();
-    
-    
-    
-    
-    
-    m_animModel = nullptr;
-    m_skele = nullptr;
 }
 
 Window::~Window()
@@ -78,27 +70,9 @@ bool Window::mainLoop()
     m_prevTime      = time;
     
     pollInput(delta);
+    m_entityList.animateModels(delta, getCamera().getPosition());
     
-    clear();
-
-    Camera* cam = &getCamera();
-    cam->recalculate();
-    cam->applyView();
-    
-    if (m_zoneModel)
-        m_zoneModel->draw(&getCamera());
-    
-    if (m_skele)
-    {
-        m_skele->animate(delta);
-        m_skele->draw();
-    }
-    else if (m_animModel)
-    {
-        m_animModel->draw();
-    }
-    
-    display();
+    drawAll();
     
     return m_running;
 }
@@ -121,6 +95,44 @@ void Window::clear()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void Window::drawAll()
+{
+    clear();
+    
+    // Set draw states
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_TEXTURE_2D);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    
+    // Draw world models
+    Camera& camera = getCamera();
+    camera.recalculate();
+    camera.applyView();
+    
+    if (m_zoneModel)
+        m_zoneModel->draw(camera);
+    
+    m_entityList.drawModels(camera);
+    
+    // Draw GUI
+    
+    // Apply drawing to frame buffer
+    display();
+    
+    // Clear draw states
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_TEXTURE_2D);
+}
+
 void Window::loadZoneModel(const std::string& shortname)
 {
     ZoneModel* prevZone = m_zoneModel;
@@ -133,11 +145,12 @@ void Window::loadZoneModel(const std::string& shortname)
     setTitle("ZEQ :: " + shortname);
     
     AnimatedModelPrototype* model = gModelResources.getMobModel(75, 2);
-    m_animModel = model;
     
     if (model)
     {
-        m_skele = model->createSkeletonInstance();
-        m_skele->setAnimation(5);
+        Skeleton* skele = model->createSkeletonInstance();
+        skele->setAnimation(5);
+        
+        m_entityList.add(skele, Vec3(-20, 0, 0));
     }
 }

@@ -39,7 +39,6 @@ protected:
         Quaternion  rot;
         Vec3        scale;
         
-        Mat4        localMatrix;
         Mat4        globalMatrix;
         Mat4        globalInverseMatrix;
         

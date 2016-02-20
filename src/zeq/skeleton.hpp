@@ -10,11 +10,13 @@
 #include "animation.hpp"
 #include "bone_assignment.hpp"
 #include "temp_alloc.hpp"
+#include "entity.hpp"
+#include "axis_aligned_bounding_box.hpp"
 
 class AnimatedModelPrototype;
 class MobModelPrototype;
 
-class Skeleton
+class Skeleton : public Entity
 {
 private:
     friend class AnimatedModelPrototype;
@@ -28,7 +30,6 @@ private:
         Quaternion  rot;
         Vec3        scale;
         
-        Mat4        localAnimMatrix;
         Mat4        globalAnimMatrix;
         Mat4        globalInverseMatrix;
         
@@ -50,8 +51,6 @@ private:
         WeightedBoneAssignment*     assignments;
     };
     
-    //uint32_t    m_boundingBoxIndex;
-    
     uint32_t    m_boneCount;
     Bone*       m_bones;
     Mat4*       m_animMatrices;
@@ -70,15 +69,18 @@ private:
     
 private:
     void buildMatrices();
-    void moveVerticesEQG();
-    void moveVerticesWLD();
+    AABB moveVerticesEQG();
+    AABB moveVerticesWLD();
     
 public:
     Skeleton();
     ~Skeleton();
 
-    void setAnimation(int animId);
-    void animate(double delta);
+    void    setAnimation(int animId);
+    float   incrementAnimation(float delta);
+    AABB    animate(float delta);
+
+    bool isEQG() const { return !m_vertexBufferSets.empty(); }
 
     void draw();
 };

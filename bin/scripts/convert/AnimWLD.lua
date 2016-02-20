@@ -24,7 +24,7 @@ function AnimWLD:count()
     return self._count
 end
 
-function AnimWLD:addFrames(index, f12, parentIndex)
+function AnimWLD:addFrames(index, f12)
     local frames    = AnimFrame()
     local entries   = f12.entry
     local len       = self:count()

@@ -67,7 +67,7 @@ public:
 
     void generateOctree();
     
-    void draw(Camera* camera);
+    void draw(Camera& camera);
 };
 
 #endif//_ZEQ_ZONE_MODEL_HPP_

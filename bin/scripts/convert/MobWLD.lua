@@ -151,7 +151,7 @@ function MobWLD.readModelData(model, f14)
         for i = 0, boneCount - 1 do
             local f12 = f12s[i]
             if f12 then
-                anim:addFrames(i, f12, skele:getParentIndexByBoneIndex(i))
+                anim:addFrames(i, f12)
             end
         end
         

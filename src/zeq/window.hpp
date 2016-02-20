@@ -7,6 +7,7 @@
 #include "input.hpp"
 #include "model_resources.hpp"
 #include "zone_model.hpp"
+#include "entity_list.hpp"
 #include "animated_model.hpp"
 #include "config.hpp"
 #include "log.hpp"
@@ -25,8 +26,7 @@ private:
 
     ZoneModel* m_zoneModel;
 
-    AnimatedModelPrototype* m_animModel;
-    Skeleton* m_skele;
+    EntityList m_entityList;
 
 private:
     static void clear();
@@ -37,16 +37,11 @@ public:
 
     bool mainLoop();
     void pollInput(double delta);
+    void drawAll();
 
     void loadZoneModel(const std::string& shortname);
 
     Camera& getCamera() { return m_input.getCamera(); }
-};
-
-class WindowSet
-{
-private:
-    std::vector<Window*> m_windows;
 };
 
 #endif//_ZEQ_WINDOW_HPP_

@@ -182,14 +182,14 @@ public:
         m[10] = cr * cp;
     }
     
-    void setTranslation(Vec3& vec)
+    void setTranslation(const Vec3& vec)
     {
         m[12] = vec.x;
         m[13] = vec.y;
         m[14] = vec.z;
     }
     
-    void setScale(Vec3& vec)
+    void setScale(const Vec3& vec)
     {
         m[ 0] = vec.x;
         m[ 5] = vec.y;
@@ -386,6 +386,58 @@ public:
     static Mat4 angleXYZ(Vec3& v)
     {
         return angleX(v.x) * angleY(v.y) * angleZ(v.z);
+    }
+    
+    // Model type adjustments
+    Mat4 adjustForWLD()
+    {
+        // Scale by -1 on the X axis;
+        // Rotate by -90 degrees on the X axis
+        Mat4 mat(1);
+        
+        mat[ 0] = -1.0f;
+        mat[ 1] = 0.0f;
+        mat[ 2] = 0.0f;
+        mat[ 3] = 0.0f;
+        mat[ 4] = 0.0f;
+        mat[ 5] = 0.000001f;
+        mat[ 6] = -1.0f;
+        mat[ 7] = 0.0f;
+        mat[ 8] = 0.0f;
+        mat[ 9] = 1.0f;
+        mat[10] = 0.000001f;
+        mat[11] = 0.0f;
+        mat[12] = 0.0f;
+        mat[13] = 0.0f;
+        mat[14] = 0.0f;
+        mat[15] = 1.0f;
+        
+        return (*this) * mat;
+    }
+    
+    Mat4 adjustForEQG()
+    {
+        // Scale by -1 on the Y axis
+        Mat4 mat(1);
+        
+        m[ 0] = 1.0f;
+        m[ 1] = 0.0f;
+        m[ 2] = 0.0f;
+        m[ 3] = 0.0f;
+        m[ 4] = 0.0f;
+        m[ 5] = -1.0f;
+        m[ 6] = 0.0f;
+        m[ 7] = 0.0f;
+        m[ 8] = 0.0f;
+        m[ 9] = 0.0f;
+        m[10] = 1.0f;
+        m[11] = 0.0f;
+        m[12] = 0.0f;
+        m[13] = 0.0f;
+        m[14] = 0.0f;
+        m[15] = 1.0f;
+
+        return (*this) * mat;
     }
 };
 

@@ -32,12 +32,11 @@ void Skeleton::setAnimation(int animId)
     }
 }
 
-void Skeleton::animate(double delta)
+float Skeleton::incrementAnimation(float delta)
 {
-    //PerfTimer atimer;
     float frame = m_curAnimFrame + delta;
     
-    //check against duration here
+    // Check against anim duration
     while (frame > m_curAnimDuration)
     {
         frame -= m_curAnimDuration;
@@ -48,7 +47,13 @@ void Skeleton::animate(double delta)
         }
     }
     
-    m_curAnimFrame  = frame;
+    m_curAnimFrame = frame;
+    return frame;
+}
+
+AABB Skeleton::animate(float delta)
+{
+    float frame = incrementAnimation(delta);
     
     Animation* anim = m_curAnim;
     Bone* bones     = m_bones;
@@ -67,13 +72,13 @@ void Skeleton::animate(double delta)
     
     buildMatrices();
     
-    if (!m_vertexBufferSets.empty())
-        moveVerticesEQG();
+    if (isEQG())
+        return moveVerticesEQG();
     else
-        moveVerticesWLD();
+        return moveVerticesWLD();
 }
 
-void Skeleton::moveVerticesEQG()
+AABB Skeleton::moveVerticesEQG()
 {
     Bone* bones         = m_bones;
     uint32_t count      = m_boneCount;
@@ -84,6 +89,8 @@ void Skeleton::moveVerticesEQG()
         Bone& bone      = bones[i];
         animMatrices[i] = bone.globalAnimMatrix * bone.globalInverseMatrix;
     }
+    
+    AABB box;
     
     for (VertexBufferSet& set : m_vertexBufferSets)
     {
@@ -125,11 +132,15 @@ void Skeleton::moveVerticesEQG()
                 vert.pos    += pos * weight;
                 vert.normal += normal * weight;
             }
+            
+            box.addInternalPoint(vert.pos);
         }
     }
+    
+    return box;
 }
 
-void Skeleton::moveVerticesWLD()
+AABB Skeleton::moveVerticesWLD()
 {
     Bone* bones         = m_bones;
     uint32_t count      = m_boneCount;
@@ -140,6 +151,8 @@ void Skeleton::moveVerticesWLD()
         Bone& bone      = bones[i];
         animMatrices[i] = bone.globalAnimMatrix;
     }
+    
+    AABB box;
     
     for (SimpleVertexBufferSet& set : m_simpleVertexBufferSets)
     {
@@ -161,8 +174,12 @@ void Skeleton::moveVerticesWLD()
             
             vert.pos    = pos;
             vert.normal = normal;
+            
+            box.addInternalPoint(vert.pos);
         }
     }
+    
+    return box;
 }
 
 void Skeleton::buildMatrices()
@@ -174,8 +191,7 @@ void Skeleton::buildMatrices()
         if (!bone.hasAnimFrames)
             continue;
         
-        Mat4& mat = bone.localAnimMatrix;
-        
+        Mat4 mat;
         bone.rot.getMatrixTransposed(mat);
         
         Vec3 pos = bone.pos;
@@ -212,26 +228,10 @@ void Skeleton::buildMatrices()
 
 void Skeleton::draw()
 {
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    
-    
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    if (!m_vertexBufferSets.empty())
-    {
-        glScalef(1, -1, 1);
-    }
-    else
-    {
-        glScalef(-1, 1, 1);
-        glRotatef(-90, 1, 0, 0);
-    }
+    
+    glMultMatrixf(getModelMatrix().ptr());
     
     uint32_t lastDiffuseMap = 0;
     for (VertexBuffer& vb : m_ownedVertexBuffers)
@@ -254,13 +254,4 @@ void Skeleton::draw()
     
     
     glPopMatrix();
-    
-    
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_TEXTURE_2D);
 }
