@@ -69,10 +69,11 @@ function MobWLD.readModelData(model, f14)
     
     if not f10 or f10:type() ~= 0x10 or not f10:hasRefList() then return end
     
-    local boneCount = f10:boneCount()
-    local rootBone  = f10:boneList()
-    local binBone   = rootBone
-    local bones     = {}
+    local boneCount     = f10:boneCount()
+    local rootBone      = f10:boneList()
+    local binBone       = rootBone
+    local bones         = {}
+    local attachBones   = {}
     
     -- Read and convert bones
     for i = 0, boneCount - 1 do
@@ -87,6 +88,10 @@ function MobWLD.readModelData(model, f14)
         local name = wld:getFragName(f13)
         
         local bone = Bone(name, f12.entry[0], i)
+        
+        if name:find("_POINT_TRACK") then
+            attachBones[bone] = true
+        end
         
         bones[i]    = bone
         binBone     = binBone:next()
@@ -107,7 +112,7 @@ function MobWLD.readModelData(model, f14)
         binBone = binBone:next()
     end
     
-    local skele = Skeleton(bones[0], boneCount)
+    local skele = Skeleton(bones[0], boneCount, attachBones)
     model:setSkeleton(skele)
     
     -- Animations

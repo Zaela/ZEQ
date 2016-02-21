@@ -9,21 +9,27 @@
 class Entity
 {
 private:
-    int     m_boundingBoxIndex;
+    bool    m_needsUpdate;
+    int     m_modelIndex;
     Mat4    m_modelMatrix;
+    Vec3    m_position;
 
 public:
-    Entity() : m_boundingBoxIndex(-1) { }
+    Entity() : m_needsUpdate(false), m_modelIndex(-1) { }
+    virtual ~Entity() { }
     
-    int     getBoundingBoxIndex() const { return m_boundingBoxIndex; }
-    void    setBoundingBoxIndex(int index) { m_boundingBoxIndex = index; }
+    bool updateMatrix();
     
-    void setPosition(const Vec3& pos) { m_modelMatrix.setTranslation(pos); }
+    int     getModelIndex() const { return m_modelIndex; }
+    void    setModelIndex(int index) { m_modelIndex = index; }
+    
+    void setPosition(const Vec3& pos);
     
     void adjustForWLD() { m_modelMatrix = m_modelMatrix.adjustForWLD(); }
     void adjustForEQG() { m_modelMatrix = m_modelMatrix.adjustForEQG(); }
     
-    Mat4& getModelMatrix() { return m_modelMatrix; }
+    void    setModelMatrix(const Mat4& matrix);
+    Mat4&   getModelMatrix() { return m_modelMatrix; }
 };
 
 #endif//_ZEQ_ENTITY_HPP_

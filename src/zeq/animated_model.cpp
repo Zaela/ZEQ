@@ -51,7 +51,8 @@ void AnimatedModelPrototype::readSkeletonRecurse(DBBone* frames, uint32_t& cur, 
     bone.globalInverseMatrix = bone.globalMatrix;
     bone.globalInverseMatrix.invert();
     
-    bone.parentIndex = parentIndex;
+    bone.parentIndex        = parentIndex;
+    bone.attachPointType    = frame.attachPointType;
     
     uint32_t n = frame.childCount;
     
@@ -115,7 +116,8 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
         
         dst.parentGlobalAnimMatrix = (i != 0) ? &bones[src.parentIndex].globalAnimMatrix : nullptr;
         
-        dst.animHint = Animation::DEFAULT_HINT;
+        dst.animHint        = Animation::DEFAULT_HINT;
+        dst.attachPointSlot = src.attachPointType;
     }
     
     // The skeleton needs its own copies of all the VertexBuffers, but needs the original VertexBuffers to transform each frame
@@ -170,6 +172,8 @@ Skeleton* AnimatedModelPrototype::createSkeletonInstance()
     
     // Animation definitions are centralized, belonging to the prototype
     sk->m_animations.inherit(m_animations);
+    
+    sk->m_prototype = this;
     
     return sk;
 }

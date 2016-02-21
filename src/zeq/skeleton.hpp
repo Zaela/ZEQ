@@ -12,6 +12,8 @@
 #include "temp_alloc.hpp"
 #include "entity.hpp"
 #include "axis_aligned_bounding_box.hpp"
+#include "material.hpp"
+#include "attach_point.hpp"
 
 class AnimatedModelPrototype;
 class MobModelPrototype;
@@ -36,6 +38,7 @@ private:
         Mat4*       parentGlobalAnimMatrix;
         
         uint32_t    animHint;
+        int         attachPointSlot;
     };
     
     struct SimpleVertexBufferSet
@@ -59,7 +62,10 @@ private:
     std::vector<SimpleVertexBufferSet>  m_simpleVertexBufferSets;
     std::vector<VertexBuffer>           m_ownedVertexBuffers;
 
-    AnimationSet m_animations;
+    AnimationSet    m_animations;
+    AttachPointSet  m_attachPoints;
+    
+    AnimatedModelPrototype* m_prototype;
     
     // Active animation info
     int         m_curAnimId; 
@@ -71,16 +77,20 @@ private:
     void buildMatrices();
     AABB moveVerticesEQG();
     AABB moveVerticesWLD();
+
+    float incrementAnimation(float delta);
     
 public:
     Skeleton();
-    ~Skeleton();
+    virtual ~Skeleton();
 
-    void    setAnimation(int animId);
-    float   incrementAnimation(float delta);
-    AABB    animate(float delta);
+    void setAnimation(int animId);
+    AABB animate(float delta);
 
     bool isEQG() const { return !m_vertexBufferSets.empty(); }
+    void adjustModelMatrix();
+    
+    void attach(AttachPoint::Slot slot, Skeleton* model) { m_attachPoints.attach(slot, model); }
 
     void draw();
 };

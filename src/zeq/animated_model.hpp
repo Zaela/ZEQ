@@ -25,6 +25,7 @@ protected:
     struct DBBone
     {
         uint32_t    childCount;
+        int         attachPointType;
         Vec3        pos;
         Quaternion  rot;
         Vec3        scale;
@@ -43,6 +44,7 @@ protected:
         Mat4        globalInverseMatrix;
         
         uint32_t    parentIndex;
+        int         attachPointType;
     };
     
     uint32_t    m_boneCount;
@@ -65,6 +67,8 @@ public:
     virtual ~AnimatedModelPrototype();
 
     virtual Skeleton* createSkeletonInstance();
+
+    virtual bool isMobModelPrototype() const { return false; }
 };
 
 class MobModelPrototype : public AnimatedModelPrototype
@@ -106,6 +110,8 @@ public:
     virtual ~MobModelPrototype();
 
     virtual Skeleton* createSkeletonInstance();
+
+    virtual bool isMobModelPrototype() const override { return true; }
 };
 
 #endif//_ZEQ_ANIMATED_MODEL_HPP_

@@ -220,12 +220,7 @@ void ZoneModel::draw(Camera& camera)
     //glColor3f(0.1f, 0.65f, 0.7f);
     //glColor3f(0.5f, 0.25f, 0.25f);
     
-    int lastBlendType       = -1;
-    uint32_t lastDiffuseMap = 0;
-    
-    PerfTimer timer;
-    uint32_t count      = 0;
-    uint32_t texCount   = 0;
+    MATERIAL_SETUP();
     
     for (uint32_t i = 0; i < n; i++)
     {
@@ -241,74 +236,13 @@ void ZoneModel::draw(Camera& camera)
         
         uint32_t diffuseMap = vb->getDiffuseMap();
         
-        if (diffuseMap != lastDiffuseMap)
-        {
-            glBindTexture(GL_TEXTURE_2D, diffuseMap);
-            lastDiffuseMap = diffuseMap;
-            texCount++;
-        }
-        
-        if (blendType != lastBlendType)
-        {
-            unsetBlendType(lastBlendType);
-            setBlendType(blendType);
-            lastBlendType = blendType;
-        }
+        MATERIAL_SET(diffuseMap, blendType);
         
         vb->draw();
-        count++;
     }
     
-    unsetBlendType(lastBlendType);
-    /*static int c = 0;
-    static double total = 0.0;
-    total += timer.seconds();
-    printf("avg: %g\n", total / ++c);*/
-    //timer.printf("Octree: checked %u nodes and drew %u with %u textures", m_boundingBoxes.size(), count, texCount);
+    MATERIAL_CLEANUP();
     
     glDisable(GL_FOG);
     glColor3f(1.0f, 1.0f, 1.0f);
-}
-
-void ZoneModel::setBlendType(int blendType)
-{
-    switch (blendType)
-    {
-    case Material::Blend::Particle:
-        glDepthMask(GL_FALSE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-        // Fallthrough
-    case Material::Blend::Masked:
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GEQUAL, 0.5f);
-        break;
-    case Material::Blend::Additive:
-        glDepthMask(GL_FALSE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_SRC_COLOR);
-        break;
-    default:
-        break;
-    }
-}
-
-void ZoneModel::unsetBlendType(int blendType)
-{
-    switch (blendType)
-    {
-    case Material::Blend::Particle:
-        glDepthMask(GL_TRUE);
-        glDisable(GL_BLEND);
-        // Fallthrough
-    case Material::Blend::Masked:
-        glDisable(GL_ALPHA_TEST);
-        break;
-    case Material::Blend::Additive:
-        glDepthMask(GL_TRUE);
-        glDisable(GL_BLEND);
-        break;
-    default:
-        break;
-    }
 }

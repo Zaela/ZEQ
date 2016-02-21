@@ -6,6 +6,7 @@
 #include "texture.hpp"
 #include "vertex_buffer.hpp"
 #include "ref_counter.hpp"
+#include "material.hpp"
 #include <vector>
 
 class ModelResources;

@@ -52,9 +52,6 @@ private:
     static void octreeMakeNode(OctreeTemp& temp, VertexBuffer* vb, VertexBuffer::Triangle* triArray, uint32_t triCount, uint32_t claim);
     static bool octreeCheckSmallVertexBuffer(VertexBuffer* vb, OctreeTemp& temp);
 
-    static void setBlendType(int blendType);
-    static void unsetBlendType(int blendType);
-
     friend class ModelResources;
     std::vector<AABB>&          getBoundingBoxes() { return m_boundingBoxes; }
     std::vector<VertexBuffer*>& getVertexBuffers() { return m_vertexBuffers; }

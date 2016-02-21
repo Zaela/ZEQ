@@ -1,16 +1,33 @@
 
-local Class     = require "Class"
-local BoneEntry = require "BoneEntry"
-local ConvSkele = require "ConvSkeleton"
+local Class         = require "Class"
+local BoneEntry     = require "BoneEntry"
+local ConvSkele     = require "ConvSkeleton"
+local AttachPoint   = require "AttachPoint"
 
 local SkeletonWLD = Class("SkeletonWLD", ConvSkele)
 
-function SkeletonWLD.new(root, count)
+local pointValues = {
+    head    = AttachPoint.Camera,
+    r       = AttachPoint.RightHand,
+    l       = AttachPoint.LeftHand,
+    shield  = AttachPoint.Shield,
+}
+
+function SkeletonWLD.new(root, count, attachBones)
     local entries       = BoneEntry.Array(count)
     local index         = 0
     local indexMap      = {}
     local byName        = {}
     local indexToParent = {}
+    
+    local function getAttachType(bone)
+        if not attachBones[bone] then return -1 end
+        
+        local name = bone:getName():sub(4)
+        name = name:match("^%a+"):lower()
+
+        return pointValues[name] or -1
+    end
     
     local function recurse(bone)
         local childCount    = bone:getChildCount()
@@ -25,17 +42,18 @@ function SkeletonWLD.new(root, count)
         local pos = bone:pos()
         local rot = bone:rot()
         
-        entry.childCount    = childCount
-        entry.x             = pos.x
-        entry.y             = pos.y
-        entry.z             = pos.z
-        entry.rot.x         = rot.x
-        entry.rot.y         = rot.y
-        entry.rot.z         = rot.z
-        entry.rot.w         = rot.w
-        entry.scale.x       = 1
-        entry.scale.y       = 1
-        entry.scale.z       = 1
+        entry.childCount        = childCount
+        entry.attachPointType   = getAttachType(bone)
+        entry.x                 = pos.x
+        entry.y                 = pos.y
+        entry.z                 = pos.z
+        entry.rot.x             = rot.x
+        entry.rot.y             = rot.y
+        entry.rot.z             = rot.z
+        entry.rot.w             = rot.w
+        entry.scale.x           = 1
+        entry.scale.y           = 1
+        entry.scale.z           = 1
         
         for child in bone:children() do
             indexToParent[index] = thisIndex

@@ -4,6 +4,7 @@
 Skeleton::Skeleton()
     : m_boneCount(0),
       m_bones(nullptr),
+      m_prototype(nullptr),
       m_curAnimId(0),
       m_curAnim(nullptr),
       m_curAnimDuration(0.0f),
@@ -40,7 +41,6 @@ float Skeleton::incrementAnimation(float delta)
     while (frame > m_curAnimDuration)
     {
         frame -= m_curAnimDuration;
-        m_curAnimFrame = frame;
         for (uint32_t i = 0; i < m_boneCount; i++)
         {
             m_bones[i].animHint = Animation::DEFAULT_HINT;
@@ -88,6 +88,9 @@ AABB Skeleton::moveVerticesEQG()
     {
         Bone& bone      = bones[i];
         animMatrices[i] = bone.globalAnimMatrix * bone.globalInverseMatrix;
+        
+        if (bone.attachPointSlot != AttachPoint::Slot::None)
+            m_attachPoints.setMatrix((AttachPoint::Slot)bone.attachPointSlot, animMatrices[i]);
     }
     
     AABB box;
@@ -150,6 +153,9 @@ AABB Skeleton::moveVerticesWLD()
     {
         Bone& bone      = bones[i];
         animMatrices[i] = bone.globalAnimMatrix;
+        
+        if (bone.attachPointSlot != AttachPoint::Slot::None)
+            m_attachPoints.setMatrix((AttachPoint::Slot)bone.attachPointSlot, bone.globalAnimMatrix);
     }
     
     AABB box;
@@ -188,36 +194,37 @@ void Skeleton::buildMatrices()
     {
         Bone& bone = m_bones[i];
         
-        if (!bone.hasAnimFrames)
-            continue;
-        
         Mat4 mat;
-        bone.rot.getMatrixTransposed(mat);
         
-        Vec3 pos = bone.pos;
-        Vec3 scl = bone.scale;
-        
-        float scale = scl.x;
-        mat[ 0] *= scale;
-        mat[ 1] *= scale;
-        mat[ 2] *= scale;
-        mat[ 3] *= scale;
-        
-        scale = scl.y;
-        mat[ 4] *= scale;
-        mat[ 5] *= scale;
-        mat[ 6] *= scale;
-        mat[ 7] *= scale;
-        
-        scale = scl.z;
-        mat[ 8] *= scale;
-        mat[ 9] *= scale;
-        mat[10] *= scale;
-        mat[11] *= scale;
-        
-        mat[12] = pos.x;
-        mat[13] = pos.y;
-        mat[14] = pos.z;
+        if (bone.hasAnimFrames)
+        {
+            bone.rot.getMatrixTransposed(mat);
+            
+            Vec3 pos = bone.pos;
+            Vec3 scl = bone.scale;
+            
+            float scale = scl.x;
+            mat[ 0] *= scale;
+            mat[ 1] *= scale;
+            mat[ 2] *= scale;
+            mat[ 3] *= scale;
+            
+            scale = scl.y;
+            mat[ 4] *= scale;
+            mat[ 5] *= scale;
+            mat[ 6] *= scale;
+            mat[ 7] *= scale;
+            
+            scale = scl.z;
+            mat[ 8] *= scale;
+            mat[ 9] *= scale;
+            mat[10] *= scale;
+            mat[11] *= scale;
+            
+            mat[12] = pos.x;
+            mat[13] = pos.y;
+            mat[14] = pos.z;
+        }
         
         if (bone.parentGlobalAnimMatrix)
             bone.globalAnimMatrix = (*bone.parentGlobalAnimMatrix) * mat;
@@ -228,30 +235,36 @@ void Skeleton::buildMatrices()
 
 void Skeleton::draw()
 {
-    glMatrixMode(GL_MODELVIEW);
+
     glPushMatrix();
     
     glMultMatrixf(getModelMatrix().ptr());
     
-    uint32_t lastDiffuseMap = 0;
+    MATERIAL_SETUP();
+    
     for (VertexBuffer& vb : m_ownedVertexBuffers)
     {
-        //int blendType = vb->getBlendType();
+        int blendType = vb.getBlendType();
         
-        //if (blendType == Material::Blend::Invisible)
-        //    continue;
+        if (blendType == Material::Blend::Invisible)
+            continue;
         
         uint32_t diffuseMap = vb.getDiffuseMap();
         
-        if (diffuseMap != lastDiffuseMap)
-        {
-            glBindTexture(GL_TEXTURE_2D, diffuseMap);
-            lastDiffuseMap = diffuseMap;
-        }
+        MATERIAL_SET(diffuseMap, blendType);
         
         vb.draw();
     }
     
+    MATERIAL_CLEANUP();
     
     glPopMatrix();
+}
+
+void Skeleton::adjustModelMatrix()
+{
+    if (isEQG())
+        adjustForEQG();
+    else
+        adjustForWLD();
 }

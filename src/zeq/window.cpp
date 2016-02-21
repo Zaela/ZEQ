@@ -113,6 +113,8 @@ void Window::drawAll()
     camera.recalculate();
     camera.applyView();
     
+    glMatrixMode(GL_MODELVIEW);
+    
     if (m_zoneModel)
         m_zoneModel->draw(camera);
     
@@ -120,7 +122,7 @@ void Window::drawAll()
     
     // Draw GUI
     
-    // Apply drawing to frame buffer
+    // Swap frame buffers
     display();
     
     // Clear draw states
@@ -146,11 +148,25 @@ void Window::loadZoneModel(const std::string& shortname)
     
     AnimatedModelPrototype* model = gModelResources.getMobModel(75, 2);
     
+    Skeleton* skele = nullptr;
     if (model)
     {
-        Skeleton* skele = model->createSkeletonInstance();
+        skele = model->createSkeletonInstance();
         skele->setAnimation(5);
         
         m_entityList.add(skele, Vec3(-20, 0, 0));
+    }
+    
+    model = gModelResources.getMobModel(2, 2);
+    
+    if (model)
+    {
+        Skeleton* skele2 = model->createSkeletonInstance();
+        skele2->setAnimation(5);
+        
+        m_entityList.add(skele2, Vec3(-20, 0, 0));
+        
+        if (skele)
+            skele->attach(AttachPoint::Slot::RightHand, skele2);
     }
 }

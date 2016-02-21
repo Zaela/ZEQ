@@ -30,15 +30,15 @@ private:
 
 private:
     static void clear();
+
+    void pollInput(double delta);
+    void drawAll();
     
 public:
     Window();
     virtual ~Window();
 
     bool mainLoop();
-    void pollInput(double delta);
-    void drawAll();
-
     void loadZoneModel(const std::string& shortname);
 
     Camera& getCamera() { return m_input.getCamera(); }

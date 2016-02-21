@@ -31,38 +31,21 @@ void ModelPrototype::clearReferencedVertexBuffers()
 
 void ModelPrototype::draw()
 {
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    MATERIAL_SETUP();
     
-    uint32_t lastDiffuseMap = 0;
     for (VertexBuffer* vb : m_referencedVertexBuffers)
     {
-        //int blendType = vb->getBlendType();
+        int blendType = vb->getBlendType();
         
-        //if (blendType == Material::Blend::Invisible)
-        //    continue;
+        if (blendType == Material::Blend::Invisible)
+            continue;
         
         uint32_t diffuseMap = vb->getDiffuseMap();
         
-        if (diffuseMap != lastDiffuseMap)
-        {
-            glBindTexture(GL_TEXTURE_2D, diffuseMap);
-            lastDiffuseMap = diffuseMap;
-        }
+        MATERIAL_SET(diffuseMap, blendType);
         
         vb->draw();
     }
     
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_TEXTURE_2D);
+    MATERIAL_CLEANUP();
 }
