@@ -154,8 +154,8 @@ AABB Skeleton::moveVerticesWLD()
         Bone& bone      = bones[i];
         animMatrices[i] = bone.globalAnimMatrix;
         
-        if (bone.attachPointSlot != AttachPoint::Slot::None)
-            m_attachPoints.setMatrix((AttachPoint::Slot)bone.attachPointSlot, bone.globalAnimMatrix);
+        //if (bone.attachPointSlot != AttachPoint::Slot::None)
+        //    m_attachPoints.setMatrix((AttachPoint::Slot)bone.attachPointSlot, bone.globalAnimMatrix);
     }
     
     AABB box;
@@ -235,16 +235,24 @@ void Skeleton::buildMatrices()
 
 void Skeleton::draw()
 {
-
     glPushMatrix();
     
-    glMultMatrixf(getModelMatrix().ptr());
+    glMultMatrixf(isAttached() ? getAttachedMatrix().ptr() : getModelMatrix().ptr());
+    
+    if (isAttached())
+    {
+        //glRotatef(90, 1, 0, 0);
+        glRotatef(90, 0, 1, 0);
+    }
     
     MATERIAL_SETUP();
+    
+    glColor4f(1, 1, 1, 0.5f);
     
     for (VertexBuffer& vb : m_ownedVertexBuffers)
     {
         int blendType = vb.getBlendType();
+        blendType = Material::Blend::Alpha;
         
         if (blendType == Material::Blend::Invisible)
             continue;
@@ -255,6 +263,28 @@ void Skeleton::draw()
         
         vb.draw();
     }
+    
+    glColor4f(1, 0, 0, 1);
+    glDepthMask(GL_FALSE);
+    glPointSize(10.0f);
+    for (uint32_t i = 0; i < m_boneCount; i++)
+    {
+        Bone& bone = m_bones[i];
+        if (bone.attachPointSlot != AttachPoint::Slot::None)
+        {
+            float vert[3] = {
+                bone.globalAnimMatrix[12],
+                bone.globalAnimMatrix[13],
+                bone.globalAnimMatrix[14]
+            };
+            
+            glVertexPointer(3, GL_FLOAT, sizeof(float) * 3, vert);
+            glDrawArrays(GL_POINTS, 0, 1);
+        }
+    }
+    glDepthMask(GL_TRUE);
+    
+    glColor4f(1, 1, 1, 1);
     
     MATERIAL_CLEANUP();
     
@@ -267,4 +297,24 @@ void Skeleton::adjustModelMatrix()
         adjustForEQG();
     else
         adjustForWLD();
+}
+
+void Skeleton::attach(AttachPoint::Slot slot, Skeleton* model)
+{
+    bool found = false;
+    
+    for (uint32_t i = 0; i < m_boneCount; i++)
+    {
+        Bone& bone = m_bones[i];
+        
+        if (bone.attachPointSlot == slot)
+        {
+            model->setParentMatrix(&bone.globalAnimMatrix);
+            found = true;
+            break;
+        }
+    }
+    
+    if (found)
+        m_attachPoints.attach(slot, model);
 }

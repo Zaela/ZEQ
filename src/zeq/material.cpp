@@ -19,6 +19,11 @@ void Material::setBlendType(int blendType)
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_SRC_COLOR);
         break;
+    case Material::Blend::Alpha:
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
     default:
         break;
     }
@@ -36,6 +41,7 @@ void Material::unsetBlendType(int blendType)
         glDisable(GL_ALPHA_TEST);
         break;
     case Material::Blend::Additive:
+    case Material::Blend::Alpha:
         glDepthMask(GL_TRUE);
         glDisable(GL_BLEND);
         break;

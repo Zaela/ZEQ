@@ -35,6 +35,7 @@ public:
         Particle,
         Additive,
         Invisible,
+        Alpha,
         COUNT
     };
     

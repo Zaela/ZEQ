@@ -85,12 +85,13 @@ public:
     virtual ~Skeleton();
 
     void setAnimation(int animId);
+    bool isAnimating() const { return m_curAnim != nullptr; }
     AABB animate(float delta);
 
     bool isEQG() const { return !m_vertexBufferSets.empty(); }
     void adjustModelMatrix();
     
-    void attach(AttachPoint::Slot slot, Skeleton* model) { m_attachPoints.attach(slot, model); }
+    void attach(AttachPoint::Slot slot, Skeleton* model);
 
     void draw();
 };

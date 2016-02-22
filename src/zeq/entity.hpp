@@ -9,16 +9,13 @@
 class Entity
 {
 private:
-    bool    m_needsUpdate;
     int     m_modelIndex;
     Mat4    m_modelMatrix;
-    Vec3    m_position;
+    Mat4*   m_parentMatrix;
 
 public:
-    Entity() : m_needsUpdate(false), m_modelIndex(-1) { }
+    Entity();
     virtual ~Entity() { }
-    
-    bool updateMatrix();
     
     int     getModelIndex() const { return m_modelIndex; }
     void    setModelIndex(int index) { m_modelIndex = index; }
@@ -30,6 +27,11 @@ public:
     
     void    setModelMatrix(const Mat4& matrix);
     Mat4&   getModelMatrix() { return m_modelMatrix; }
+    
+    void setParentMatrix(Mat4* matrix) { m_parentMatrix = matrix; }
+    
+    bool isAttached() const { return m_parentMatrix != nullptr; }
+    Mat4 getAttachedMatrix();
 };
 
 #endif//_ZEQ_ENTITY_HPP_

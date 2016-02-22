@@ -222,15 +222,12 @@ function Matrix:getRotationNoScale()
     
     if math.abs(c) >= 0.000001 then
         local invC = 1 / c
-        print(invC)
         
         rx = m[10] * invC
         ry = m[ 6] * invC
-        print(rx, ry)
         x  = math.atan2(ry, rx)
         rx = m[ 0] * invC
         ry = m[ 1] * invC
-        print(rx, ry)
         z  = math.atan2(ry, rx)
     else
         x  = 0

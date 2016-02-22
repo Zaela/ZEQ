@@ -1,7 +1,8 @@
 
-local Class     = require "Class"
-local BoneEntry = require "BoneEntry"
-local ConvSkele = require "ConvSkeleton"
+local Class         = require "Class"
+local BoneEntry     = require "BoneEntry"
+local ConvSkele     = require "ConvSkeleton"
+local AttachPoint   = require "AttachPoint"
 
 local SkeletonEQG = Class("SkeletonEQG", ConvSkele)
 
@@ -23,17 +24,18 @@ function SkeletonEQG.new(root, count, byName)
         local rot   = bone:rot()
         local scale = bone:scale()
         
-        entry.childCount    = childCount
-        entry.x             = pos.x
-        entry.y             = pos.y
-        entry.z             = pos.z
-        entry.rot.x         = rot.x
-        entry.rot.y         = rot.y
-        entry.rot.z         = rot.z
-        entry.rot.w         = rot.w
-        entry.scale.x       = scale.x
-        entry.scale.y       = scale.y
-        entry.scale.z       = scale.z
+        entry.childCount        = childCount
+        entry.attachPointType   = AttachPoint.None --fixme
+        entry.x                 = pos.x
+        entry.y                 = pos.y
+        entry.z                 = pos.z
+        entry.rot.x             = rot.x
+        entry.rot.y             = rot.y
+        entry.rot.z             = rot.z
+        entry.rot.w             = rot.w
+        entry.scale.x           = scale.x
+        entry.scale.y           = scale.y
+        entry.scale.z           = scale.z
         
         for child in bone:children() do
             recurse(child)

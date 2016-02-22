@@ -162,7 +162,7 @@ void Window::loadZoneModel(const std::string& shortname)
     if (model)
     {
         Skeleton* skele2 = model->createSkeletonInstance();
-        skele2->setAnimation(5);
+        //skele2->setAnimation(5);
         
         m_entityList.add(skele2, Vec3(-20, 0, 0));
         

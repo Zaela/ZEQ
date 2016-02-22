@@ -5,6 +5,7 @@
 #include "define.hpp"
 #include "math.hpp"
 #include "vec3.hpp"
+#include <algorithm>
 
 class Mat4
 {
@@ -43,6 +44,11 @@ public:
     }
     
     float& operator[](int i)
+    {
+        return m[i];
+    }
+    
+    float operator[](int i) const
     {
         return m[i];
     }
@@ -180,6 +186,11 @@ public:
         m[ 8] = crsp * cy + sr * sy;
         m[ 9] = crsp * sy - sr * cy;
         m[10] = cr * cp;
+    }
+    
+    void setRotationRadians(const Vec3& vec)
+    {
+        setRotationRadians(vec.x, vec.y, vec.z);
     }
     
     void setTranslation(const Vec3& vec)
@@ -393,6 +404,35 @@ public:
     static Mat4 angleXYZ(Vec3& v)
     {
         return angleX(v.x) * angleY(v.y) * angleZ(v.z);
+    }
+    
+    Vec3 getRotationNoScale() const
+    {
+        float y = -asinf(std::max(std::min(m[2], 1.0f), -1.0f));
+        float c = cosf(y);
+        
+        float x, z, rx, ry;
+        
+        if (fabsf(c) >= 0.000001f)
+        {
+            float invC = 1.0f / c;
+            
+            rx = m[10] * invC;
+            ry = m[ 6] * invC;
+            x  = atan2f(ry, rx);
+            rx = m[ 0] * invC;
+            ry = m[ 1] * invC;
+        }
+        else
+        {
+            x  = 0.0f;
+            rx = m[ 5];
+            ry = -m[4];
+        }
+        
+        z = atan2f(ry, rx);
+        
+        return Vec3(x, y, z);
     }
     
     // Model type adjustments

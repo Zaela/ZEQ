@@ -44,7 +44,12 @@ void EntityList::animateModels(double delta, const Vec3& center)
         float delta = m_animatedModelFrameDeltas[i];
         m_animatedModelFrameDeltas[i] = 0.0f;
         
-        AABB box = m_animatedModels[i]->animate(delta);
+        Skeleton* skele = m_animatedModels[i];
+        
+        if (!skele->isAnimating())
+            continue;
+        
+        AABB box = skele->animate(delta);
         
         box += pos;
         
@@ -62,9 +67,6 @@ void EntityList::drawModels(Camera& camera)
         if (!frustum.contains(m_animatedBoundingBoxes[i]))
             continue;
         
-        Skeleton* skele = m_animatedModels[i];
-        if (skele->updateMatrix())
-            skele->adjustModelMatrix();
-        skele->draw();
+        m_animatedModels[i]->draw();
     }
 }
